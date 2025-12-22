@@ -40,6 +40,7 @@ export default function PrintProducts() {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedFinish, setSelectedFinish] = useState("");
   const [selectedPaperType, setSelectedPaperType] = useState("");
+  const [pageCount, setPageCount] = useState(24); // For photobooks
   const [currentPrice, setCurrentPrice] = useState(null);
   const [shippingLevel, setShippingLevel] = useState("cp_postal");
   const [shippingAddress, setShippingAddress] = useState({
@@ -610,6 +611,7 @@ export default function PrintProducts() {
         shippingLevel: shippingLevel,
         finish: selectedFinish || undefined,
         paperType: selectedPaperType || undefined,
+        pageCount: selectedProduct === 'photobook' ? pageCount : undefined,
         coverUrl: selectedProduct === 'photobook' ? coverFileUrl : undefined,
         bookUrl: selectedProduct === 'photobook' ? bookFileUrl : undefined
       };
@@ -1058,6 +1060,26 @@ export default function PrintProducts() {
                                       {paperType}
                                     </SelectItem>
                                   ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-bold text-gray-700 mb-2">
+                                {language === 'ar' ? 'عدد الصفحات' : 'Number of Pages'}
+                              </label>
+                              <Select value={String(pageCount)} onValueChange={(val) => setPageCount(Number(val))}>
+                                <SelectTrigger className="rounded-xl border-2 h-12">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="24">24 pages</SelectItem>
+                                  <SelectItem value="36">36 pages</SelectItem>
+                                  <SelectItem value="48">48 pages</SelectItem>
+                                  <SelectItem value="60">60 pages</SelectItem>
+                                  <SelectItem value="72">72 pages</SelectItem>
+                                  <SelectItem value="84">84 pages</SelectItem>
+                                  <SelectItem value="96">96 pages</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>

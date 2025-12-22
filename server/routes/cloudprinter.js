@@ -239,11 +239,68 @@ router.post('/order', async (req, res) => {
 
         // Build options array if needed
         let options = [];
-        if (finish) {
-            options.push({ type: 'finish', value: finish });
-        }
-        if (paperType) {
-            options.push({ type: 'paper', value: paperType });
+
+        // For photobooks, page count is REQUIRED in options
+        if (productType === 'photobook') {
+            // Default to 24 pages if not specified
+            const pageCount = req.body.pageCount || 24;
+
+            options.push({
+                type: 'total_pages',
+                count: String(pageCount)
+            });
+
+            // Map paper type to CloudPrinter's exact option names
+            if (paperType) {
+                let paperOption = null;
+
+                // Parse paper type from frontend format to CloudPrinter format
+                // CloudPrinter uses: pageblock_130mcg, pageblock_130mcs, pageblock_150mcg, pageblock_150mcs
+                if (paperType.includes('130gsm') && paperType.includes('Gloss')) {
+                    paperOption = 'pageblock_130mcg';
+                } else if (paperType.includes('130gsm') && paperType.includes('Silk')) {
+                    paperOption = 'pageblock_130mcs';
+                } else if (paperType.includes('150gsm') && paperType.includes('Gloss')) {
+                    paperOption = 'pageblock_150mcg';
+                } else if (paperType.includes('150gsm') && paperType.includes('Silk')) {
+                    paperOption = 'pageblock_150mcs';
+                }
+
+                if (paperOption) {
+                    options.push({
+                        type: paperOption,
+                        count: String(pageCount)
+                    });
+                }
+            }
+
+            // Map finish type to CloudPrinter's exact option names
+            if (finish) {
+                let finishOption = null;
+
+                // CloudPrinter uses: cover_finish_gloss, cover_finish_matte
+                if (finish.toLowerCase().includes('gloss')) {
+                    finishOption = 'cover_finish_gloss';
+                } else if (finish.toLowerCase().includes('matt') || finish.toLowerCase().includes('matte')) {
+                    finishOption = 'cover_finish_matte';
+                }
+
+                if (finishOption) {
+                    options.push({
+                        type: finishOption,
+                        count: String(pageCount)
+                    });
+                }
+            }
+        } else {
+            // For other products (aluminum, wood, canvas)
+            // These don't typically need options, but keep for future use
+            if (finish) {
+                options.push({ type: 'finish', value: finish });
+            }
+            if (paperType) {
+                options.push({ type: 'paper', value: paperType });
+            }
         }
 
         // Build CloudPrinter order payload according to API v1.0 spec
