@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import { base44 } from "@/api/base44Client";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -64,7 +65,7 @@ export default function EditPhoto() {
       title: t('absherPhotoFemale'),
       description: t('absherPhotoFemaleDesc'),
       beforeImage: "/images/Edit-Absher-Female-Before.jpg",
-      afterImage: "/images/Edit-Absher-Female-After.png",
+      afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Absher-Female-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/absher", // Assuming the same webhook can handle male/female variations or will be updated.
       category: "id"
     },

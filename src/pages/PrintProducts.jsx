@@ -533,35 +533,7 @@ export default function PrintProducts() {
     }
   };
 
-  const savePhotoMutation = useMutation({
-    mutationFn: async (photoData) => {
-      const savedPhoto = await base44.entities.Photo.create(photoData);
-
-      const cartData = {
-        user: currentUser.email,
-        photo_id: savedPhoto.id,
-        photo_title: photoData.title,
-        photo_url: photoData.edited_url,
-        print_size: photoData.print_size,
-        quantity: 1,
-        price_per_item: photoData.price || 0,
-        total_price: photoData.price || 0,
-        editing_settings: photoData.editing_settings
-      };
-
-      await base44.entities.CartItem.create(cartData);
-      return savedPhoto;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['photos'] });
-      queryClient.invalidateQueries({ queryKey: ['cartItems'] });
-      navigate(createPageUrl("Cart"));
-    },
-    onError: (error) => {
-      console.error("Error:", error);
-      alert(`Failed to save: ${error.message}`);
-    }
-  });
+  // savePhotoMutation removed - not used in PrintProducts flow
 
   const handleSubmitOrder = async () => {
     if (!currentUser || !selectedProduct) return;
@@ -1074,12 +1046,6 @@ export default function PrintProducts() {
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="24">24 pages</SelectItem>
-                                  <SelectItem value="36">36 pages</SelectItem>
-                                  <SelectItem value="48">48 pages</SelectItem>
-                                  <SelectItem value="60">60 pages</SelectItem>
-                                  <SelectItem value="72">72 pages</SelectItem>
-                                  <SelectItem value="84">84 pages</SelectItem>
-                                  <SelectItem value="96">96 pages</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
