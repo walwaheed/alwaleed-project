@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -86,15 +85,6 @@ export default function EditPhoto() {
       afterImage: "/images/Home-Baby-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/baby-photo",
       category: "id"
-    },
-    {
-      id: "family-photo",
-      title: language === 'ar' ? 'صورة العائلة' : 'Family Photo',
-      description: language === 'ar' ? 'تحرير يدوي للصور العائلية مع خيارات طباعة متنوعة' : 'Manual editing for family photos with versatile print options',
-      beforeImage: "/images/Edit-Family-Before.jpg",
-      afterImage: "/images/Edit-Family-After.jpg",
-      webhook: null,
-      category: "family"
     }
   ], [t, language]);
 
