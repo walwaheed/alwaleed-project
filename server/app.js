@@ -6,6 +6,9 @@ require('dotenv').config();
 
 const errorHandler = require('./middleware/errorHandler');
 
+// Debug: Check if CloudPrinter API key is loaded
+console.log('🔍 Checking CLOUD_PRINTER_KEY:', process.env.CLOUD_PRINTER_KEY ? '✅ Found' : '❌ Missing');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -36,6 +39,7 @@ app.use('/api/cart', require('./routes/cart'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/process-image', require('./routes/process-image'));
+app.use('/api/cloudprinter', require('./routes/cloudprinter'));
 
 // 404 Handler
 app.use((req, res) => {

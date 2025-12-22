@@ -12,26 +12,26 @@ export default function Home() {
   const beforeAfterExamples = [
     {
       id: "visa-photo",
-      before: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/182b2239c_Screenshot2025-11-21064253.png",
-      after: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/2702f0040_edited-1763700285692.png",
+      before: "/images/Home-Visa-Before.png",
+      after: "/images/Home-Visa-After.png",
       title: t('visaPhotoReady')
     },
     {
       id: "absher-photo",
-      before: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/c1bcc23bc_pexels-italo-melo-881954-2379004.jpg",
-      after: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/c372d3d27_edited-1764547451093.png",
+      before: "/images/Home-Absher-Before.jpg",
+      after: "/images/Home-Absher-After.png",
       title: t('absherPhoto')
     },
     {
       id: "saudi-look",
-      before: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/e3a0814d4_7074919201_635b0bcdab_z.jpg",
-      after: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/cd59bd50b_edited-1763697717196.png",
+      before: "/images/Home-Saudi-Before.jpg",
+      after: "/images/Home-Saudi-After.png",
       title: t('saudiLook')
     },
     {
       id: "baby-photo",
-      before: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/a1372b428_DSC02553.JPG",
-      after: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/d5b1dc14b_edited-1763699257215.png",
+      before: "/images/Home-Baby-Before.jpg",
+      after: "/images/Home-Baby-After.png",
       title: t('babyPhoto')
     }
   ];
@@ -58,7 +58,7 @@ export default function Home() {
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                 <span>{t('trustedByUsers')}</span>
               </div>
-              
+
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.1] mb-6">
                 <span className="text-[#1A1A2E]">
                   {t('heroMainTitle')}
@@ -68,7 +68,7 @@ export default function Home() {
                   {t('heroPrintReady')}
                 </span>
               </h1>
-              
+
               <p className="text-xl text-[#4A4A5A] mb-8 leading-relaxed max-w-xl">
                 {t('heroSubtitle')}
               </p>
@@ -263,16 +263,16 @@ export default function Home() {
               {process.map((item, index) => (
                 <Link key={index} to={createPageUrl("EditPhoto")}>
                   <motion.div
-                    initial={{ 
+                    initial={{
                       opacity: 0,
                       y: 50,
                     }}
-                    whileInView={{ 
+                    whileInView={{
                       opacity: 1,
                       y: 0,
                     }}
                     viewport={{ once: true, margin: "-100px" }}
-                    transition={{ 
+                    transition={{
                       duration: 0.5,
                       delay: index * 0.15,
                       ease: "easeOut"
@@ -360,8 +360,8 @@ export default function Home() {
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-[#E63946] hover:bg-[#C1121F] text-white rounded-full px-12 py-6 text-xl font-bold relative overflow-hidden group transition-all hover:-translate-y-0.5"
                   style={{ boxShadow: '0 4px 14px rgba(230, 57, 70, 0.3)' }}
                 >

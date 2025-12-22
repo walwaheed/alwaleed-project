@@ -46,8 +46,8 @@ export default function EditPhoto() {
       id: "visa-photo",
       title: t('visaPhoto'),
       description: t('visaPhotoDesc'),
-      beforeImage: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/a3f80b737_Screenshot2025-11-21065820.png",
-      afterImage: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/cae2c0a3d_edited-1763700122848.png",
+      beforeImage: "/images/Edit-Visa-Before.png",
+      afterImage: "/images/Edit-Visa-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/visa-photo",
       category: "id"
     },
@@ -55,8 +55,8 @@ export default function EditPhoto() {
       id: "absher-photo",
       title: t('absherPhotoMale'),
       description: t('absherPhotoMaleDesc'),
-      beforeImage: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/c1bcc23bc_pexels-italo-melo-881954-2379004.jpg",
-      afterImage: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/c372d3d27_edited-1764547451093.png",
+      beforeImage: "/images/Home-Absher-Before.jpg",
+      afterImage: "/images/Home-Absher-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/absher",
       category: "id"
     },
@@ -64,8 +64,8 @@ export default function EditPhoto() {
       id: "absher-photo-female",
       title: t('absherPhotoFemale'),
       description: t('absherPhotoFemaleDesc'),
-      beforeImage: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/6785fae25_pexels-vinicius-wiesehofer-289347-1130626.jpg",
-      afterImage: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/74ee0ca0e_edited-1764547372079.png",
+      beforeImage: "/images/Edit-Absher-Female-Before.jpg",
+      afterImage: "/images/Edit-Absher-Female-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/absher", // Assuming the same webhook can handle male/female variations or will be updated.
       category: "id"
     },
@@ -73,8 +73,8 @@ export default function EditPhoto() {
       id: "saudi-look",
       title: t('saudiLook'),
       description: t('saudiLookDesc'),
-      beforeImage: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/e3a0814d4_7074919201_635b0bcdab_z.jpg",
-      afterImage: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/cd59bd50b_edited-1763697717196.png",
+      beforeImage: "/images/Home-Saudi-Before.jpg",
+      afterImage: "/images/Home-Saudi-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/saudi-look",
       category: "portrait"
     },
@@ -82,8 +82,8 @@ export default function EditPhoto() {
       id: "baby-photo",
       title: t('babyPhoto'),
       description: t('babyPhotoDesc'),
-      beforeImage: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/a1372b428_DSC02553.JPG",
-      afterImage: "https://base44.app/api/apps/690011e6637df3b25a370af7/files/public/690011e6637df3b25a370af7/d5b1dc14b_edited-1763699257215.png",
+      beforeImage: "/images/Home-Baby-Before.jpg",
+      afterImage: "/images/Home-Baby-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/baby-photo",
       category: "id"
     },
@@ -91,8 +91,8 @@ export default function EditPhoto() {
       id: "family-photo",
       title: language === 'ar' ? 'صورة العائلة' : 'Family Photo',
       description: language === 'ar' ? 'تحرير يدوي للصور العائلية مع خيارات طباعة متنوعة' : 'Manual editing for family photos with versatile print options',
-      beforeImage: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&h=800&fit=crop&sat=-100&brightness=1.1",
-      afterImage: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&h=800&fit=crop",
+      beforeImage: "/images/Edit-Family-Before.jpg",
+      afterImage: "/images/Edit-Family-After.jpg",
       webhook: null,
       category: "family"
     }

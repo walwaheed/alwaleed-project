@@ -89,50 +89,50 @@ export default function PrintProducts() {
         'Qatar'
       ],
       pricing: [
-        {"size": "300x300 mm", "country": "Saudi Arabia", "cost_eur": 26.19, "cost_sar": 114.44},
-        {"size": "400x400 mm", "country": "Saudi Arabia", "cost_eur": 28.97, "cost_sar": 126.61},
-        {"size": "450x450 mm", "country": "Saudi Arabia", "cost_eur": 30.61, "cost_sar": 133.77},
-        {"size": "500x500 mm", "country": "Saudi Arabia", "cost_eur": 37.24, "cost_sar": 162.73},
-        {"size": "700x700 mm", "country": "Saudi Arabia", "cost_eur": 54.70, "cost_sar": 239.04},
-        {"size": "300x450 mm", "country": "Saudi Arabia", "cost_eur": 27.72, "cost_sar": 121.12},
-        {"size": "500x600 mm", "country": "Saudi Arabia", "cost_eur": 32.09, "cost_sar": 140.22},
-        {"size": "600x800 mm", "country": "Saudi Arabia", "cost_eur": 50.26, "cost_sar": 219.62},
-        {"size": "600x900 mm", "country": "Saudi Arabia", "cost_eur": 56.67, "cost_sar": 247.63},
-        {"size": "300x300 mm", "country": "Kuwait", "cost_eur": 22.33, "cost_sar": 97.59},
-        {"size": "400x400 mm", "country": "Kuwait", "cost_eur": 24.76, "cost_sar": 108.18},
-        {"size": "450x450 mm", "country": "Kuwait", "cost_eur": 26.18, "cost_sar": 114.41},
-        {"size": "500x500 mm", "country": "Kuwait", "cost_eur": 30.06, "cost_sar": 131.34},
-        {"size": "700x700 mm", "country": "Kuwait", "cost_eur": 42.67, "cost_sar": 186.46},
-        {"size": "300x450 mm", "country": "Kuwait", "cost_eur": 23.66, "cost_sar": 103.41},
-        {"size": "500x600 mm", "country": "Kuwait", "cost_eur": 27.46, "cost_sar": 120.01},
-        {"size": "600x800 mm", "country": "Kuwait", "cost_eur": 40.09, "cost_sar": 175.17},
-        {"size": "600x900 mm", "country": "Kuwait", "cost_eur": 44.38, "cost_sar": 193.93},
-        {"size": "300x300 mm", "country": "Oman", "cost_eur": 28.15, "cost_sar": 123.03},
-        {"size": "400x400 mm", "country": "Oman", "cost_eur": 30.58, "cost_sar": 133.61},
-        {"size": "450x450 mm", "country": "Oman", "cost_eur": 32.00, "cost_sar": 139.84},
-        {"size": "500x500 mm", "country": "Oman", "cost_eur": 36.31, "cost_sar": 158.65},
-        {"size": "700x700 mm", "country": "Oman", "cost_eur": 49.83, "cost_sar": 217.75},
-        {"size": "300x450 mm", "country": "Oman", "cost_eur": 29.48, "cost_sar": 128.84},
-        {"size": "500x600 mm", "country": "Oman", "cost_eur": 33.28, "cost_sar": 145.44},
-        {"size": "600x800 mm", "country": "Oman", "cost_eur": 46.80, "cost_sar": 204.49},
-        {"size": "600x900 mm", "country": "Oman", "cost_eur": 51.54, "cost_sar": 225.22},
-        {"size": "300x300 mm", "country": "Bahrain", "cost_eur": 26.30, "cost_sar": 114.94},
-        {"size": "400x400 mm", "country": "Bahrain", "cost_eur": 28.73, "cost_sar": 125.53},
-        {"size": "450x450 mm", "country": "Bahrain", "cost_eur": 30.15, "cost_sar": 131.76},
-        {"size": "500x500 mm", "country": "Bahrain", "cost_eur": 34.70, "cost_sar": 151.62},
-        {"size": "700x700 mm", "country": "Bahrain", "cost_eur": 48.66, "cost_sar": 212.63},
-        {"size": "300x450 mm", "country": "Bahrain", "cost_eur": 27.63, "cost_sar": 120.75},
-        {"size": "500x600 mm", "country": "Bahrain", "cost_eur": 31.43, "cost_sar": 137.36},
-        {"size": "600x800 mm", "country": "Bahrain", "cost_eur": 45.41, "cost_sar": 198.42},
-        {"size": "600x900 mm", "country": "Bahrain", "cost_eur": 50.37, "cost_sar": 220.11},
-        {"size": "300x300 mm", "country": "Qatar", "cost_eur": 19.86, "cost_sar": 86.80},
-        {"size": "400x400 mm", "country": "Qatar", "cost_eur": 22.29, "cost_sar": 97.39},
-        {"size": "450x450 mm", "country": "Qatar", "cost_eur": 23.71, "cost_sar": 103.61},
-        {"size": "500x500 mm", "country": "Qatar", "cost_eur": 28.39, "cost_sar": 124.04},
-        {"size": "700x700 mm", "country": "Qatar", "cost_eur": 42.65, "cost_sar": 186.37},
-        {"size": "300x450 mm", "country": "Qatar", "cost_eur": 21.19, "cost_sar": 92.61},
-        {"size": "500x600 mm", "country": "Qatar", "cost_eur": 24.99, "cost_sar": 109.22},
-        {"size": "600x900 mm", "country": "Qatar", "cost_eur": 44.36, "cost_sar": 193.84}
+        { "size": "300x300 mm", "country": "Saudi Arabia", "cost_eur": 26.19, "cost_sar": 114.44 },
+        { "size": "400x400 mm", "country": "Saudi Arabia", "cost_eur": 28.97, "cost_sar": 126.61 },
+        { "size": "450x450 mm", "country": "Saudi Arabia", "cost_eur": 30.61, "cost_sar": 133.77 },
+        { "size": "500x500 mm", "country": "Saudi Arabia", "cost_eur": 37.24, "cost_sar": 162.73 },
+        { "size": "700x700 mm", "country": "Saudi Arabia", "cost_eur": 54.70, "cost_sar": 239.04 },
+        { "size": "300x450 mm", "country": "Saudi Arabia", "cost_eur": 27.72, "cost_sar": 121.12 },
+        { "size": "500x600 mm", "country": "Saudi Arabia", "cost_eur": 32.09, "cost_sar": 140.22 },
+        { "size": "600x800 mm", "country": "Saudi Arabia", "cost_eur": 50.26, "cost_sar": 219.62 },
+        { "size": "600x900 mm", "country": "Saudi Arabia", "cost_eur": 56.67, "cost_sar": 247.63 },
+        { "size": "300x300 mm", "country": "Kuwait", "cost_eur": 22.33, "cost_sar": 97.59 },
+        { "size": "400x400 mm", "country": "Kuwait", "cost_eur": 24.76, "cost_sar": 108.18 },
+        { "size": "450x450 mm", "country": "Kuwait", "cost_eur": 26.18, "cost_sar": 114.41 },
+        { "size": "500x500 mm", "country": "Kuwait", "cost_eur": 30.06, "cost_sar": 131.34 },
+        { "size": "700x700 mm", "country": "Kuwait", "cost_eur": 42.67, "cost_sar": 186.46 },
+        { "size": "300x450 mm", "country": "Kuwait", "cost_eur": 23.66, "cost_sar": 103.41 },
+        { "size": "500x600 mm", "country": "Kuwait", "cost_eur": 27.46, "cost_sar": 120.01 },
+        { "size": "600x800 mm", "country": "Kuwait", "cost_eur": 40.09, "cost_sar": 175.17 },
+        { "size": "600x900 mm", "country": "Kuwait", "cost_eur": 44.38, "cost_sar": 193.93 },
+        { "size": "300x300 mm", "country": "Oman", "cost_eur": 28.15, "cost_sar": 123.03 },
+        { "size": "400x400 mm", "country": "Oman", "cost_eur": 30.58, "cost_sar": 133.61 },
+        { "size": "450x450 mm", "country": "Oman", "cost_eur": 32.00, "cost_sar": 139.84 },
+        { "size": "500x500 mm", "country": "Oman", "cost_eur": 36.31, "cost_sar": 158.65 },
+        { "size": "700x700 mm", "country": "Oman", "cost_eur": 49.83, "cost_sar": 217.75 },
+        { "size": "300x450 mm", "country": "Oman", "cost_eur": 29.48, "cost_sar": 128.84 },
+        { "size": "500x600 mm", "country": "Oman", "cost_eur": 33.28, "cost_sar": 145.44 },
+        { "size": "600x800 mm", "country": "Oman", "cost_eur": 46.80, "cost_sar": 204.49 },
+        { "size": "600x900 mm", "country": "Oman", "cost_eur": 51.54, "cost_sar": 225.22 },
+        { "size": "300x300 mm", "country": "Bahrain", "cost_eur": 26.30, "cost_sar": 114.94 },
+        { "size": "400x400 mm", "country": "Bahrain", "cost_eur": 28.73, "cost_sar": 125.53 },
+        { "size": "450x450 mm", "country": "Bahrain", "cost_eur": 30.15, "cost_sar": 131.76 },
+        { "size": "500x500 mm", "country": "Bahrain", "cost_eur": 34.70, "cost_sar": 151.62 },
+        { "size": "700x700 mm", "country": "Bahrain", "cost_eur": 48.66, "cost_sar": 212.63 },
+        { "size": "300x450 mm", "country": "Bahrain", "cost_eur": 27.63, "cost_sar": 120.75 },
+        { "size": "500x600 mm", "country": "Bahrain", "cost_eur": 31.43, "cost_sar": 137.36 },
+        { "size": "600x800 mm", "country": "Bahrain", "cost_eur": 45.41, "cost_sar": 198.42 },
+        { "size": "600x900 mm", "country": "Bahrain", "cost_eur": 50.37, "cost_sar": 220.11 },
+        { "size": "300x300 mm", "country": "Qatar", "cost_eur": 19.86, "cost_sar": 86.80 },
+        { "size": "400x400 mm", "country": "Qatar", "cost_eur": 22.29, "cost_sar": 97.39 },
+        { "size": "450x450 mm", "country": "Qatar", "cost_eur": 23.71, "cost_sar": 103.61 },
+        { "size": "500x500 mm", "country": "Qatar", "cost_eur": 28.39, "cost_sar": 124.04 },
+        { "size": "700x700 mm", "country": "Qatar", "cost_eur": 42.65, "cost_sar": 186.37 },
+        { "size": "300x450 mm", "country": "Qatar", "cost_eur": 21.19, "cost_sar": 92.61 },
+        { "size": "500x600 mm", "country": "Qatar", "cost_eur": 24.99, "cost_sar": 109.22 },
+        { "size": "600x900 mm", "country": "Qatar", "cost_eur": 44.36, "cost_sar": 193.84 }
       ]
     },
     wood: {
@@ -164,51 +164,51 @@ export default function PrintProducts() {
         'Qatar'
       ],
       pricing: [
-        {"size": "300x300 mm", "country": "Saudi Arabia", "cost_eur": 27.90, "cost_sar": 121.93},
-        {"size": "400x400 mm", "country": "Saudi Arabia", "cost_eur": 34.67, "cost_sar": 151.51},
-        {"size": "450x450 mm", "country": "Saudi Arabia", "cost_eur": 49.73, "cost_sar": 217.31},
-        {"size": "500x500 mm", "country": "Saudi Arabia", "cost_eur": 62.40, "cost_sar": 272.68},
-        {"size": "700x700 mm", "country": "Saudi Arabia", "cost_eur": 82.41, "cost_sar": 360.13},
-        {"size": "300x450 mm", "country": "Saudi Arabia", "cost_eur": 34.12, "cost_sar": 149.12},
-        {"size": "400x600 mm", "country": "Saudi Arabia", "cost_eur": 46.23, "cost_sar": 202.04},
-        {"size": "600x800 mm", "country": "Saudi Arabia", "cost_eur": 73.22, "cost_sar": 319.95},
-        {"size": "600x900 mm", "country": "Saudi Arabia", "cost_eur": 75.07, "cost_sar": 328.07},
-        {"size": "300x300 mm", "country": "Kuwait", "cost_eur": 23.82, "cost_sar": 104.11},
-        {"size": "400x400 mm", "country": "Kuwait", "cost_eur": 27.82, "cost_sar": 121.58},
-        {"size": "450x450 mm", "country": "Kuwait", "cost_eur": 38.35, "cost_sar": 167.57},
-        {"size": "500x500 mm", "country": "Kuwait", "cost_eur": 45.57, "cost_sar": 199.15},
-        {"size": "700x700 mm", "country": "Kuwait", "cost_eur": 51.98, "cost_sar": 227.13},
-        {"size": "300x450 mm", "country": "Kuwait", "cost_eur": 27.35, "cost_sar": 119.51},
-        {"size": "400x600 mm", "country": "Kuwait", "cost_eur": 35.31, "cost_sar": 154.28},
-        {"size": "600x800 mm", "country": "Kuwait", "cost_eur": 46.01, "cost_sar": 201.06},
-        {"size": "600x900 mm", "country": "Kuwait", "cost_eur": 47.63, "cost_sar": 208.12},
-        {"size": "300x300 mm", "country": "Oman", "cost_eur": 29.64, "cost_sar": 129.54},
-        {"size": "400x400 mm", "country": "Oman", "cost_eur": 34.07, "cost_sar": 148.90},
-        {"size": "450x450 mm", "country": "Oman", "cost_eur": 45.51, "cost_sar": 198.86},
-        {"size": "500x500 mm", "country": "Oman", "cost_eur": 54.05, "cost_sar": 236.20},
-        {"size": "700x700 mm", "country": "Oman", "cost_eur": 69.82, "cost_sar": 305.09},
-        {"size": "300x450 mm", "country": "Oman", "cost_eur": 33.60, "cost_sar": 146.82},
-        {"size": "400x600 mm", "country": "Oman", "cost_eur": 42.47, "cost_sar": 185.57},
-        {"size": "600x800 mm", "country": "Oman", "cost_eur": 62.65, "cost_sar": 273.78},
-        {"size": "600x900 mm", "country": "Oman", "cost_eur": 64.27, "cost_sar": 280.84},
-        {"size": "300x300 mm", "country": "Bahrain", "cost_eur": 27.79, "cost_sar": 121.46},
-        {"size": "400x400 mm", "country": "Bahrain", "cost_eur": 32.46, "cost_sar": 141.86},
-        {"size": "450x450 mm", "country": "Bahrain", "cost_eur": 44.34, "cost_sar": 193.74},
-        {"size": "500x500 mm", "country": "Bahrain", "cost_eur": 53.55, "cost_sar": 234.02},
-        {"size": "700x700 mm", "country": "Bahrain", "cost_eur": 69.78, "cost_sar": 304.92},
-        {"size": "300x450 mm", "country": "Bahrain", "cost_eur": 31.99, "cost_sar": 139.79},
-        {"size": "400x600 mm", "country": "Bahrain", "cost_eur": 41.30, "cost_sar": 180.46},
-        {"size": "600x800 mm", "country": "Bahrain", "cost_eur": 62.38, "cost_sar": 272.60},
-        {"size": "600x900 mm", "country": "Bahrain", "cost_eur": 64.00, "cost_sar": 279.66},
-        {"size": "300x300 mm", "country": "Qatar", "cost_eur": 21.35, "cost_sar": 93.32},
-        {"size": "400x400 mm", "country": "Qatar", "cost_eur": 26.15, "cost_sar": 114.29},
-        {"size": "450x450 mm", "country": "Qatar", "cost_eur": 38.33, "cost_sar": 167.48},
-        {"size": "500x500 mm", "country": "Qatar", "cost_eur": 47.98, "cost_sar": 209.68},
-        {"size": "700x700 mm", "country": "Qatar", "cost_eur": 64.50, "cost_sar": 281.84},
-        {"size": "300x450 mm", "country": "Qatar", "cost_eur": 25.68, "cost_sar": 112.21},
-        {"size": "400x600 mm", "country": "Qatar", "cost_eur": 35.29, "cost_sar": 154.20},
-        {"size": "600x800 mm", "country": "Qatar", "cost_eur": 56.96, "cost_sar": 248.92},
-        {"size": "600x900 mm", "country": "Qatar", "cost_eur": 58.58, "cost_sar": 255.97}
+        { "size": "300x300 mm", "country": "Saudi Arabia", "cost_eur": 27.90, "cost_sar": 121.93 },
+        { "size": "400x400 mm", "country": "Saudi Arabia", "cost_eur": 34.67, "cost_sar": 151.51 },
+        { "size": "450x450 mm", "country": "Saudi Arabia", "cost_eur": 49.73, "cost_sar": 217.31 },
+        { "size": "500x500 mm", "country": "Saudi Arabia", "cost_eur": 62.40, "cost_sar": 272.68 },
+        { "size": "700x700 mm", "country": "Saudi Arabia", "cost_eur": 82.41, "cost_sar": 360.13 },
+        { "size": "300x450 mm", "country": "Saudi Arabia", "cost_eur": 34.12, "cost_sar": 149.12 },
+        { "size": "400x600 mm", "country": "Saudi Arabia", "cost_eur": 46.23, "cost_sar": 202.04 },
+        { "size": "600x800 mm", "country": "Saudi Arabia", "cost_eur": 73.22, "cost_sar": 319.95 },
+        { "size": "600x900 mm", "country": "Saudi Arabia", "cost_eur": 75.07, "cost_sar": 328.07 },
+        { "size": "300x300 mm", "country": "Kuwait", "cost_eur": 23.82, "cost_sar": 104.11 },
+        { "size": "400x400 mm", "country": "Kuwait", "cost_eur": 27.82, "cost_sar": 121.58 },
+        { "size": "450x450 mm", "country": "Kuwait", "cost_eur": 38.35, "cost_sar": 167.57 },
+        { "size": "500x500 mm", "country": "Kuwait", "cost_eur": 45.57, "cost_sar": 199.15 },
+        { "size": "700x700 mm", "country": "Kuwait", "cost_eur": 51.98, "cost_sar": 227.13 },
+        { "size": "300x450 mm", "country": "Kuwait", "cost_eur": 27.35, "cost_sar": 119.51 },
+        { "size": "400x600 mm", "country": "Kuwait", "cost_eur": 35.31, "cost_sar": 154.28 },
+        { "size": "600x800 mm", "country": "Kuwait", "cost_eur": 46.01, "cost_sar": 201.06 },
+        { "size": "600x900 mm", "country": "Kuwait", "cost_eur": 47.63, "cost_sar": 208.12 },
+        { "size": "300x300 mm", "country": "Oman", "cost_eur": 29.64, "cost_sar": 129.54 },
+        { "size": "400x400 mm", "country": "Oman", "cost_eur": 34.07, "cost_sar": 148.90 },
+        { "size": "450x450 mm", "country": "Oman", "cost_eur": 45.51, "cost_sar": 198.86 },
+        { "size": "500x500 mm", "country": "Oman", "cost_eur": 54.05, "cost_sar": 236.20 },
+        { "size": "700x700 mm", "country": "Oman", "cost_eur": 69.82, "cost_sar": 305.09 },
+        { "size": "300x450 mm", "country": "Oman", "cost_eur": 33.60, "cost_sar": 146.82 },
+        { "size": "400x600 mm", "country": "Oman", "cost_eur": 42.47, "cost_sar": 185.57 },
+        { "size": "600x800 mm", "country": "Oman", "cost_eur": 62.65, "cost_sar": 273.78 },
+        { "size": "600x900 mm", "country": "Oman", "cost_eur": 64.27, "cost_sar": 280.84 },
+        { "size": "300x300 mm", "country": "Bahrain", "cost_eur": 27.79, "cost_sar": 121.46 },
+        { "size": "400x400 mm", "country": "Bahrain", "cost_eur": 32.46, "cost_sar": 141.86 },
+        { "size": "450x450 mm", "country": "Bahrain", "cost_eur": 44.34, "cost_sar": 193.74 },
+        { "size": "500x500 mm", "country": "Bahrain", "cost_eur": 53.55, "cost_sar": 234.02 },
+        { "size": "700x700 mm", "country": "Bahrain", "cost_eur": 69.78, "cost_sar": 304.92 },
+        { "size": "300x450 mm", "country": "Bahrain", "cost_eur": 31.99, "cost_sar": 139.79 },
+        { "size": "400x600 mm", "country": "Bahrain", "cost_eur": 41.30, "cost_sar": 180.46 },
+        { "size": "600x800 mm", "country": "Bahrain", "cost_eur": 62.38, "cost_sar": 272.60 },
+        { "size": "600x900 mm", "country": "Bahrain", "cost_eur": 64.00, "cost_sar": 279.66 },
+        { "size": "300x300 mm", "country": "Qatar", "cost_eur": 21.35, "cost_sar": 93.32 },
+        { "size": "400x400 mm", "country": "Qatar", "cost_eur": 26.15, "cost_sar": 114.29 },
+        { "size": "450x450 mm", "country": "Qatar", "cost_eur": 38.33, "cost_sar": 167.48 },
+        { "size": "500x500 mm", "country": "Qatar", "cost_eur": 47.98, "cost_sar": 209.68 },
+        { "size": "700x700 mm", "country": "Qatar", "cost_eur": 64.50, "cost_sar": 281.84 },
+        { "size": "300x450 mm", "country": "Qatar", "cost_eur": 25.68, "cost_sar": 112.21 },
+        { "size": "400x600 mm", "country": "Qatar", "cost_eur": 35.29, "cost_sar": 154.20 },
+        { "size": "600x800 mm", "country": "Qatar", "cost_eur": 56.96, "cost_sar": 248.92 },
+        { "size": "600x900 mm", "country": "Qatar", "cost_eur": 58.58, "cost_sar": 255.97 }
       ]
     },
     canva: {
@@ -244,71 +244,71 @@ export default function PrintProducts() {
         'Qatar'
       ],
       pricing: [
-        {"size": "1000x500 mm", "country": "Saudi Arabia", "cost_eur": 69.29, "cost_sar": 302.78},
-        {"size": "200x200 mm", "country": "Saudi Arabia", "cost_eur": 21.30, "cost_sar": 93.09},
-        {"size": "200x300 mm", "country": "Saudi Arabia", "cost_eur": 22.15, "cost_sar": 96.79},
-        {"size": "300x300 mm", "country": "Saudi Arabia", "cost_eur": 22.28, "cost_sar": 97.38},
-        {"size": "300x400 mm", "country": "Saudi Arabia", "cost_eur": 23.27, "cost_sar": 101.67},
-        {"size": "300x450 mm", "country": "Saudi Arabia", "cost_eur": 24.05, "cost_sar": 105.10},
-        {"size": "400x400 mm", "country": "Saudi Arabia", "cost_eur": 29.29, "cost_sar": 128.00},
-        {"size": "400x600 mm", "country": "Saudi Arabia", "cost_eur": 33.22, "cost_sar": 145.16},
-        {"size": "500x700 mm", "country": "Saudi Arabia", "cost_eur": 35.18, "cost_sar": 153.75},
-        {"size": "500x750 mm", "country": "Saudi Arabia", "cost_eur": 36.16, "cost_sar": 158.04},
-        {"size": "600x600 mm", "country": "Saudi Arabia", "cost_eur": 35.18, "cost_sar": 153.75},
-        {"size": "600x800 mm", "country": "Saudi Arabia", "cost_eur": 48.29, "cost_sar": 211.03},
-        {"size": "800x800 mm", "country": "Saudi Arabia", "cost_eur": 60.03, "cost_sar": 262.35},
-        {"size": "1000x500 mm", "country": "Kuwait", "cost_eur": 54.11, "cost_sar": 236.48},
-        {"size": "200x200 mm", "country": "Kuwait", "cost_eur": 11.08, "cost_sar": 48.41},
-        {"size": "200x300 mm", "country": "Kuwait", "cost_eur": 11.81, "cost_sar": 51.62},
-        {"size": "300x300 mm", "country": "Kuwait", "cost_eur": 11.93, "cost_sar": 52.14},
-        {"size": "300x400 mm", "country": "Kuwait", "cost_eur": 12.79, "cost_sar": 55.87},
-        {"size": "300x450 mm", "country": "Kuwait", "cost_eur": 13.47, "cost_sar": 58.86},
-        {"size": "400x400 mm", "country": "Kuwait", "cost_eur": 25.03, "cost_sar": 109.39},
-        {"size": "400x600 mm", "country": "Kuwait", "cost_eur": 28.45, "cost_sar": 124.31},
-        {"size": "500x700 mm", "country": "Kuwait", "cost_eur": 30.16, "cost_sar": 131.78},
-        {"size": "500x750 mm", "country": "Kuwait", "cost_eur": 31.01, "cost_sar": 135.51},
-        {"size": "600x600 mm", "country": "Kuwait", "cost_eur": 30.16, "cost_sar": 131.78},
-        {"size": "600x800 mm", "country": "Kuwait", "cost_eur": 38.38, "cost_sar": 167.70},
-        {"size": "800x800 mm", "country": "Kuwait", "cost_eur": 46.07, "cost_sar": 201.31},
-        {"size": "1000x500 mm", "country": "Oman", "cost_eur": 61.70, "cost_sar": 269.65},
-        {"size": "200x200 mm", "country": "Oman", "cost_eur": 24.74, "cost_sar": 108.10},
-        {"size": "200x300 mm", "country": "Oman", "cost_eur": 25.47, "cost_sar": 111.31},
-        {"size": "300x300 mm", "country": "Oman", "cost_eur": 25.59, "cost_sar": 111.83},
-        {"size": "300x400 mm", "country": "Oman", "cost_eur": 26.44, "cost_sar": 115.56},
-        {"size": "300x450 mm", "country": "Oman", "cost_eur": 27.13, "cost_sar": 118.54},
-        {"size": "400x400 mm", "country": "Oman", "cost_eur": 30.85, "cost_sar": 134.82},
-        {"size": "400x600 mm", "country": "Oman", "cost_eur": 34.27, "cost_sar": 149.75},
-        {"size": "500x700 mm", "country": "Oman", "cost_eur": 35.98, "cost_sar": 157.21},
-        {"size": "500x750 mm", "country": "Oman", "cost_eur": 36.83, "cost_sar": 160.94},
-        {"size": "600x600 mm", "country": "Oman", "cost_eur": 35.98, "cost_sar": 157.21},
-        {"size": "600x800 mm", "country": "Oman", "cost_eur": 45.09, "cost_sar": 197.02},
-        {"size": "800x800 mm", "country": "Oman", "cost_eur": 53.66, "cost_sar": 234.48},
-        {"size": "1000x500 mm", "country": "Bahrain", "cost_eur": 60.76, "cost_sar": 265.54},
-        {"size": "200x200 mm", "country": "Bahrain", "cost_eur": 22.67, "cost_sar": 99.05},
-        {"size": "200x300 mm", "country": "Bahrain", "cost_eur": 23.40, "cost_sar": 102.26},
-        {"size": "300x300 mm", "country": "Bahrain", "cost_eur": 23.52, "cost_sar": 102.78},
-        {"size": "300x400 mm", "country": "Bahrain", "cost_eur": 24.37, "cost_sar": 106.51},
-        {"size": "300x450 mm", "country": "Bahrain", "cost_eur": 25.06, "cost_sar": 109.50},
-        {"size": "400x400 mm", "country": "Bahrain", "cost_eur": 29.00, "cost_sar": 126.74},
-        {"size": "400x600 mm", "country": "Bahrain", "cost_eur": 32.42, "cost_sar": 141.66},
-        {"size": "500x700 mm", "country": "Bahrain", "cost_eur": 34.13, "cost_sar": 149.13},
-        {"size": "500x750 mm", "country": "Bahrain", "cost_eur": 34.98, "cost_sar": 152.86},
-        {"size": "600x600 mm", "country": "Bahrain", "cost_eur": 34.13, "cost_sar": 149.13},
-        {"size": "600x800 mm", "country": "Bahrain", "cost_eur": 43.70, "cost_sar": 190.95},
-        {"size": "800x800 mm", "country": "Bahrain", "cost_eur": 52.72, "cost_sar": 230.38},
-        {"size": "1000x500 mm", "country": "Qatar", "cost_eur": 54.90, "cost_sar": 239.93},
-        {"size": "200x200 mm", "country": "Qatar", "cost_eur": 16.08, "cost_sar": 70.25},
-        {"size": "200x300 mm", "country": "Qatar", "cost_eur": 16.81, "cost_sar": 73.47},
-        {"size": "300x300 mm", "country": "Qatar", "cost_eur": 16.93, "cost_sar": 73.98},
-        {"size": "300x400 mm", "country": "Qatar", "cost_eur": 17.78, "cost_sar": 77.71},
-        {"size": "300x450 mm", "country": "Qatar", "cost_eur": 18.47, "cost_sar": 80.70},
-        {"size": "400x400 mm", "country": "Qatar", "cost_eur": 22.56, "cost_sar": 98.59},
-        {"size": "400x600 mm", "country": "Qatar", "cost_eur": 25.98, "cost_sar": 113.52},
-        {"size": "500x700 mm", "country": "Qatar", "cost_eur": 27.69, "cost_sar": 120.98},
-        {"size": "500x750 mm", "country": "Qatar", "cost_eur": 28.54, "cost_sar": 124.71},
-        {"size": "600x600 mm", "country": "Qatar", "cost_eur": 27.69, "cost_sar": 120.98},
-        {"size": "600x800 mm", "country": "Qatar", "cost_eur": 37.54, "cost_sar": 164.03},
-        {"size": "800x800 mm", "country": "Qatar", "cost_eur": 46.86, "cost_sar": 204.77}
+        { "size": "1000x500 mm", "country": "Saudi Arabia", "cost_eur": 69.29, "cost_sar": 302.78 },
+        { "size": "200x200 mm", "country": "Saudi Arabia", "cost_eur": 21.30, "cost_sar": 93.09 },
+        { "size": "200x300 mm", "country": "Saudi Arabia", "cost_eur": 22.15, "cost_sar": 96.79 },
+        { "size": "300x300 mm", "country": "Saudi Arabia", "cost_eur": 22.28, "cost_sar": 97.38 },
+        { "size": "300x400 mm", "country": "Saudi Arabia", "cost_eur": 23.27, "cost_sar": 101.67 },
+        { "size": "300x450 mm", "country": "Saudi Arabia", "cost_eur": 24.05, "cost_sar": 105.10 },
+        { "size": "400x400 mm", "country": "Saudi Arabia", "cost_eur": 29.29, "cost_sar": 128.00 },
+        { "size": "400x600 mm", "country": "Saudi Arabia", "cost_eur": 33.22, "cost_sar": 145.16 },
+        { "size": "500x700 mm", "country": "Saudi Arabia", "cost_eur": 35.18, "cost_sar": 153.75 },
+        { "size": "500x750 mm", "country": "Saudi Arabia", "cost_eur": 36.16, "cost_sar": 158.04 },
+        { "size": "600x600 mm", "country": "Saudi Arabia", "cost_eur": 35.18, "cost_sar": 153.75 },
+        { "size": "600x800 mm", "country": "Saudi Arabia", "cost_eur": 48.29, "cost_sar": 211.03 },
+        { "size": "800x800 mm", "country": "Saudi Arabia", "cost_eur": 60.03, "cost_sar": 262.35 },
+        { "size": "1000x500 mm", "country": "Kuwait", "cost_eur": 54.11, "cost_sar": 236.48 },
+        { "size": "200x200 mm", "country": "Kuwait", "cost_eur": 11.08, "cost_sar": 48.41 },
+        { "size": "200x300 mm", "country": "Kuwait", "cost_eur": 11.81, "cost_sar": 51.62 },
+        { "size": "300x300 mm", "country": "Kuwait", "cost_eur": 11.93, "cost_sar": 52.14 },
+        { "size": "300x400 mm", "country": "Kuwait", "cost_eur": 12.79, "cost_sar": 55.87 },
+        { "size": "300x450 mm", "country": "Kuwait", "cost_eur": 13.47, "cost_sar": 58.86 },
+        { "size": "400x400 mm", "country": "Kuwait", "cost_eur": 25.03, "cost_sar": 109.39 },
+        { "size": "400x600 mm", "country": "Kuwait", "cost_eur": 28.45, "cost_sar": 124.31 },
+        { "size": "500x700 mm", "country": "Kuwait", "cost_eur": 30.16, "cost_sar": 131.78 },
+        { "size": "500x750 mm", "country": "Kuwait", "cost_eur": 31.01, "cost_sar": 135.51 },
+        { "size": "600x600 mm", "country": "Kuwait", "cost_eur": 30.16, "cost_sar": 131.78 },
+        { "size": "600x800 mm", "country": "Kuwait", "cost_eur": 38.38, "cost_sar": 167.70 },
+        { "size": "800x800 mm", "country": "Kuwait", "cost_eur": 46.07, "cost_sar": 201.31 },
+        { "size": "1000x500 mm", "country": "Oman", "cost_eur": 61.70, "cost_sar": 269.65 },
+        { "size": "200x200 mm", "country": "Oman", "cost_eur": 24.74, "cost_sar": 108.10 },
+        { "size": "200x300 mm", "country": "Oman", "cost_eur": 25.47, "cost_sar": 111.31 },
+        { "size": "300x300 mm", "country": "Oman", "cost_eur": 25.59, "cost_sar": 111.83 },
+        { "size": "300x400 mm", "country": "Oman", "cost_eur": 26.44, "cost_sar": 115.56 },
+        { "size": "300x450 mm", "country": "Oman", "cost_eur": 27.13, "cost_sar": 118.54 },
+        { "size": "400x400 mm", "country": "Oman", "cost_eur": 30.85, "cost_sar": 134.82 },
+        { "size": "400x600 mm", "country": "Oman", "cost_eur": 34.27, "cost_sar": 149.75 },
+        { "size": "500x700 mm", "country": "Oman", "cost_eur": 35.98, "cost_sar": 157.21 },
+        { "size": "500x750 mm", "country": "Oman", "cost_eur": 36.83, "cost_sar": 160.94 },
+        { "size": "600x600 mm", "country": "Oman", "cost_eur": 35.98, "cost_sar": 157.21 },
+        { "size": "600x800 mm", "country": "Oman", "cost_eur": 45.09, "cost_sar": 197.02 },
+        { "size": "800x800 mm", "country": "Oman", "cost_eur": 53.66, "cost_sar": 234.48 },
+        { "size": "1000x500 mm", "country": "Bahrain", "cost_eur": 60.76, "cost_sar": 265.54 },
+        { "size": "200x200 mm", "country": "Bahrain", "cost_eur": 22.67, "cost_sar": 99.05 },
+        { "size": "200x300 mm", "country": "Bahrain", "cost_eur": 23.40, "cost_sar": 102.26 },
+        { "size": "300x300 mm", "country": "Bahrain", "cost_eur": 23.52, "cost_sar": 102.78 },
+        { "size": "300x400 mm", "country": "Bahrain", "cost_eur": 24.37, "cost_sar": 106.51 },
+        { "size": "300x450 mm", "country": "Bahrain", "cost_eur": 25.06, "cost_sar": 109.50 },
+        { "size": "400x400 mm", "country": "Bahrain", "cost_eur": 29.00, "cost_sar": 126.74 },
+        { "size": "400x600 mm", "country": "Bahrain", "cost_eur": 32.42, "cost_sar": 141.66 },
+        { "size": "500x700 mm", "country": "Bahrain", "cost_eur": 34.13, "cost_sar": 149.13 },
+        { "size": "500x750 mm", "country": "Bahrain", "cost_eur": 34.98, "cost_sar": 152.86 },
+        { "size": "600x600 mm", "country": "Bahrain", "cost_eur": 34.13, "cost_sar": 149.13 },
+        { "size": "600x800 mm", "country": "Bahrain", "cost_eur": 43.70, "cost_sar": 190.95 },
+        { "size": "800x800 mm", "country": "Bahrain", "cost_eur": 52.72, "cost_sar": 230.38 },
+        { "size": "1000x500 mm", "country": "Qatar", "cost_eur": 54.90, "cost_sar": 239.93 },
+        { "size": "200x200 mm", "country": "Qatar", "cost_eur": 16.08, "cost_sar": 70.25 },
+        { "size": "200x300 mm", "country": "Qatar", "cost_eur": 16.81, "cost_sar": 73.47 },
+        { "size": "300x300 mm", "country": "Qatar", "cost_eur": 16.93, "cost_sar": 73.98 },
+        { "size": "300x400 mm", "country": "Qatar", "cost_eur": 17.78, "cost_sar": 77.71 },
+        { "size": "300x450 mm", "country": "Qatar", "cost_eur": 18.47, "cost_sar": 80.70 },
+        { "size": "400x400 mm", "country": "Qatar", "cost_eur": 22.56, "cost_sar": 98.59 },
+        { "size": "400x600 mm", "country": "Qatar", "cost_eur": 25.98, "cost_sar": 113.52 },
+        { "size": "500x700 mm", "country": "Qatar", "cost_eur": 27.69, "cost_sar": 120.98 },
+        { "size": "500x750 mm", "country": "Qatar", "cost_eur": 28.54, "cost_sar": 124.71 },
+        { "size": "600x600 mm", "country": "Qatar", "cost_eur": 27.69, "cost_sar": 120.98 },
+        { "size": "600x800 mm", "country": "Qatar", "cost_eur": 37.54, "cost_sar": 164.03 },
+        { "size": "800x800 mm", "country": "Qatar", "cost_eur": 46.86, "cost_sar": 204.77 }
       ]
     },
     photobook: {
@@ -347,49 +347,49 @@ export default function PrintProducts() {
         'United Arab Emirates'
       ],
       pricing: [
-        {"size": "A4 Landscape", "country": "Saudi Arabia", "cost_eur": 22.4397, "cost_sar": 98.06},
-        {"size": "A4 Portrait", "country": "Saudi Arabia", "cost_eur": 22.4397, "cost_sar": 98.06},
-        {"size": "A5 Landscape", "country": "Saudi Arabia", "cost_eur": 21.8717, "cost_sar": 95.58},
-        {"size": "A5 Portrait", "country": "Saudi Arabia", "cost_eur": 21.8717, "cost_sar": 95.58},
-        {"size": "A6 Landscape", "country": "Saudi Arabia", "cost_eur": 21.7462, "cost_sar": 95.03},
-        {"size": "A6 Portrait", "country": "Saudi Arabia", "cost_eur": 21.8717, "cost_sar": 95.58},
-        {"size": "A4 Landscape", "country": "Kuwait", "cost_eur": 12.0659, "cost_sar": 52.73},
-        {"size": "A4 Portrait", "country": "Kuwait", "cost_eur": 12.0659, "cost_sar": 52.73},
-        {"size": "A5 Landscape", "country": "Kuwait", "cost_eur": 11.5733, "cost_sar": 50.58},
-        {"size": "A5 Portrait", "country": "Kuwait", "cost_eur": 11.5733, "cost_sar": 50.58},
-        {"size": "A6 Landscape", "country": "Kuwait", "cost_eur": 11.4641, "cost_sar": 50.10},
-        {"size": "A6 Portrait", "country": "Kuwait", "cost_eur": 11.5733, "cost_sar": 50.58},
-        {"size": "A4 Landscape - 130gsm", "country": "Oman", "cost_eur": 17.506, "cost_sar": 76.50},
-        {"size": "A4 Landscape - 150gsm", "country": "Oman", "cost_eur": 17.530, "cost_sar": 76.61},
-        {"size": "A4 Portrait - 130gsm", "country": "Oman", "cost_eur": 17.410, "cost_sar": 76.08},
-        {"size": "A4 Portrait - 150gsm", "country": "Oman", "cost_eur": 17.434, "cost_sar": 76.19},
-        {"size": "A5 Landscape - 130gsm", "country": "Oman", "cost_eur": 18.120, "cost_sar": 79.18},
-        {"size": "A5 Landscape - 150gsm", "country": "Oman", "cost_eur": 18.168, "cost_sar": 79.39},
-        {"size": "A5 Portrait - 130gsm", "country": "Oman", "cost_eur": 18.048, "cost_sar": 78.87},
-        {"size": "A5 Portrait - 150gsm", "country": "Oman", "cost_eur": 18.096, "cost_sar": 79.08},
-        {"size": "A6 Landscape - 130gsm", "country": "Oman", "cost_eur": 17.318, "cost_sar": 75.68},
-        {"size": "A6 Landscape - 150gsm", "country": "Oman", "cost_eur": 17.366, "cost_sar": 75.89},
-        {"size": "A6 Portrait - 130gsm", "country": "Oman", "cost_eur": 17.270, "cost_sar": 75.47},
-        {"size": "A6 Portrait - 150gsm", "country": "Oman", "cost_eur": 17.318, "cost_sar": 75.68},
-        {"size": "A4 Landscape", "country": "Qatar", "cost_eur": 17.0644, "cost_sar": 74.57},
-        {"size": "A4 Portrait", "country": "Qatar", "cost_eur": 17.0644, "cost_sar": 74.57},
-        {"size": "A5 Landscape", "country": "Qatar", "cost_eur": 16.5718, "cost_sar": 72.42},
-        {"size": "A5 Portrait", "country": "Qatar", "cost_eur": 16.5718, "cost_sar": 72.42},
-        {"size": "A6 Landscape", "country": "Qatar", "cost_eur": 16.4626, "cost_sar": 71.94},
-        {"size": "A6 Portrait", "country": "Qatar", "cost_eur": 16.5718, "cost_sar": 72.42},
-        {"size": "A4 Landscape", "country": "United Arab Emirates", "cost_eur": 12.5329, "cost_sar": 54.77},
-        {"size": "A4 Portrait", "country": "United Arab Emirates", "cost_eur": 12.5329, "cost_sar": 54.77},
-        {"size": "A5 Landscape", "country": "United Arab Emirates", "cost_eur": 12.0152, "cost_sar": 52.51},
-        {"size": "A5 Portrait", "country": "United Arab Emirates", "cost_eur": 12.0152, "cost_sar": 52.51},
-        {"size": "A6 Landscape", "country": "United Arab Emirates", "cost_eur": 11.9006, "cost_sar": 52.01},
-        {"size": "A6 Portrait", "country": "United Arab Emirates", "cost_eur": 12.0152, "cost_sar": 52.51}
+        { "size": "A4 Landscape", "country": "Saudi Arabia", "cost_eur": 22.4397, "cost_sar": 98.06 },
+        { "size": "A4 Portrait", "country": "Saudi Arabia", "cost_eur": 22.4397, "cost_sar": 98.06 },
+        { "size": "A5 Landscape", "country": "Saudi Arabia", "cost_eur": 21.8717, "cost_sar": 95.58 },
+        { "size": "A5 Portrait", "country": "Saudi Arabia", "cost_eur": 21.8717, "cost_sar": 95.58 },
+        { "size": "A6 Landscape", "country": "Saudi Arabia", "cost_eur": 21.7462, "cost_sar": 95.03 },
+        { "size": "A6 Portrait", "country": "Saudi Arabia", "cost_eur": 21.8717, "cost_sar": 95.58 },
+        { "size": "A4 Landscape", "country": "Kuwait", "cost_eur": 12.0659, "cost_sar": 52.73 },
+        { "size": "A4 Portrait", "country": "Kuwait", "cost_eur": 12.0659, "cost_sar": 52.73 },
+        { "size": "A5 Landscape", "country": "Kuwait", "cost_eur": 11.5733, "cost_sar": 50.58 },
+        { "size": "A5 Portrait", "country": "Kuwait", "cost_eur": 11.5733, "cost_sar": 50.58 },
+        { "size": "A6 Landscape", "country": "Kuwait", "cost_eur": 11.4641, "cost_sar": 50.10 },
+        { "size": "A6 Portrait", "country": "Kuwait", "cost_eur": 11.5733, "cost_sar": 50.58 },
+        { "size": "A4 Landscape - 130gsm", "country": "Oman", "cost_eur": 17.506, "cost_sar": 76.50 },
+        { "size": "A4 Landscape - 150gsm", "country": "Oman", "cost_eur": 17.530, "cost_sar": 76.61 },
+        { "size": "A4 Portrait - 130gsm", "country": "Oman", "cost_eur": 17.410, "cost_sar": 76.08 },
+        { "size": "A4 Portrait - 150gsm", "country": "Oman", "cost_eur": 17.434, "cost_sar": 76.19 },
+        { "size": "A5 Landscape - 130gsm", "country": "Oman", "cost_eur": 18.120, "cost_sar": 79.18 },
+        { "size": "A5 Landscape - 150gsm", "country": "Oman", "cost_eur": 18.168, "cost_sar": 79.39 },
+        { "size": "A5 Portrait - 130gsm", "country": "Oman", "cost_eur": 18.048, "cost_sar": 78.87 },
+        { "size": "A5 Portrait - 150gsm", "country": "Oman", "cost_eur": 18.096, "cost_sar": 79.08 },
+        { "size": "A6 Landscape - 130gsm", "country": "Oman", "cost_eur": 17.318, "cost_sar": 75.68 },
+        { "size": "A6 Landscape - 150gsm", "country": "Oman", "cost_eur": 17.366, "cost_sar": 75.89 },
+        { "size": "A6 Portrait - 130gsm", "country": "Oman", "cost_eur": 17.270, "cost_sar": 75.47 },
+        { "size": "A6 Portrait - 150gsm", "country": "Oman", "cost_eur": 17.318, "cost_sar": 75.68 },
+        { "size": "A4 Landscape", "country": "Qatar", "cost_eur": 17.0644, "cost_sar": 74.57 },
+        { "size": "A4 Portrait", "country": "Qatar", "cost_eur": 17.0644, "cost_sar": 74.57 },
+        { "size": "A5 Landscape", "country": "Qatar", "cost_eur": 16.5718, "cost_sar": 72.42 },
+        { "size": "A5 Portrait", "country": "Qatar", "cost_eur": 16.5718, "cost_sar": 72.42 },
+        { "size": "A6 Landscape", "country": "Qatar", "cost_eur": 16.4626, "cost_sar": 71.94 },
+        { "size": "A6 Portrait", "country": "Qatar", "cost_eur": 16.5718, "cost_sar": 72.42 },
+        { "size": "A4 Landscape", "country": "United Arab Emirates", "cost_eur": 12.5329, "cost_sar": 54.77 },
+        { "size": "A4 Portrait", "country": "United Arab Emirates", "cost_eur": 12.5329, "cost_sar": 54.77 },
+        { "size": "A5 Landscape", "country": "United Arab Emirates", "cost_eur": 12.0152, "cost_sar": 52.51 },
+        { "size": "A5 Portrait", "country": "United Arab Emirates", "cost_eur": 12.0152, "cost_sar": 52.51 },
+        { "size": "A6 Landscape", "country": "United Arab Emirates", "cost_eur": 11.9006, "cost_sar": 52.01 },
+        { "size": "A6 Portrait", "country": "United Arab Emirates", "cost_eur": 12.0152, "cost_sar": 52.51 }
       ]
     }
   };
 
   useEffect(() => {
     let mounted = true;
-    
+
     const fetchUser = async () => {
       try {
         const user = await base44.auth.me();
@@ -401,7 +401,7 @@ export default function PrintProducts() {
       }
     };
     fetchUser();
-    
+
     return () => {
       mounted = false;
     };
@@ -419,7 +419,7 @@ export default function PrintProducts() {
       const productData = PRINT_PRODUCTS[selectedProduct];
       if (productData.pricing) {
         let priceEntry = null;
-        
+
         // For photobook in Oman, match size + paper weight
         if (selectedProduct === 'photobook' && selectedCountry === 'Oman' && selectedPaperType) {
           const paperWeight = selectedPaperType.split(' ')[0]; // Extract "130gsm" or "150gsm"
@@ -433,7 +433,7 @@ export default function PrintProducts() {
             p => p.size === selectedSize && p.country === selectedCountry
           );
         }
-        
+
         setCurrentPrice(priceEntry || null);
       } else {
         setCurrentPrice(null);
@@ -450,9 +450,9 @@ export default function PrintProducts() {
     setUploadedFileName("");
     setCoverFileUrl(null);
     setBookFileUrl(null);
-    
+
     const productData = PRINT_PRODUCTS[product];
-    
+
     if (productData.sizes && productData.sizes.length > 0) {
       const firstSize = typeof productData.sizes[0] === 'string' ? productData.sizes[0] : productData.sizes[0].value;
       setSelectedSize(firstSize);
@@ -478,25 +478,56 @@ export default function PrintProducts() {
       return;
     }
 
+    // Check file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      alert(language === 'ar' ? 'حجم الملف يجب أن لا يتجاوز 5 ميجابايت' : 'File size must not exceed 5MB');
+      return;
+    }
+
     setIsUploading(true);
 
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      
+      // Import supabase
+      const { supabase } = await import('../lib/supabase');
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 15);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${timestamp}_${randomStr}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('pdf-prints')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('pdf-prints')
+        .getPublicUrl(fileName);
+
       if (fileType === 'cover') {
-        setCoverFileUrl(file_url);
+        setCoverFileUrl(publicUrl);
       } else if (fileType === 'book') {
-        setBookFileUrl(file_url);
+        setBookFileUrl(publicUrl);
       } else {
-        setUploadedImageUrl(file_url);
+        setUploadedImageUrl(publicUrl);
         setUploadedImage(file);
         setUploadedFileName(file.name);
       }
-      
+
       setIsUploading(false);
     } catch (error) {
       console.error("Upload error:", error);
-      alert(language === 'ar' ? 'فشل رفع الملف' : 'Failed to upload file');
+      alert(language === 'ar' ? 'فشل رفع الملف: ' + error.message : 'Failed to upload file: ' + error.message);
       setIsUploading(false);
     }
   };
@@ -554,8 +585,8 @@ export default function PrintProducts() {
     }
 
     // Validate shipping address
-    if (!shippingAddress.firstname || !shippingAddress.lastname || !shippingAddress.street1 || 
-        !shippingAddress.zip || !shippingAddress.city || !shippingAddress.email || !shippingAddress.phone) {
+    if (!shippingAddress.firstname || !shippingAddress.lastname || !shippingAddress.street1 ||
+      !shippingAddress.zip || !shippingAddress.city || !shippingAddress.email || !shippingAddress.phone) {
       alert(language === 'ar' ? 'يرجى ملء جميع معلومات الشحن' : 'Please fill in all shipping information');
       return;
     }
@@ -569,12 +600,12 @@ export default function PrintProducts() {
         imageUrl: selectedProduct === 'photobook' ? null : uploadedImageUrl,
         shippingAddress: {
           ...shippingAddress,
-          country: selectedCountry === "Saudi Arabia" ? "SA" : 
-                   selectedCountry === "Kuwait" ? "KW" :
-                   selectedCountry === "Oman" ? "OM" :
-                   selectedCountry === "Bahrain" ? "BH" :
-                   selectedCountry === "Qatar" ? "QA" :
-                   selectedCountry === "United Arab Emirates" ? "AE" : "SA"
+          country: selectedCountry === "Saudi Arabia" ? "SA" :
+            selectedCountry === "Kuwait" ? "KW" :
+              selectedCountry === "Oman" ? "OM" :
+                selectedCountry === "Bahrain" ? "BH" :
+                  selectedCountry === "Qatar" ? "QA" :
+                    selectedCountry === "United Arab Emirates" ? "AE" : "SA"
         },
         shippingLevel: shippingLevel,
         finish: selectedFinish || undefined,
@@ -586,13 +617,22 @@ export default function PrintProducts() {
       console.log("=== SENDING ORDER PAYLOAD ===");
       console.log(JSON.stringify(orderPayload, null, 2));
 
-      const response = await base44.functions.invoke('cloudprinterOrder', orderPayload);
+      // Call backend CloudPrinter API
+      const response = await fetch('/api/cloudprinter/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderPayload)
+      });
 
-      if (response.data.success) {
+      const data = await response.json();
+
+      if (data.success) {
         setOrderSuccess(true);
-        setOrderReference(response.data.orderReference);
+        setOrderReference(data.orderReference);
         setShowSuccessDialog(true);
-        
+
         // Reset form
         setUploadedImageUrl(null);
         setUploadedImage(null);
@@ -611,7 +651,7 @@ export default function PrintProducts() {
           phone: ""
         });
       } else {
-        throw new Error(response.data.error || 'Order submission failed');
+        throw new Error(data.error || 'Order submission failed');
       }
     } catch (error) {
       console.error("Order submission error:", error);
@@ -631,7 +671,7 @@ export default function PrintProducts() {
             {language === 'ar' ? 'منتجات الطباعة' : 'Print Products'}
           </h1>
           <p className="text-xl text-gray-600 font-light max-w-2xl mx-auto">
-            {language === 'ar' 
+            {language === 'ar'
               ? 'حول ذكرياتك إلى منتجات طباعة فاخرة عالية الجودة'
               : 'Transform your memories into premium quality print products'
             }
@@ -647,10 +687,9 @@ export default function PrintProducts() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <Card 
-                className={`overflow-hidden bg-white border-2 shadow-lg rounded-2xl hover:shadow-2xl smooth-transition group cursor-pointer h-full ${
-                  selectedProduct === product.id ? 'border-[#E63946] ring-2 ring-[#E63946]' : 'border-transparent'
-                }`}
+              <Card
+                className={`overflow-hidden bg-white border-2 shadow-lg rounded-2xl hover:shadow-2xl smooth-transition group cursor-pointer h-full ${selectedProduct === product.id ? 'border-[#E63946] ring-2 ring-[#E63946]' : 'border-transparent'
+                  }`}
                 onClick={() => handleProductSelect(product.id)}
               >
                 <div className="h-full flex flex-col">
@@ -662,7 +701,7 @@ export default function PrintProducts() {
                       className="w-full h-full object-cover group-hover:scale-105 smooth-transition"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 smooth-transition" />
-                    
+
                     {selectedProduct === product.id && (
                       <motion.div
                         initial={{ scale: 0 }}
@@ -690,12 +729,11 @@ export default function PrintProducts() {
                         </div>
                       ))}
                     </div>
-                    <div className={`text-sm font-semibold text-center py-2 rounded-lg ${
-                      selectedProduct === product.id 
-                        ? 'bg-[#E63946] text-white' 
-                        : 'bg-gray-100 text-gray-700 group-hover:bg-gray-200'
-                    } smooth-transition`}>
-                      {selectedProduct === product.id 
+                    <div className={`text-sm font-semibold text-center py-2 rounded-lg ${selectedProduct === product.id
+                      ? 'bg-[#E63946] text-white'
+                      : 'bg-gray-100 text-gray-700 group-hover:bg-gray-200'
+                      } smooth-transition`}>
+                      {selectedProduct === product.id
                         ? (language === 'ar' ? 'محدد' : 'Selected')
                         : (language === 'ar' ? 'اختر' : 'Select')
                       }
@@ -750,7 +788,7 @@ export default function PrintProducts() {
                             className="hidden"
                             id="cover-upload"
                           />
-                          
+
                           {!coverFileUrl ? (
                             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                               <Button
@@ -804,7 +842,7 @@ export default function PrintProducts() {
                             className="hidden"
                             id="book-upload"
                           />
-                          
+
                           {!bookFileUrl ? (
                             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                               <Button
@@ -858,79 +896,79 @@ export default function PrintProducts() {
                           onChange={handleFileSelect}
                           className="hidden"
                         />
-                        
-                        {!uploadedImageUrl ? (
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <Button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                            className="w-full bg-gradient-to-r from-gray-800 to-black text-white hover:from-gray-900 hover:to-black rounded-2xl py-12 text-lg font-medium border-2 border-dashed border-gray-300 hover:border-gray-400"
-                          >
-                            {isUploading ? (
-                              <>
-                                <Loader2 className="w-6 h-6 mr-3 animate-spin" />
-                                {language === 'ar' ? 'جارٍ الرفع...' : 'Uploading...'}
-                              </>
-                            ) : (
-                              <div className="flex flex-col items-center gap-3">
-                                <Upload className="w-10 h-10" />
-                                <span>{language === 'ar' ? 'اختر ملف PDF للرفع' : 'Choose PDF File to Upload'}</span>
-                                <span className="text-xs opacity-70">{language === 'ar' ? 'PDF فقط' : 'PDF only'}</span>
-                              </div>
-                            )}
-                          </Button>
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="relative"
-                        >
-                          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200 shadow-lg">
-                            <div className="flex flex-col items-center justify-center space-y-4">
-                              <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center">
-                                <FileText className="w-10 h-10 text-green-600" />
-                              </div>
-                              
-                              <div className="text-center space-y-2">
-                                <div className="flex items-center justify-center gap-2">
-                                  <Check className="w-5 h-5 text-green-600" />
-                                  <p className="text-lg font-bold text-green-900">
-                                    {language === 'ar' ? 'تم رفع الملف بنجاح' : 'File Uploaded Successfully'}
-                                  </p>
-                                </div>
-                                <p className="text-sm text-gray-600 break-all px-4">
-                                  {uploadedFileName}
-                                </p>
-                              </div>
 
-                              <div className="w-full bg-white rounded-xl p-4 shadow-sm border border-green-100">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <p className="text-sm font-bold text-black">
-                                      {PRINT_PRODUCTS[selectedProduct].name}
-                                    </p>
-                                    <p className="text-xs text-gray-600">
-                                      {selectedSize}
+                        {!uploadedImageUrl ? (
+                          <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <Button
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isUploading}
+                              className="w-full bg-gradient-to-r from-gray-800 to-black text-white hover:from-gray-900 hover:to-black rounded-2xl py-12 text-lg font-medium border-2 border-dashed border-gray-300 hover:border-gray-400"
+                            >
+                              {isUploading ? (
+                                <>
+                                  <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                                  {language === 'ar' ? 'جارٍ الرفع...' : 'Uploading...'}
+                                </>
+                              ) : (
+                                <div className="flex flex-col items-center gap-3">
+                                  <Upload className="w-10 h-10" />
+                                  <span>{language === 'ar' ? 'اختر ملف PDF للرفع' : 'Choose PDF File to Upload'}</span>
+                                  <span className="text-xs opacity-70">{language === 'ar' ? 'PDF فقط' : 'PDF only'}</span>
+                                </div>
+                              )}
+                            </Button>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="relative"
+                          >
+                            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200 shadow-lg">
+                              <div className="flex flex-col items-center justify-center space-y-4">
+                                <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center">
+                                  <FileText className="w-10 h-10 text-green-600" />
+                                </div>
+
+                                <div className="text-center space-y-2">
+                                  <div className="flex items-center justify-center gap-2">
+                                    <Check className="w-5 h-5 text-green-600" />
+                                    <p className="text-lg font-bold text-green-900">
+                                      {language === 'ar' ? 'تم رفع الملف بنجاح' : 'File Uploaded Successfully'}
                                     </p>
                                   </div>
-                                  <Button
-                                    onClick={() => fileInputRef.current?.click()}
-                                    size="sm"
-                                    variant="outline"
-                                    className="rounded-lg border-green-300 text-green-700 hover:bg-green-50"
-                                  >
-                                    {language === 'ar' ? 'تغيير' : 'Change'}
-                                  </Button>
+                                  <p className="text-sm text-gray-600 break-all px-4">
+                                    {uploadedFileName}
+                                  </p>
+                                </div>
+
+                                <div className="w-full bg-white rounded-xl p-4 shadow-sm border border-green-100">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-bold text-black">
+                                        {PRINT_PRODUCTS[selectedProduct].name}
+                                      </p>
+                                      <p className="text-xs text-gray-600">
+                                        {selectedSize}
+                                      </p>
+                                    </div>
+                                    <Button
+                                      onClick={() => fileInputRef.current?.click()}
+                                      size="sm"
+                                      variant="outline"
+                                      className="rounded-lg border-green-300 text-green-700 hover:bg-green-50"
+                                    >
+                                      {language === 'ar' ? 'تغيير' : 'Change'}
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      )}
+                          </motion.div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -941,7 +979,7 @@ export default function PrintProducts() {
                       <label className="block text-lg font-bold text-black mb-3">
                         {language === 'ar' ? 'خيارات التخصيص' : 'Customization Options'}
                       </label>
-                      
+
                       <div className="space-y-4">
                         {/* Size */}
                         <div>
@@ -1079,7 +1117,7 @@ export default function PrintProducts() {
                           <h3 className="text-lg font-bold text-black mb-3">
                             {language === 'ar' ? 'عنوان الشحن' : 'Shipping Address'}
                           </h3>
-                          
+
                           <div className="space-y-3">
                             <div className="grid grid-cols-2 gap-3">
                               <div>
@@ -1089,7 +1127,7 @@ export default function PrintProducts() {
                                 <input
                                   type="text"
                                   value={shippingAddress.firstname}
-                                  onChange={(e) => setShippingAddress({...shippingAddress, firstname: e.target.value})}
+                                  onChange={(e) => setShippingAddress({ ...shippingAddress, firstname: e.target.value })}
                                   className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none"
                                   placeholder={language === 'ar' ? 'أحمد' : 'John'}
                                 />
@@ -1101,7 +1139,7 @@ export default function PrintProducts() {
                                 <input
                                   type="text"
                                   value={shippingAddress.lastname}
-                                  onChange={(e) => setShippingAddress({...shippingAddress, lastname: e.target.value})}
+                                  onChange={(e) => setShippingAddress({ ...shippingAddress, lastname: e.target.value })}
                                   className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none"
                                   placeholder={language === 'ar' ? 'محمد' : 'Doe'}
                                 />
@@ -1115,7 +1153,7 @@ export default function PrintProducts() {
                               <input
                                 type="text"
                                 value={shippingAddress.street1}
-                                onChange={(e) => setShippingAddress({...shippingAddress, street1: e.target.value})}
+                                onChange={(e) => setShippingAddress({ ...shippingAddress, street1: e.target.value })}
                                 className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none"
                                 placeholder={language === 'ar' ? 'شارع الملك فهد' : 'King Fahd Street'}
                               />
@@ -1129,7 +1167,7 @@ export default function PrintProducts() {
                                 <input
                                   type="text"
                                   value={shippingAddress.city}
-                                  onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})}
+                                  onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
                                   className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none"
                                   placeholder={language === 'ar' ? 'الرياض' : 'Riyadh'}
                                 />
@@ -1141,7 +1179,7 @@ export default function PrintProducts() {
                                 <input
                                   type="text"
                                   value={shippingAddress.zip}
-                                  onChange={(e) => setShippingAddress({...shippingAddress, zip: e.target.value})}
+                                  onChange={(e) => setShippingAddress({ ...shippingAddress, zip: e.target.value })}
                                   className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none"
                                   placeholder="12345"
                                 />
@@ -1155,7 +1193,7 @@ export default function PrintProducts() {
                               <input
                                 type="email"
                                 value={shippingAddress.email}
-                                onChange={(e) => setShippingAddress({...shippingAddress, email: e.target.value})}
+                                onChange={(e) => setShippingAddress({ ...shippingAddress, email: e.target.value })}
                                 className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none"
                                 placeholder="email@example.com"
                               />
@@ -1168,7 +1206,7 @@ export default function PrintProducts() {
                               <input
                                 type="tel"
                                 value={shippingAddress.phone}
-                                onChange={(e) => setShippingAddress({...shippingAddress, phone: e.target.value})}
+                                onChange={(e) => setShippingAddress({ ...shippingAddress, phone: e.target.value })}
                                 className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none"
                                 placeholder="+966 50 123 4567"
                               />
@@ -1210,7 +1248,7 @@ export default function PrintProducts() {
 
         {/* Features Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -1223,13 +1261,13 @@ export default function PrintProducts() {
               {language === 'ar' ? 'جودة احترافية' : 'Professional Quality'}
             </h3>
             <p className="text-gray-600">
-              {language === 'ar' 
+              {language === 'ar'
                 ? 'طباعة عالية الدقة باستخدام أحدث التقنيات'
                 : 'High-resolution printing with latest technology'
               }
             </p>
           </motion.div>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -1242,13 +1280,13 @@ export default function PrintProducts() {
               {language === 'ar' ? 'شحن سريع' : 'Fast Shipping'}
             </h3>
             <p className="text-gray-600">
-              {language === 'ar' 
+              {language === 'ar'
                 ? 'توصيل سريع إلى جميع دول الخليج'
                 : 'Quick delivery to all GCC countries'
               }
             </p>
           </motion.div>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -1261,7 +1299,7 @@ export default function PrintProducts() {
               {language === 'ar' ? 'تخصيص كامل' : 'Full Customization'}
             </h3>
             <p className="text-gray-600">
-              {language === 'ar' 
+              {language === 'ar'
                 ? 'اختر الحجم والمادة والتشطيب المناسب'
                 : 'Choose your size, material, and finish'
               }
@@ -1283,7 +1321,7 @@ export default function PrintProducts() {
               {language === 'ar' ? 'تم تقديم الطلب بنجاح!' : 'Order Submitted Successfully!'}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="bg-gray-50 rounded-xl p-4 text-center">
               <p className="text-sm text-gray-600 mb-2">
@@ -1293,15 +1331,15 @@ export default function PrintProducts() {
                 {orderReference}
               </p>
             </div>
-            
+
             <p className="text-center text-gray-600">
-              {language === 'ar' 
+              {language === 'ar'
                 ? 'سيتم معالجة طلبك قريباً. سنرسل لك تحديثات عبر البريد الإلكتروني.'
                 : 'Your order will be processed soon. We will send you updates via email.'
               }
             </p>
           </div>
-          
+
           <div className="flex gap-3">
             <Button
               onClick={() => setShowSuccessDialog(false)}
@@ -1326,13 +1364,13 @@ export default function PrintProducts() {
               {language === 'ar' ? 'فشل تقديم الطلب' : 'Order Submission Failed'}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <p className="text-center text-gray-600">
               {errorMessage}
             </p>
           </div>
-          
+
           <div className="flex gap-3">
             <Button
               onClick={() => setShowErrorDialog(false)}
