@@ -1,13 +1,66 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Building2, QrCode, ArrowLeft, MessageCircle, Copy, Check } from "lucide-react";
+import { Building2, QrCode, ArrowLeft, MessageCircle, Copy, Check, CreditCard, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useLanguage } from "./LanguageContext";
+import { getSession } from "@/lib/supabase";
 
 export default function PaymentOptions({ bookingData, packageInfo, onBack }) {
   const { language } = useLanguage();
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [copiedField, setCopiedField] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handlePaylinkPayment = async () => {
+    setIsProcessing(true);
+    try {
+      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+      // Get session token for authentication
+      const session = await getSession();
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch(`${backendUrl}/api/paylink/create-payment`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          amount: packageInfo?.price,
+          clientName: `${bookingData.firstName} ${bookingData.lastName}`,
+          clientMobile: bookingData.phone,
+          clientEmail: bookingData.email,
+          address: bookingData.address,
+          bookingDate: bookingData.bookingDate,
+          packageTitle: language === 'ar' ? packageInfo?.title : packageInfo?.titleEn
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Payment initialization failed');
+      }
+
+      if (data.success && data.paymentUrl) {
+        // Redirect to Paylink
+        window.location.href = data.paymentUrl;
+      } else {
+        toast.error("Failed to get payment URL");
+      }
+
+    } catch (error) {
+      console.error('Payment Error:', error);
+      toast.error(error.message || "An error occurred");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const copyToClipboard = (text, field) => {
     navigator.clipboard.writeText(text);
@@ -28,6 +81,12 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack }) {
   };
 
   const paymentMethods = [
+    {
+      id: 'paylink',
+      title: language === 'ar' ? 'دفع إلكتروني (مدى / فيزا / أبل باي)' : 'Online Payment (Mada / Visa / Apple Pay)',
+      icon: CreditCard,
+      isOnline: true
+    },
     {
       id: 'snb',
       title: language === 'ar' ? 'تحويل بنكي - البنك الأهلي السعودي' : 'Bank Transfer - SNB',
@@ -98,34 +157,52 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack }) {
           <Card
             key={method.id}
             onClick={() => setSelectedMethod(selectedMethod === method.id ? null : method.id)}
-            className={`p-4 cursor-pointer transition-all duration-300 ${
-              selectedMethod === method.id 
-                ? 'border-2 border-[#3b82f6] shadow-lg' 
-                : 'border border-gray-200 hover:border-gray-300'
-            }`}
+            className={`p-4 cursor-pointer transition-all duration-300 ${selectedMethod === method.id
+              ? 'border-2 border-[#3b82f6] shadow-lg'
+              : 'border border-gray-200 hover:border-gray-300'
+              }`}
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                selectedMethod === method.id ? 'bg-blue-100' : 'bg-gray-100'
-              }`}>
-                <method.icon className={`w-6 h-6 ${
-                  selectedMethod === method.id ? 'text-blue-600' : 'text-gray-600'
-                }`} />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedMethod === method.id ? 'bg-blue-100' : 'bg-gray-100'
+                }`}>
+                <method.icon className={`w-6 h-6 ${selectedMethod === method.id ? 'text-blue-600' : 'text-gray-600'
+                  }`} />
               </div>
               <h4 className="font-semibold text-lg flex-1">{method.title}</h4>
             </div>
 
             {selectedMethod === method.id && (
               <div className="mt-4 space-y-3 animate-in slide-in-from-top-2">
-                {method.qrCode ? (
+                {method.isOnline ? (
+                  <div className="p-2">
+                    <p className="text-sm text-gray-600 mb-4">
+                      {language === 'ar'
+                        ? 'سيتم تحويلك إلى صفحة الدفع الآمنة لإتمام العملية.'
+                        : 'You will be redirected to a secure payment page to complete the transaction.'}
+                    </p>
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePaylinkPayment();
+                      }}
+                      className="w-full bg-[#1e3a8a] hover:bg-[#1e40af] text-white"
+                      disabled={isProcessing}
+                    >
+                      {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {language === 'ar'
+                        ? `دفع ${packageInfo?.price} ر.س`
+                        : `Pay ${packageInfo?.price} SAR`}
+                    </Button>
+                  </div>
+                ) : method.qrCode ? (
                   <div className="flex flex-col items-center">
-                    <img 
-                      src={method.qrCode} 
-                      alt="STC Pay QR Code" 
+                    <img
+                      src={method.qrCode}
+                      alt="STC Pay QR Code"
                       className="w-64 h-auto rounded-xl shadow-lg"
                     />
                     <p className="text-sm text-gray-600 mt-4 text-center">
-                      {language === 'ar' 
+                      {language === 'ar'
                         ? 'امسح رمز QR من تطبيق STC Pay'
                         : 'Scan QR code from STC Pay app'
                       }
@@ -141,7 +218,7 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack }) {
                         <p className="font-medium">{method.details.accountName}</p>
                       </div>
                     )}
-                    
+
                     {method.details.accountNumber && (
                       <div>
                         <p className="text-xs text-gray-500 mb-1">
@@ -217,7 +294,7 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack }) {
             {language === 'ar' ? 'بعد إتمام الدفع' : 'After Payment'}
           </h4>
           <p className="text-gray-700">
-            {language === 'ar' 
+            {language === 'ar'
               ? 'يرجى إرسال لقطة شاشة لإيصال الدفع إلى رقم الواتساب:'
               : 'Please send a screenshot of the payment receipt to WhatsApp:'
             }

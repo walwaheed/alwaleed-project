@@ -10,7 +10,7 @@ const translations = {
     profile: "Profile",
     aboutUs: "About Us",
     company: "Company",
-    
+
     // Home Page
     heroMainTitle: "Studio Professional Quality",
     heroPrintReady: "Photos in Seconds",
@@ -21,7 +21,7 @@ const translations = {
     globalShipping: "Global Shipping",
     trustedByUsers: "Trusted by 5,000+ Professionals",
     studioProcessing: "Studio Processing",
-    
+
     // Before/After Section
     seeTheDifference: "See The Difference",
     realTransformations: "Real transformations powered by professional studio technology",
@@ -30,7 +30,7 @@ const translations = {
     babyPhoto: "Baby Photo",
     before: "Before",
     after: "After",
-    
+
     // How It Works
     threeSteps: "Three Simple Steps",
     noComplicatedSoftware: "No complicated software. No learning curve. Just results.",
@@ -41,11 +41,11 @@ const translations = {
     step3Title: "Download and Print",
     step3Desc: "Delivered to your door",
     tryItNow: "Try It Now",
-    
+
     // Final CTA
     perfectPhotoSecondsAway: "Your Perfect Photo is Seconds Away",
     joinUsers: "Join thousands of users who trust Alwaleed Studio for hassle-free professional photos",
-    
+
     // Editing & Results
     aiPhotoStudio: "Professional Photo Editing Studio",
     chooseStyle: "Choose an editing style and let our professional studio transform your photos instantly",
@@ -76,12 +76,12 @@ const translations = {
     downloading: "Downloading...",
     buyPrints: "Buy Prints",
     photoSavedSuccess: "Photo Saved Successfully!",
-    
+
     // Camera
     startingCamera: "Starting camera...",
     cancel: "Cancel",
     capturePhoto: "Capture Photo",
-    
+
     // Gallery Page
     yourGallery: "Your Gallery",
     photosReady: "photos ready for purchase",
@@ -98,7 +98,7 @@ const translations = {
     viewGallery: "View Gallery",
     filterByType: "Filter by Type",
     sortBy: "Sort By",
-    
+
     // Cart Page
     shoppingCart: "Shopping Cart",
     itemsInCart: "items in your cart",
@@ -113,7 +113,7 @@ const translations = {
     total: "Total",
     buyShipNow: "Buy & Ship Now",
     secureCheckout: "Secure checkout with encrypted payment",
-    
+
     // Checkout
     shippingInformation: "Shipping Information",
     orderConfirmed: "Order Confirmed!",
@@ -130,7 +130,7 @@ const translations = {
     country: "Country",
     completePurchase: "Complete Purchase",
     processingOrder: "Processing Order...",
-    
+
     // Profile Page
     orderHistory: "Order History",
     noOrders: "No Orders Yet",
@@ -145,13 +145,14 @@ const translations = {
     signOut: "Sign Out",
     administrator: "Administrator",
     member: "Member",
-    
+
     // Order Status
     processing: "Processing",
+    paid: "Paid",
     shipped: "Shipped",
     delivered: "Delivered",
     cancelled: "Cancelled",
-    
+
     // Footer
     footerDescription: "Professional photo editing and printing studio. Transform your photos in seconds, delivered to your door.",
     product: "Product",
@@ -160,13 +161,13 @@ const translations = {
     helpCenter: "Help Center",
     contactUs: "Contact Us",
     allRightsReserved: "All rights reserved",
-    
+
     // Footer Links
     privacyPolicy: "Privacy Policy",
     returnPolicy: "Return & Refund",
     termsOfService: "Terms of Service",
     legal: "Legal",
-    
+
     // Location Section
     visitOurStudio: "We'd Love to See You",
     comeVisitUs: "Come visit us at our location in Tarout, Saudi Arabia",
@@ -186,7 +187,7 @@ const translations = {
     // New keys for Home Page / General
     whoWeAre: "Who We Are",
     viewLargerMap: "View Larger Map",
-    
+
     // Currency
     currency: "SAR",
   },
@@ -199,7 +200,7 @@ const translations = {
     profile: "الملف الشخصي",
     aboutUs: "من نحن",
     company: "الشركة",
-    
+
     // Home Page
     heroMainTitle: "صور احترافية بجودة الاستوديو",
     heroPrintReady: "في ثوانٍ",
@@ -210,7 +211,7 @@ const translations = {
     globalShipping: "شحن عالمي",
     trustedByUsers: "موثوق من قبل أكثر من 5,000 محترف",
     studioProcessing: "معالجة الاستوديو",
-    
+
     // Before/After Section
     seeTheDifference: "شاهد الفرق",
     realTransformations: "تحولات حقيقية بتقنيات الاستوديو الاحترافية",
@@ -219,7 +220,7 @@ const translations = {
     babyPhoto: "صورة الأطفال",
     before: "قبل",
     after: "بعد",
-    
+
     // How It Works
     threeSteps: "ثلاث خطوات بسيطة",
     noComplicatedSoftware: "لا برامج معقدة. لا منحنى تعلم. فقط نتائج.",
@@ -230,11 +231,11 @@ const translations = {
     step3Title: "حمّل واطبع",
     step3Desc: "توصيل إلى باب منزلك",
     tryItNow: "جربه الآن",
-    
+
     // Final CTA
     perfectPhotoSecondsAway: "صورتك المثالية على بعد ثوانٍ",
     joinUsers: "انضم إلى آلاف المستخدمين الذين يثقون في استوديو الوليد للحصول على صور احترافية بدون عناء",
-    
+
     // Editing & Results
     aiPhotoStudio: "استوديو التصوير الاحترافي",
     chooseStyle: "اختر نمط التحرير ودع استوديونا الاحترافي يحول صورك على الفور",
@@ -265,12 +266,12 @@ const translations = {
     downloading: "جارٍ التنزيل...",
     buyPrints: "اطلب نسخ مطبوعة",
     photoSavedSuccess: "تم حفظ الصورة بنجاح!",
-    
+
     // Camera
     startingCamera: "جارٍ تشغيل الكاميرا...",
     cancel: "إلغاء",
     capturePhoto: "التقط صورة",
-    
+
     // Gallery Page
     yourGallery: "معرضك",
     photosReady: "صور جاهزة للشراء",
@@ -287,7 +288,7 @@ const translations = {
     viewGallery: "عرض المعرض",
     filterByType: "تصفية حسب النوع",
     sortBy: "ترتيب حسب",
-    
+
     // Cart Page
     shoppingCart: "سلة التسوق",
     itemsInCart: "عناصر في سلتك",
@@ -302,7 +303,7 @@ const translations = {
     total: "المجموع",
     buyShipNow: "اشترِ واشحن الآن",
     secureCheckout: "دفع آمن مع تشفير",
-    
+
     // Checkout
     shippingInformation: "معلومات الشحن",
     orderConfirmed: "تم تأكيد الطلب!",
@@ -319,7 +320,7 @@ const translations = {
     country: "الدولة",
     completePurchase: "إتمام الشراء",
     processingOrder: "جارٍ معالجة الطلب...",
-    
+
     // Profile Page
     orderHistory: "سجل الطلبات",
     noOrders: "لا توجد طلبات بعد",
@@ -334,13 +335,14 @@ const translations = {
     signOut: "تسجيل الخروج",
     administrator: "مدير",
     member: "عضو",
-    
+
     // Order Status
     processing: "قيد المعالجة",
+    paid: "مدفوع",
     shipped: "تم الشحن",
     delivered: "تم التوصيل",
     cancelled: "ملغى",
-    
+
     // Footer
     footerDescription: "استوديو تحرير وطباعة الصور الاحترافي. حول صورك في ثوانٍ، مع التوصيل إلى بابك.",
     product: "المنتج",
@@ -349,13 +351,13 @@ const translations = {
     helpCenter: "مركز المساعدة",
     contactUs: "اتصل بنا",
     allRightsReserved: "جميع الحقوق محفوظة",
-    
+
     // Footer Links
     privacyPolicy: "سياسة الخصوصية",
     returnPolicy: "الإرجاع والاسترداد",
     termsOfService: "شروط الخدمة",
     legal: "قانوني",
-    
+
     // Location Section
     visitOurStudio: "نسعد بزيارتكم لنا",
     comeVisitUs: "تعال لزيارتنا في موقعنا في تاروت، المملكة العربية السعودية",

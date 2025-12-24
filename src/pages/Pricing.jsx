@@ -1,16 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, Star, Crown, Video, Camera, Radio, Plane } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "../components/LanguageContext";
+import { base44 } from "@/api/base44Client";
 import BookingDialog from "../components/BookingDialog";
 
 export default function Pricing() {
   const { language } = useLanguage();
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const currentUser = await base44.auth.getUser();
+        setUser(currentUser);
+      } catch (e) {
+        console.log("Guest User");
+      }
+    };
+    checkUser();
+  }, []);
 
   // Helper function to extract colors from gradient classes
   const getIconColors = (gradientClass) => {
@@ -218,7 +232,7 @@ export default function Pricing() {
             {language === 'ar' ? 'باقات التصوير' : 'Photography Packages'}
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            {language === 'ar' 
+            {language === 'ar'
               ? 'اختر الباقة المناسبة لك من مجموعة متنوعة من باقات التصوير الاحترافية'
               : 'Choose the right package from our diverse range of professional photography packages'
             }
@@ -235,20 +249,19 @@ export default function Pricing() {
               transition={{ delay: index * 0.1 }}
               className="h-full"
             >
-              <Card className={`relative p-8 bg-white rounded-2xl transition-all duration-300 h-full flex flex-col ${
-                pkg.tags && pkg.tags.length > 0 
-                  ? 'border-2 border-[#3b82f6] hover:scale-[1.02]' 
+              <Card className={`relative p-8 bg-white rounded-2xl transition-all duration-300 h-full flex flex-col ${pkg.tags && pkg.tags.length > 0
+                  ? 'border-2 border-[#3b82f6] hover:scale-[1.02]'
                   : 'border border-[rgba(226,232,240,0.8)] hover:-translate-y-1'
-              }`}
-              style={{
-                boxShadow: pkg.tags && pkg.tags.length > 0 
-                  ? '0 25px 50px -12px rgba(59, 130, 246, 0.25)' 
-                  : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-              }}>
+                }`}
+                style={{
+                  boxShadow: pkg.tags && pkg.tags.length > 0
+                    ? '0 25px 50px -12px rgba(59, 130, 246, 0.25)'
+                    : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                }}>
                 {/* Tags */}
                 {pkg.tags && pkg.tags.length > 0 && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge 
+                    <Badge
                       className="text-white border-none px-4 py-1.5"
                       style={{
                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -262,14 +275,14 @@ export default function Pricing() {
                 )}
 
                 {/* Icon */}
-                <div 
+                <div
                   className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 mx-auto relative"
                   style={{
                     background: `linear-gradient(135deg, ${getIconColors(pkg.color).from}15, ${getIconColors(pkg.color).to}15)`,
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
                   }}
                 >
-                  <pkg.icon 
+                  <pkg.icon
                     className="w-8 h-8"
                     style={{
                       color: getIconColors(pkg.color).from
@@ -287,7 +300,7 @@ export default function Pricing() {
 
                 {/* Price */}
                 <div className="text-center mb-6 flex justify-center">
-                  <div 
+                  <div
                     className="inline-block px-6 py-3 rounded-xl text-4xl font-bold text-[#1e3a8a]"
                     dir={language === 'ar' ? 'rtl' : 'ltr'}
                     style={{
@@ -302,11 +315,11 @@ export default function Pricing() {
                 {/* Features */}
                 <div className="space-y-3 mb-6 flex-grow">
                   {pkg.features.map((feature, idx) => (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       className="flex items-start gap-3"
                       dir={language === 'ar' ? 'rtl' : 'ltr'}
-                      style={{ 
+                      style={{
                         flexDirection: language === 'ar' ? 'row' : 'row',
                         textAlign: language === 'ar' ? 'right' : 'left'
                       }}
@@ -327,7 +340,7 @@ export default function Pricing() {
                 )}
 
                 {/* CTA Button */}
-                <Button 
+                <Button
                   onClick={() => {
                     setSelectedPackage(pkg);
                     setBookingDialogOpen(true);
@@ -362,7 +375,7 @@ export default function Pricing() {
             <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#grid)" />
@@ -372,7 +385,7 @@ export default function Pricing() {
             {language === 'ar' ? 'لديك استفسار؟' : 'Have a Question?'}
           </h2>
           <p className="text-xl text-white/90 mb-8 relative z-10">
-            {language === 'ar' 
+            {language === 'ar'
               ? 'تواصل معنا للحصول على استشارة مجانية وباقة مخصصة'
               : 'Contact us for a free consultation and custom package'
             }
@@ -390,6 +403,7 @@ export default function Pricing() {
         open={bookingDialogOpen}
         onOpenChange={setBookingDialogOpen}
         packageInfo={selectedPackage}
+        currentUser={user}
       />
     </div>
   );

@@ -24,6 +24,9 @@ import TestSetup from "./TestSetup";
 
 import Login from "./Login";
 
+import Payment from "./Payment";
+import PaymentStatus from "./PaymentStatus";
+
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
@@ -53,6 +56,9 @@ const PAGES = {
     TestSetup: TestSetup,
 
     Login: Login,
+
+    Payment: Payment,
+    PaymentStatus: PaymentStatus,
 
 }
 
@@ -104,6 +110,9 @@ function PagesContent() {
                 <Route path="/PrintProducts" element={<ProtectedRoute><PrintProducts /></ProtectedRoute>} />
 
                 <Route path="/TestSetup" element={<ProtectedRoute><TestSetup /></ProtectedRoute>} />
+
+                <Route path="/Payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+                <Route path="/payment-status" element={<ProtectedRoute><PaymentStatus /></ProtectedRoute>} />
 
             </Routes>
         </Layout>

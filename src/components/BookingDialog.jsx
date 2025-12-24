@@ -7,29 +7,42 @@ import { Calendar, User, Mail, MapPin, Phone } from "lucide-react";
 import { useLanguage } from "./LanguageContext";
 import PaymentOptions from "./PaymentOptions";
 
-export default function BookingDialog({ open, onOpenChange, packageInfo }) {
+export default function BookingDialog({ open, onOpenChange, packageInfo, currentUser }) {
   const { language } = useLanguage();
   const [step, setStep] = useState(1); // 1: Booking Info, 2: Payment
   const [bookingData, setBookingData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
+    firstName: currentUser?.user_metadata?.first_name || currentUser?.full_name?.split(' ')[0] || "",
+    lastName: currentUser?.user_metadata?.last_name || currentUser?.full_name?.split(' ')[1] || "",
+    email: currentUser?.email || "",
     address: "",
-    phone: "",
+    phone: currentUser?.phone || "",
     bookingDate: ""
   });
+
+  // Update form if user logs in or data becomes available
+  React.useEffect(() => {
+    if (currentUser && open) {
+      setBookingData(prev => ({
+        ...prev,
+        firstName: prev.firstName || currentUser?.user_metadata?.first_name || currentUser?.full_name?.split(' ')[0] || "",
+        lastName: prev.lastName || currentUser?.user_metadata?.last_name || currentUser?.full_name?.split(' ')[1] || "",
+        email: prev.email || currentUser?.email || "",
+        phone: prev.phone || currentUser?.phone || ""
+      }));
+    }
+  }, [currentUser, open]);
 
   const handleInputChange = (field, value) => {
     setBookingData({ ...bookingData, [field]: value });
   };
 
   const isFormValid = () => {
-    return bookingData.firstName && 
-           bookingData.lastName && 
-           bookingData.email && 
-           bookingData.address && 
-           bookingData.phone && 
-           bookingData.bookingDate;
+    return bookingData.firstName &&
+      bookingData.lastName &&
+      bookingData.email &&
+      bookingData.address &&
+      bookingData.phone &&
+      bookingData.bookingDate;
   };
 
   const handleContinueToPayment = async () => {
@@ -81,11 +94,17 @@ export default function BookingDialog({ open, onOpenChange, packageInfo }) {
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-            {step === 1 
+            {step === 1
               ? (language === 'ar' ? 'معلومات الحجز' : 'Booking Information')
               : (language === 'ar' ? 'خيارات الدفع' : 'Payment Options')
             }
           </DialogTitle>
+          <div className="text-sm text-gray-500" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+            {step === 1
+              ? (language === 'ar' ? 'الرجاء ملء البيانات التالية لإتمام الحجز' : 'Please fill in the details below to complete your booking')
+              : (language === 'ar' ? 'اختر طريقة الدفع المناسبة لك' : 'Choose your preferred payment method')
+            }
+          </div>
         </DialogHeader>
 
         {step === 1 ? (
@@ -138,8 +157,9 @@ export default function BookingDialog({ open, onOpenChange, packageInfo }) {
                 type="email"
                 value={bookingData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="rounded-xl border-2"
+                className={`rounded-xl border-2 ${currentUser?.email ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 placeholder={language === 'ar' ? 'example@email.com' : 'example@email.com'}
+                readOnly={!!(currentUser?.email)}
               />
             </div>
 
@@ -198,7 +218,7 @@ export default function BookingDialog({ open, onOpenChange, packageInfo }) {
             </Button>
           </div>
         ) : (
-          <PaymentOptions 
+          <PaymentOptions
             bookingData={bookingData}
             packageInfo={packageInfo}
             onBack={() => setStep(1)}

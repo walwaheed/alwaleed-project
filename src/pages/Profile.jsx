@@ -48,8 +48,7 @@ export default function Profile() {
       if (!user?.email) return [];
       return base44.entities.orders.getAll();
     },
-    enabled: !!user?.email,
-    initialData: [],
+    enabled: !!user?.email
   });
 
   const { data: photos = [] } = useQuery({
@@ -87,6 +86,8 @@ export default function Profile() {
     switch (status) {
       case "processing":
         return <Package className="w-5 h-5" />;
+      case "paid":
+        return <CheckCircle2 className="w-5 h-5 text-green-600" />;
       case "shipped":
         return <Truck className="w-5 h-5" />;
       case "delivered":
@@ -100,6 +101,8 @@ export default function Profile() {
     switch (status) {
       case "processing":
         return "bg-blue-100 text-blue-800 border-blue-200";
+      case "paid":
+        return "bg-green-100 text-green-800 border-green-200";
       case "shipped":
         return "bg-purple-100 text-purple-800 border-purple-200";
       case "delivered":

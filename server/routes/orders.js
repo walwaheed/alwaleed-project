@@ -36,7 +36,7 @@ const generateOrderNumber = () => {
 // GET /api/orders - Get all orders for authenticated user
 router.get('/', authenticate, async (req, res, next) => {
     try {
-        const userEmail = req.user.email;
+        const userEmail = req.user.email.toLowerCase().trim(); // Normalize to lowercase
 
         const { data, error } = await supabase
             .from('orders')
