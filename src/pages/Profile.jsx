@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Package, Loader2, LogOut, CheckCircle2, Truck, Box, Image, ShoppingCart } from "lucide-react";
+import { User, Package, Loader2, LogOut, CheckCircle2, Truck, Box, Image, ShoppingCart, Receipt } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { useLanguage } from "../components/LanguageContext";
@@ -17,6 +17,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [receiptUrls, setReceiptUrls] = useState({});
 
   useEffect(() => {
     let mounted = true;
@@ -111,6 +112,61 @@ export default function Profile() {
         return "bg-red-100 text-red-800 border-red-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getReceiptUrl = (order) => {
+    console.log('🔍 Checking receipt for order:', order.order_number);
+    console.log('   Status:', order.status);
+    console.log('   Notes:', order.notes);
+    console.log('   Tracking:', order.tracking_number);
+
+    // First, check if we already fetched it
+    if (receiptUrls[order.order_number]) {
+      console.log('   ✅ Using cached receipt URL');
+      return receiptUrls[order.order_number];
+    }
+
+    // Then check if it's stored in notes
+    try {
+      if (order.notes && typeof order.notes === 'string') {
+        const notesData = JSON.parse(order.notes);
+        console.log('   Parsed notes:', notesData);
+        if (notesData.receiptUrl) {
+          console.log('   ✅ Receipt URL from notes:', notesData.receiptUrl);
+          return notesData.receiptUrl;
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing order notes:', error);
+    }
+
+    // If paid order has tracking number but no receipt URL, fetch it
+    if (order.status === 'paid' && order.tracking_number && !receiptUrls[order.order_number]) {
+      console.log('   🔄 Fetching receipt URL from Paylink...');
+      fetchReceiptUrl(order);
+    }
+
+    console.log('   ❌ No receipt URL found yet');
+    return null;
+  };
+
+  const fetchReceiptUrl = async (order) => {
+    try {
+      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/paylink/verify-payment/${order.tracking_number}`);
+      const data = await response.json();
+
+      if (data.success && data.receiptUrl) {
+        console.log('   ✅ Retrieved receipt URL:', data.receiptUrl);
+        // Cache it in state
+        setReceiptUrls(prev => ({
+          ...prev,
+          [order.order_number]: data.receiptUrl
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching receipt URL:', error);
     }
   };
 
@@ -281,6 +337,19 @@ export default function Profile() {
                             </div>
                           ))}
                         </div>
+
+                        {/* View Receipt Button - Only for paid orders */}
+                        {order.status === 'paid' && getReceiptUrl(order) && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <Button
+                              onClick={() => window.open(getReceiptUrl(order), '_blank')}
+                              className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium"
+                            >
+                              <Receipt className="w-4 h-4 mr-2" />
+                              {t('viewReceipt') || 'View Receipt'}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </Card>

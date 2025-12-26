@@ -130,6 +130,9 @@ const translations = {
     country: "Country",
     completePurchase: "Complete Purchase",
     processingOrder: "Processing Order...",
+    phone: "Phone Number",
+    optional: "Optional",
+    continueToPayment: "Continue to Payment",
 
     // Profile Page
     orderHistory: "Order History",
@@ -145,6 +148,7 @@ const translations = {
     signOut: "Sign Out",
     administrator: "Administrator",
     member: "Member",
+    viewReceipt: "View Receipt",
 
     // Order Status
     processing: "Processing",
@@ -320,6 +324,9 @@ const translations = {
     country: "الدولة",
     completePurchase: "إتمام الشراء",
     processingOrder: "جارٍ معالجة الطلب...",
+    phone: "رقم الهاتف",
+    optional: "اختياري",
+    continueToPayment: "متابعة إلى الدفع",
 
     // Profile Page
     orderHistory: "سجل الطلبات",
@@ -335,6 +342,7 @@ const translations = {
     signOut: "تسجيل الخروج",
     administrator: "مدير",
     member: "عضو",
+    viewReceipt: "عرض الإيصال",
 
     // Order Status
     processing: "قيد المعالجة",

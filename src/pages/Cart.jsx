@@ -22,6 +22,8 @@ export default function Cart() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [shippingInfo, setShippingInfo] = useState(null);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
   const VAT_RATE = 0.15; // 15% VAT
 
@@ -278,19 +280,148 @@ export default function Cart() {
       </div>
 
       {/* Checkout Dialog */}
-      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
+      <Dialog open={showCheckout} onOpenChange={(open) => {
+        setShowCheckout(open);
+        if (!open) {
+          setShowPaymentOptions(false);
+          setShippingInfo(null);
+        }
+      }}>
         <DialogContent className="sm:max-w-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">
-              {t('buyShipNow')}
+              {!showPaymentOptions ? t('shippingInformation') : t('buyShipNow')}
             </DialogTitle>
           </DialogHeader>
 
-          <PaymentOptions
-            bookingData={mockBookingData}
-            packageInfo={mockPackageInfo}
-            onBack={null}
-          />
+          {!showPaymentOptions ? (
+            /* Shipping Information Form */
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const info = {
+                fullName: formData.get('fullName'),
+                phone: formData.get('phone'),
+                addressLine1: formData.get('addressLine1'),
+                addressLine2: formData.get('addressLine2') || '',
+                city: formData.get('city'),
+                state: formData.get('state') || '',
+                postalCode: formData.get('postalCode'),
+                country: formData.get('country')
+              };
+              setShippingInfo(info);
+              setShowPaymentOptions(true);
+            }} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-2">{t('fullName')}</label>
+                  <input
+                    name="fullName"
+                    type="text"
+                    required
+                    defaultValue={currentUser?.full_name || ''}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-2">{t('phone') || 'Phone Number'}</label>
+                  <input
+                    name="phone"
+                    type="tel"
+                    required
+                    placeholder="+966XXXXXXXXX"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-2">{t('addressLine1')}</label>
+                  <input
+                    name="addressLine1"
+                    type="text"
+                    required
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-2">{t('addressLine2')} ({t('optional') || 'Optional'})</label>
+                  <input
+                    name="addressLine2"
+                    type="text"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">{t('city')}</label>
+                  <input
+                    name="city"
+                    type="text"
+                    required
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">{t('state')}</label>
+                  <input
+                    name="state"
+                    type="text"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">{t('postalCode')}</label>
+                  <input
+                    name="postalCode"
+                    type="text"
+                    required
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">{t('country')}</label>
+                  <input
+                    name="country"
+                    type="text"
+                    required
+                    defaultValue="Saudi Arabia"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-black text-white hover:bg-gray-900 rounded-xl py-3"
+              >
+                {t('continueToPayment') || 'Continue to Payment'}
+              </Button>
+            </form>
+          ) : (
+            /* Payment Options */
+            <PaymentOptions
+              bookingData={{
+                firstName: shippingInfo?.fullName?.split(' ')[0] || '',
+                lastName: shippingInfo?.fullName?.split(' ').slice(1).join(' ') || '',
+                email: currentUser?.email || '',
+                phone: shippingInfo?.phone || '',
+                address: `${shippingInfo?.addressLine1}, ${shippingInfo?.addressLine2 ? shippingInfo.addressLine2 + ', ' : ''}${shippingInfo?.city}, ${shippingInfo?.postalCode}, ${shippingInfo?.country}`,
+                bookingDate: new Date().toISOString().split('T')[0]
+              }}
+              packageInfo={{
+                title: t('shoppingCart'),
+                titleEn: 'Shopping Cart',
+                price: calculateTotal().toFixed(2)
+              }}
+              items={cartItems}
+              onBack={() => setShowPaymentOptions(false)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

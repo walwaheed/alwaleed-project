@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useLanguage } from "./LanguageContext";
 import { getSession } from "@/lib/supabase";
 
-export default function PaymentOptions({ bookingData, packageInfo, onBack }) {
+export default function PaymentOptions({ bookingData, packageInfo, onBack, items }) {
   const { language } = useLanguage();
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [copiedField, setCopiedField] = useState(null);
@@ -27,18 +27,30 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack }) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
+      const payload = {
+        amount: packageInfo?.price,
+        clientName: `${bookingData.firstName} ${bookingData.lastName}`,
+        clientMobile: bookingData.phone,
+        clientEmail: bookingData.email,
+        address: bookingData.address,
+        bookingDate: bookingData.bookingDate,
+        packageTitle: language === 'ar' ? packageInfo?.title : packageInfo?.titleEn
+      };
+
+      // Add items if provided (from Cart)
+      if (items && items.length > 0) {
+        payload.items = items.map(item => ({
+          title: item.photo_title,
+          price: item.total_price / item.quantity, // Unit price
+          qty: item.quantity,
+          description: item.print_size
+        }));
+      }
+
       const response = await fetch(`${backendUrl}/api/paylink/create-payment`, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({
-          amount: packageInfo?.price,
-          clientName: `${bookingData.firstName} ${bookingData.lastName}`,
-          clientMobile: bookingData.phone,
-          clientEmail: bookingData.email,
-          address: bookingData.address,
-          bookingDate: bookingData.bookingDate,
-          packageTitle: language === 'ar' ? packageInfo?.title : packageInfo?.titleEn
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();

@@ -229,18 +229,133 @@ router.get('/verify-payment/:transactionNo', async (req, res) => {
         }
 
         const data = await response.json();
-        console.log('💳 Paylink Response:', {
+        console.log('💳 Paylink Full Response:', JSON.stringify(data, null, 2));
+        console.log('💳 Paylink Response Summary:', {
             orderStatus: data.orderStatus,
             orderNumber: data.orderNumber,
             amount: data.amount,
-            transactionNo: data.transactionNo
+            transactionNo: data.transactionNo,
+            gatewayOrderRequest: data.gatewayOrderRequest
         });
 
+        // Map authentication result codes to user-friendly messages
+        const getAuthenticationDetails = (paylinkData) => {
+            const authCode = paylinkData.gatewayOrderRequest?.authenticationResult;
+            const orderStatus = paylinkData.orderStatus;
+
+            // Define all possible authentication result codes
+            const authResultMap = {
+                'Y': {
+                    code: 'Y',
+                    status: 'success',
+                    title: 'Authentication Successful',
+                    message: 'Your account has been verified successfully and the payment is complete.',
+                    dbStatus: 'paid',
+                    icon: 'success'
+                },
+                'N': {
+                    code: 'N',
+                    status: 'denied',
+                    title: 'Transaction Denied',
+                    message: 'Authentication failed. The account could not be verified. Transaction has been denied.',
+                    dbStatus: 'cancelled',
+                    icon: 'error'
+                },
+                'cancelled': {
+                    code: 'N',
+                    status: 'cancelled',
+                    title: 'Authentication Cancelled',
+                    message: 'The authentication process was cancelled by you or timed out.',
+                    dbStatus: 'cancelled',
+                    icon: 'warning'
+                },
+                'U': {
+                    code: 'U',
+                    status: 'unavailable',
+                    title: 'Authentication Unavailable',
+                    message: 'Authentication service is currently unavailable. Please try again later or use a different payment method.',
+                    dbStatus: 'cancelled',
+                    icon: 'warning'
+                },
+                'R': {
+                    code: 'R',
+                    status: 'rejected',
+                    title: 'Authentication Rejected',
+                    message: 'The authentication was rejected. Please contact your bank for more information.',
+                    dbStatus: 'cancelled',
+                    icon: 'error'
+                },
+                'E': {
+                    code: 'E',
+                    status: 'server_error',
+                    title: 'Authentication Server Error',
+                    message: 'A server error occurred during authentication. Please try again or contact support.',
+                    dbStatus: 'cancelled',
+                    icon: 'error'
+                },
+                'AI': {
+                    code: 'AI',
+                    status: 'gateway_error',
+                    title: 'API Gateway Error',
+                    message: 'An API Gateway ASM Policy Error occurred. Please contact support.',
+                    dbStatus: 'cancelled',
+                    icon: 'error'
+                }
+            };
+
+            // Determine the authentication result
+            // IMPORTANT: Check authentication code FIRST before orderStatus
+            // This ensures rejected/failed payments are caught even if orderStatus is 'Pending'
+            let authResult = null;
+
+            // Priority 1: Check for authentication code (most reliable indicator)
+            if (authCode && authResultMap[authCode]) {
+                console.log(`🔐 Authentication Code Found: ${authCode}`);
+                authResult = authResultMap[authCode];
+            }
+            // Priority 2: Check if payment is confirmed as Paid
+            else if (orderStatus === 'Paid') {
+                authResult = authResultMap['Y'];
+            }
+            // Priority 3: Check if explicitly cancelled
+            else if (orderStatus === 'Cancelled' || orderStatus === 'Canceled') {
+                authResult = authResultMap['cancelled'];
+            }
+            // Priority 4: Still pending (no auth code, not paid, not cancelled)
+            else if (orderStatus === 'Pending') {
+                authResult = {
+                    code: 'PENDING',
+                    status: 'pending',
+                    title: 'Payment Pending',
+                    message: 'Your payment is being processed. Please wait a moment.',
+                    dbStatus: 'processing',
+                    icon: 'pending'
+                };
+            }
+            // Priority 5: Fallback for unknown statuses
+            else {
+                authResult = {
+                    code: 'UNKNOWN',
+                    status: 'failed',
+                    title: 'Payment Failed',
+                    message: `Payment could not be completed. Status: ${orderStatus}`,
+                    dbStatus: 'cancelled',
+                    icon: 'error'
+                };
+            }
+
+            return authResult;
+        };
+
+        const authDetails = getAuthenticationDetails(data);
+        console.log('🔐 Authentication Details:', authDetails);
+
         // Update Order Status in Database
-        if (data.orderStatus === 'Paid') {
+        if (authDetails.dbStatus === 'paid') {
             console.log('✅ Payment confirmed as Paid. Finding order by transactionNo:', transactionNo);
 
             // Find order by tracking_number (we stored the Paylink transactionNo there)
+            // Note: Receipt URL can be retrieved from Paylink API using tracking_number
             const { data: updateData, error: updateError } = await supabase
                 .from('orders')
                 .update({ status: 'paid' })
@@ -252,19 +367,54 @@ router.get('/verify-payment/:transactionNo', async (req, res) => {
                 console.error('   This usually means the database constraint does not allow "paid" status.');
                 console.error('   Please run the SQL command in supabase_update_status.sql');
             } else if (updateData && updateData.length > 0) {
-                console.log('✅ Order status updated to PAID:', updateData);
+                console.log('✅ Order status updated to PAID with receipt URL:', updateData);
+
+                // Clear the cart for this user after successful payment
+                const userEmail = updateData[0].user_email;
+                if (userEmail) {
+                    const { error: cartDeleteError } = await supabase
+                        .from('cart')
+                        .delete()
+                        .eq('user_email', userEmail);
+
+                    if (cartDeleteError) {
+                        console.error('⚠️ Failed to clear cart:', cartDeleteError);
+                    } else {
+                        console.log('🛒 Cart cleared for user:', userEmail);
+                    }
+                }
+            } else {
+                console.error('⚠️ No order found with tracking_number:', transactionNo);
+            }
+        } else if (authDetails.dbStatus === 'cancelled') {
+            console.log('⚠️ Payment cancelled/rejected. Finding order by transactionNo:', transactionNo);
+
+            // Update order to cancelled status
+            const { data: updateData, error: updateError } = await supabase
+                .from('orders')
+                .update({ status: 'cancelled' })
+                .eq('tracking_number', transactionNo)
+                .select();
+
+            if (updateError) {
+                console.error('❌ Database Update Error:', updateError);
+            } else if (updateData && updateData.length > 0) {
+                console.log('✅ Order status updated to CANCELLED:', updateData);
             } else {
                 console.error('⚠️ No order found with tracking_number:', transactionNo);
             }
         } else {
-            console.log('⚠️ Payment not confirmed as Paid. Status:', data.orderStatus);
+            console.log('⚠️ Payment not confirmed. Status:', data.orderStatus);
         }
 
         res.json({
             success: true,
             status: data.orderStatus,
+            authenticationResult: authDetails,
             amount: data.amount,
-            receiptUrl: data.url
+            orderNumber: data.orderNumber,
+            receiptUrl: data.url,
+            transactionNo: data.transactionNo
         });
 
     } catch (error) {
