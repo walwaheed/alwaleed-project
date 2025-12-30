@@ -41,6 +41,7 @@ app.use('/api/upload', require('./routes/upload'));
 app.use('/api/process-image', require('./routes/process-image'));
 app.use('/api/cloudprinter', require('./routes/cloudprinter'));
 app.use('/api/paylink', require('./routes/paylink'));
+app.use('/api/print-orders', require('./routes/printOrders'));
 
 // 404 Handler
 app.use((req, res) => {

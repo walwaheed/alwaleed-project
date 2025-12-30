@@ -34,7 +34,8 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack, items
         clientEmail: bookingData.email,
         address: bookingData.address,
         bookingDate: bookingData.bookingDate,
-        packageTitle: language === 'ar' ? packageInfo?.title : packageInfo?.titleEn
+        packageTitle: language === 'ar' ? packageInfo?.title : packageInfo?.titleEn,
+        printOrderId: packageInfo?.printOrderId  // Add print order ID if exists
       };
 
       // Add items if provided (from Cart)
@@ -98,32 +99,6 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack, items
       title: language === 'ar' ? 'دفع إلكتروني (مدى / فيزا / أبل باي)' : 'Online Payment (Mada / Visa / Apple Pay)',
       icon: CreditCard,
       isOnline: true
-    },
-    {
-      id: 'snb',
-      title: language === 'ar' ? 'تحويل بنكي - البنك الأهلي السعودي' : 'Bank Transfer - SNB',
-      icon: Building2,
-      details: {
-        accountName: language === 'ar' ? 'استديو وليد الوحيد للتصوير الفوتوغرافي' : 'Waleed Al Waheed Photography Studio',
-        accountNumber: '96500003629103',
-        iban: 'SA6210000096500003629103',
-        bank: language === 'ar' ? 'البنك الأهلي السعودي (SNB)' : 'Saudi National Bank (SNB)'
-      }
-    },
-    {
-      id: 'stc',
-      title: language === 'ar' ? 'الدفع السريع - STC Pay' : 'Quick Pay - STC Pay',
-      icon: QrCode,
-      qrCode: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/690011e6637df3b25a370af7/036f27a6f_STCBankQR.jpg'
-    },
-    {
-      id: 'inma',
-      title: language === 'ar' ? 'تحويل بنكي - بنك الإنماء' : 'Bank Transfer - INMA Bank',
-      icon: Building2,
-      details: {
-        accountNumber: '68204760079000',
-        bank: language === 'ar' ? 'بنك الإنماء (INMA)' : 'INMA Bank'
-      }
     }
   ];
 

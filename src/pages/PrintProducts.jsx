@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import PaymentOptions from "../components/PaymentOptions";
 
 export default function PrintProducts() {
   const { t, language } = useLanguage();
@@ -59,6 +60,8 @@ export default function PrintProducts() {
   const [orderReference, setOrderReference] = useState("");
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [pendingOrderData, setPendingOrderData] = useState(null);
 
   const PRINT_PRODUCTS = {
     aluminum: {
@@ -567,6 +570,7 @@ export default function PrintProducts() {
     setIsSubmittingOrder(true);
 
     try {
+      // Prepare order data for CloudPrinter
       const orderPayload = {
         productType: selectedProduct,
         size: selectedSize,
@@ -588,8 +592,55 @@ export default function PrintProducts() {
         bookUrl: selectedProduct === 'photobook' ? bookFileUrl : undefined
       };
 
+      // Create print order in database (before payment)
+      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/print-orders/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userEmail: currentUser.email,
+          productType: selectedProduct,
+          orderData: orderPayload,
+          totalAmount: currentPrice?.cost_sar || 0
+        })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to create print order');
+      }
+
+      console.log('✅ Print order created with ID:', data.printOrderId);
+
+      // Store order data and print order ID
+      setPendingOrderData({
+        ...orderPayload,
+        printOrderId: data.printOrderId
+      });
+
+      // Show payment dialog
+      setShowPaymentDialog(true);
+
+    } catch (error) {
+      console.error('Order preparation error:', error);
+      setErrorMessage(error.message);
+      setShowErrorDialog(true);
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  };
+
+  const actualSubmitOrder = async () => {
+    if (!pendingOrderData) return;
+
+    setIsSubmittingOrder(true);
+
+    try {
       console.log("=== SENDING ORDER PAYLOAD ===");
-      console.log(JSON.stringify(orderPayload, null, 2));
+      console.log(JSON.stringify(pendingOrderData, null, 2));
 
       // Call backend CloudPrinter API
       const response = await fetch('/api/cloudprinter/order', {
@@ -597,7 +648,7 @@ export default function PrintProducts() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(orderPayload)
+        body: JSON.stringify(pendingOrderData)
       });
 
       const data = await response.json();
@@ -606,6 +657,7 @@ export default function PrintProducts() {
         setOrderSuccess(true);
         setOrderReference(data.orderReference);
         setShowSuccessDialog(true);
+        setShowPaymentDialog(false);
 
         // Reset form
         setUploadedImageUrl(null);
@@ -624,6 +676,7 @@ export default function PrintProducts() {
           email: "",
           phone: ""
         });
+        setPendingOrderData(null);
       } else {
         throw new Error(data.error || 'Order submission failed');
       }
@@ -1368,6 +1421,42 @@ export default function PrintProducts() {
               {language === 'ar' ? 'حسناً' : 'OK'}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={(open) => {
+        setShowPaymentDialog(open);
+        if (!open) {
+          setPendingOrderData(null);
+        }
+      }}>
+        <DialogContent className="sm:max-w-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              {language === 'ar' ? 'إتمام الدفع' : 'Complete Payment'}
+            </DialogTitle>
+          </DialogHeader>
+
+          {pendingOrderData && currentPrice && (
+            <PaymentOptions
+              bookingData={{
+                firstName: shippingAddress.firstname,
+                lastName: shippingAddress.lastname,
+                email: shippingAddress.email,
+                phone: shippingAddress.phone,
+                address: `${shippingAddress.street1}, ${shippingAddress.city}, ${shippingAddress.zip}, ${selectedCountry}`,
+                bookingDate: new Date().toISOString().split('T')[0]
+              }}
+              packageInfo={{
+                title: `${PRINT_PRODUCTS[selectedProduct]?.name} - ${selectedSize}`,
+                titleEn: `${PRINT_PRODUCTS[selectedProduct]?.name} - ${selectedSize}`,
+                price: currentPrice.cost_sar.toFixed(2),
+                printOrderId: pendingOrderData.printOrderId  // Pass print order ID
+              }}
+              onBack={() => setShowPaymentDialog(false)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

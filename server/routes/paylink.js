@@ -55,7 +55,7 @@ async function getPaylinkToken() {
  */
 router.post('/create-payment', async (req, res) => {
     try {
-        const { amount, clientName, clientMobile, clientEmail, items, address, bookingDate, packageTitle } = req.body;
+        const { amount, clientName, clientMobile, clientEmail, items, address, bookingDate, packageTitle, printOrderId } = req.body;
 
         if (!amount || !clientName || !clientMobile) {
             return res.status(400).json({ error: 'Missing required fields' });
@@ -183,6 +183,16 @@ router.post('/create-payment', async (req, res) => {
                 .eq('order_number', orderNumber);
 
             console.log('💾 Stored Paylink transactionNo:', data.transactionNo, 'for order:', orderNumber);
+
+            // Also update print_orders if printOrderId was provided
+            if (printOrderId) {
+                await supabase
+                    .from('print_orders')
+                    .update({ paylink_transaction_id: data.transactionNo })
+                    .eq('id', printOrderId);
+
+                console.log('🖨️ Linked print order:', printOrderId, 'with transaction:', data.transactionNo);
+            }
         }
 
         res.json({
@@ -381,6 +391,60 @@ router.get('/verify-payment/:transactionNo', async (req, res) => {
                         console.error('⚠️ Failed to clear cart:', cartDeleteError);
                     } else {
                         console.log('🛒 Cart cleared for user:', userEmail);
+                    }
+
+                    // Check for print orders and submit to CloudPrinter
+                    const { data: printOrders, error: printOrderError } = await supabase
+                        .from('print_orders')
+                        .select('*')
+                        .eq('paylink_transaction_id', transactionNo)
+                        .eq('status', 'payment_pending');
+
+                    if (printOrders && printOrders.length > 0) {
+                        console.log(`📦 Found ${printOrders.length} print order(s) to submit to CloudPrinter`);
+
+                        for (const printOrder of printOrders) {
+                            try {
+                                // Update payment status first
+                                await supabase
+                                    .from('print_orders')
+                                    .update({ payment_status: 'paid', status: 'paid' })
+                                    .eq('id', printOrder.id);
+
+                                // Submit to CloudPrinter
+                                console.log(`🚀 Submitting print order ${printOrder.id} to CloudPrinter...`);
+                                const cloudPrinterResponse = await fetch('http://localhost:5000/api/cloudprinter/order', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(printOrder.order_data)
+                                });
+
+                                const cloudPrinterData = await cloudPrinterResponse.json();
+
+                                if (cloudPrinterData.success) {
+                                    // Update with CloudPrinter reference
+                                    await supabase
+                                        .from('print_orders')
+                                        .update({
+                                            cloudprinter_order_ref: cloudPrinterData.orderReference,
+                                            cloudprinter_status: 'submitted',
+                                            status: 'submitted'
+                                        })
+                                        .eq('id', printOrder.id);
+
+                                    console.log(`✅ Print order submitted to CloudPrinter: ${cloudPrinterData.orderReference}`);
+                                } else {
+                                    throw new Error(cloudPrinterData.error || 'CloudPrinter submission failed');
+                                }
+                            } catch (printError) {
+                                console.error(`❌ Error submitting print order ${printOrder.id}:`, printError);
+                                // Mark as failed
+                                await supabase
+                                    .from('print_orders')
+                                    .update({ status: 'failed' })
+                                    .eq('id', printOrder.id);
+                            }
+                        }
                     }
                 }
             } else {
