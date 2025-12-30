@@ -46,8 +46,8 @@ export default function EditPhoto() {
       id: "visa-photo",
       title: t('visaPhoto'),
       description: t('visaPhotoDesc'),
-      beforeImage: "/images/Edit-Visa-Before.png",
-      afterImage: "/images/Edit-Visa-After.png",
+      beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Visa-Before.png",
+      afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Visa-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/visa-photo",
       category: "id"
     },
@@ -55,8 +55,8 @@ export default function EditPhoto() {
       id: "absher-photo",
       title: t('absherPhotoMale'),
       description: t('absherPhotoMaleDesc'),
-      beforeImage: "/images/Home-Absher-Before.jpg",
-      afterImage: "/images/Home-Absher-After.png",
+      beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Absher-Before.jpg",
+      afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Absher-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/absher",
       category: "id"
     },
@@ -64,7 +64,7 @@ export default function EditPhoto() {
       id: "absher-photo-female",
       title: t('absherPhotoFemale'),
       description: t('absherPhotoFemaleDesc'),
-      beforeImage: "/images/Edit-Absher-Female-Before.jpg",
+      beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Absher-Female-Before.jpg",
       afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Absher-Female-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/absher", // Assuming the same webhook can handle male/female variations or will be updated.
       category: "id"
@@ -73,8 +73,8 @@ export default function EditPhoto() {
       id: "saudi-look",
       title: t('saudiLook'),
       description: t('saudiLookDesc'),
-      beforeImage: "/images/Home-Saudi-Before.jpg",
-      afterImage: "/images/Home-Saudi-After.png",
+      beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Saudi-Before.jpg",
+      afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Saudi-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/saudi-look",
       category: "portrait"
     },
@@ -82,8 +82,8 @@ export default function EditPhoto() {
       id: "baby-photo",
       title: t('babyPhoto'),
       description: t('babyPhotoDesc'),
-      beforeImage: "/images/Home-Baby-Before.jpg",
-      afterImage: "/images/Home-Baby-After.png",
+      beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Baby-Before.jpg",
+      afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Baby-After.png",
       webhook: "https://n8n.renovaai.cloud/webhook/baby-photo",
       category: "id"
     }
@@ -240,6 +240,7 @@ export default function EditPhoto() {
   const [viewMode, setViewMode] = useState("slider");
   const [selectedVisaCountry, setSelectedVisaCountry] = useState("Schengen (Fr/Es/De)"); // New state for visa country
   const [selectedSaudiStyle, setSelectedSaudiStyle] = useState("Royal"); // New state for Saudi Look style
+  const [selectedAbsherStyle, setSelectedAbsherStyle] = useState("Royal"); // New state for Absher Photo style
 
   // Family Photo Editing Controls
   const [brightness, setBrightness] = useState(100);
@@ -527,7 +528,9 @@ export default function EditPhoto() {
         // Include selectedVisaCountry only if the option is "visa-photo"
         ...(selectedOption.id === "visa-photo" && { country: selectedVisaCountry }),
         // Include selectedSaudiStyle only if the option is "saudi-look"
-        ...(selectedOption.id === "saudi-look" && { style: selectedSaudiStyle })
+        ...(selectedOption.id === "saudi-look" && { style: selectedSaudiStyle }),
+        // Include selectedAbsherStyle only if the option is "absher-photo" (male only)
+        ...(selectedOption.id === "absher-photo" && { style: selectedAbsherStyle })
       };
 
       console.log("Step 2: Sending to webhook...");
@@ -1689,6 +1692,28 @@ export default function EditPhoto() {
                   {language === 'ar' ? 'النمط:' : 'Style:'}
                 </label>
                 <Select value={selectedSaudiStyle} onValueChange={setSelectedSaudiStyle}>
+                  <SelectTrigger className="rounded-xl border-2">
+                    <SelectValue placeholder={language === 'ar' ? 'اختر النمط' : 'Select style'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Royal">{language === 'ar' ? 'الملكية' : 'Royal'}</SelectItem>
+                    <SelectItem value="sheyoukh">{language === 'ar' ? 'الشيوخ' : 'Sheyoukh'}</SelectItem>
+                    <SelectItem value="Eagle">{language === 'ar' ? 'الصقر' : 'Eagle'}</SelectItem>
+                    <SelectItem value="practical">{language === 'ar' ? 'العملية' : 'Practical'}</SelectItem>
+                    <SelectItem value="youth">{language === 'ar' ? 'الشبابية' : 'Youth'}</SelectItem>
+                    <SelectItem value="knight">{language === 'ar' ? 'الفارس' : 'Knight'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Style Selection - Only for Absher Photo (Male) */}
+            {selectedOption?.id === "absher-photo" && (
+              <div>
+                <label className="block text-sm font-bold text-black mb-2">
+                  {language === 'ar' ? 'النمط:' : 'Style:'}
+                </label>
+                <Select value={selectedAbsherStyle} onValueChange={setSelectedAbsherStyle}>
                   <SelectTrigger className="rounded-xl border-2">
                     <SelectValue placeholder={language === 'ar' ? 'اختر النمط' : 'Select style'} />
                   </SelectTrigger>

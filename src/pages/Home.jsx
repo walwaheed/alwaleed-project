@@ -12,26 +12,26 @@ export default function Home() {
   const beforeAfterExamples = [
     {
       id: "visa-photo",
-      before: "/images/Home-Visa-Before.png",
-      after: "/images/Home-Visa-After.png",
+      before: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Visa-Before.png",
+      after: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Visa-After.png",
       title: t('visaPhotoReady')
     },
     {
       id: "absher-photo",
-      before: "/images/Home-Absher-Before.jpg",
-      after: "/images/Home-Absher-After.png",
+      before: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Absher-Before.jpg",
+      after: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Absher-After.png",
       title: t('absherPhoto')
     },
     {
       id: "saudi-look",
-      before: "/images/Home-Saudi-Before.jpg",
-      after: "/images/Home-Saudi-After.png",
+      before: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Saudi-Before.jpg",
+      after: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Saudi-After.png",
       title: t('saudiLook')
     },
     {
       id: "baby-photo",
-      before: "/images/Home-Baby-Before.jpg",
-      after: "/images/Home-Baby-After.png",
+      before: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Baby-Before.jpg",
+      after: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Baby-After.png",
       title: t('babyPhoto')
     }
   ];
