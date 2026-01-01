@@ -57,9 +57,13 @@ router.post('/create-payment', async (req, res) => {
     try {
         const { amount, clientName, clientMobile, clientEmail, items, address, bookingDate, packageTitle, printOrderId } = req.body;
 
-        if (!amount || !clientName || !clientMobile) {
+        // Only amount and clientName are strictly required, email is fallback for mobile
+        if (!amount || !clientName) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
+
+        // Use email as fallback identifier if no phone provided
+        const mobileNumber = clientMobile || '0500000000'; // Default placeholder if not provided
 
         // 1. Create a Pending Order in Database
         const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -146,7 +150,7 @@ router.post('/create-payment', async (req, res) => {
             amount: parseFloat(amount),
             callBackUrl: callBackUrl,
             clientEmail: clientEmail || 'test@test.com',
-            clientMobile: clientMobile,
+            clientMobile: mobileNumber,
             clientName: clientName,
             note: `Order #${orderNumber} - ${bookingDate || ''}`,
             orderNumber: orderNumber,
@@ -383,7 +387,7 @@ router.get('/verify-payment/:transactionNo', async (req, res) => {
                 const userEmail = updateData[0].user_email;
                 if (userEmail) {
                     const { error: cartDeleteError } = await supabase
-                        .from('cart')
+                        .from('cart_items')
                         .delete()
                         .eq('user_email', userEmail);
 
@@ -446,6 +450,49 @@ router.get('/verify-payment/:transactionNo', async (req, res) => {
                             }
                         }
                     }
+                }
+
+                // Update photos from "pending" to "paid" status - ONLY for photos in this order
+                const orderItems = updateData[0].items;
+                console.log(`📦 Order contains ${orderItems.length} item(s)`);
+
+                // Extract photo IDs from cart items in this order
+                const photoIdsInOrder = [];
+                for (const item of orderItems) {
+                    if (item.photo_id) {
+                        photoIdsInOrder.push(item.photo_id);
+                    }
+                }
+
+                if (photoIdsInOrder.length > 0) {
+                    console.log(`📸 Found ${photoIdsInOrder.length} photo(s) in this order to mark as paid`);
+
+                    for (const photoId of photoIdsInOrder) {
+                        const { data: photo } = await supabase
+                            .from('photos')
+                            .select('*')
+                            .eq('id', photoId)
+                            .single();
+
+                        if (photo && photo.status === 'pending') {
+                            const updatedSettings = {
+                                ...photo.editing_settings,
+                                paid: true
+                            };
+
+                            await supabase
+                                .from('photos')
+                                .update({
+                                    status: 'paid',
+                                    editing_settings: updatedSettings
+                                })
+                                .eq('id', photoId);
+
+                            console.log(`✅ Photo ${photoId} marked as paid`);
+                        }
+                    }
+                } else {
+                    console.log('ℹ️ No photos found in this order');
                 }
             } else {
                 console.error('⚠️ No order found with tracking_number:', transactionNo);

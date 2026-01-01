@@ -45,7 +45,9 @@ function LayoutContent({ children, currentPageName }) {
     { name: t('editPhoto'), path: createPageUrl("EditPhoto"), icon: Sparkles },
     { name: language === 'ar' ? 'منتجات الطباعة' : 'Print Products', path: createPageUrl("PrintProducts"), icon: Image },
     { name: language === 'ar' ? 'الباقات' : 'Pricing', path: createPageUrl("Pricing"), icon: Star },
-    { name: t('profile'), path: createPageUrl("Profile"), icon: User, badge: cartCount },
+    { name: language === 'ar' ? 'المعرض' : 'Gallery', path: createPageUrl("Gallery"), icon: Image },
+    { name: language === 'ar' ? 'السلة' : 'Cart', path: createPageUrl("Cart"), icon: ShoppingCart, badge: cartCount },
+    { name: t('profile'), path: createPageUrl("Profile"), icon: User },
   ] : [
     { name: t('home'), path: createPageUrl("Home"), icon: Home },
     { name: language === 'ar' ? 'الباقات' : 'Pricing', path: createPageUrl("Pricing"), icon: Star },

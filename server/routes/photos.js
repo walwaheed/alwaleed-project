@@ -14,7 +14,7 @@ const photoSchema = Joi.object({
     editing_settings: Joi.object().default({}),
     price: Joi.number().min(0).default(0),
     print_size: Joi.string().allow(null, ''),
-    status: Joi.string().valid('draft', 'published', 'ordered').default('draft')
+    status: Joi.string().valid('draft', 'published', 'ordered', 'pending', 'paid').default('draft')
 });
 
 // GET /api/photos - Get all photos for authenticated user

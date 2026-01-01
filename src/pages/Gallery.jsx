@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Image as ImageIcon, Loader2, Plus, Play, Filter, SortAsc, ChevronLeft, ChevronRight, X, Share2 } from "lucide-react";
+import { ShoppingCart, Image as ImageIcon, Loader2, Plus, Play, Filter, SortAsc, ChevronLeft, ChevronRight, X, Share2, Download, Lock, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -138,6 +138,43 @@ export default function Gallery() {
     };
 
     await addToCartMutation.mutateAsync(cartData);
+  };
+
+  // Download photo - only for paid photos
+  const handleDownloadPhoto = async (photo) => {
+    if (!photo) return;
+
+    // Check if photo is paid
+    const isPaid = photo.status === 'paid' || photo.editing_settings?.paid === true;
+
+    if (!isPaid) {
+      alert(language === 'ar'
+        ? 'يجب دفع ثمن الصورة أولاً قبل التنزيل. أضفها إلى السلة وأكمل الدفع.'
+        : 'You must pay for this photo before downloading. Add it to cart and complete payment.'
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch(photo.edited_url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${photo.title}-edited.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading photo:', error);
+      alert(language === 'ar' ? 'حدث خطأ في التنزيل' : 'Error downloading photo');
+    }
+  };
+
+  // Check if photo is paid
+  const isPhotoPaid = (photo) => {
+    return photo.status === 'paid' || photo.editing_settings?.paid === true;
   };
 
   // Removed openSizeDialog as per changes
@@ -392,6 +429,17 @@ export default function Gallery() {
                               {photo.ai_tool === "baby-photo" && t('babyPhoto')}
                             </Badge>
                           )}
+                          {/* Payment Status Badge */}
+                          <Badge className={`absolute top-2 sm:top-3 right-2 sm:right-3 border-none text-xs ${isPhotoPaid(photo)
+                            ? 'bg-green-500 text-white'
+                            : 'bg-yellow-500 text-black'
+                            }`}>
+                            {isPhotoPaid(photo) ? (
+                              <>{language === 'ar' ? 'مدفوع' : 'Paid'}</>
+                            ) : (
+                              <><Lock className="w-3 h-3 mr-1" />{language === 'ar' ? 'غير مدفوع' : 'Unpaid'}</>
+                            )}
+                          </Badge>
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 smooth-transition flex items-center justify-center">
                             <Play className="w-12 h-12 sm:w-16 sm:h-16 text-white opacity-0 group-hover:opacity-100 smooth-transition" />
                           </div>
@@ -404,33 +452,49 @@ export default function Gallery() {
                             {photo.print_size} • {photo.price} {t('currency') || 'SAR'}
                           </p>
                           <div className="flex gap-2">
-                            <Button
-                              onClick={() => handleAddToCart(photo)}
-                              disabled={addToCartMutation.isPending}
-                              className="flex-1 bg-black text-white hover:bg-gray-900 rounded-lg py-2.5 sm:py-3 font-medium smooth-transition text-sm"
-                            >
-                              {addToCartMutation.isPending ? (
-                                <>
-                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                  {t('adding')}
-                                </>
-                              ) : (
-                                <>
-                                  <ShoppingCart className="w-4 h-4 mr-2" />
-                                  {t('addToCart')}
-                                </>
-                              )}
-                            </Button>
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openShareDialog(photo);
-                              }}
-                              variant="outline"
-                              className="border-2 border-gray-300 hover:border-black rounded-lg px-3"
-                            >
-                              <Share2 className="w-4 h-4" />
-                            </Button>
+                            {/* Download Button - Only for paid photos */}
+                            {isPhotoPaid(photo) ? (
+                              <>
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDownloadPhoto(photo);
+                                  }}
+                                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 rounded-lg py-2.5 sm:py-3 font-medium smooth-transition text-sm"
+                                >
+                                  <Download className="w-4 h-4 mr-2" />
+                                  {language === 'ar' ? 'تنزيل' : 'Download'}
+                                </Button>
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openShareDialog(photo);
+                                  }}
+                                  variant="outline"
+                                  className="border-2 border-gray-300 hover:border-black rounded-lg px-3"
+                                >
+                                  <Share2 className="w-4 h-4" />
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                onClick={() => handleAddToCart(photo)}
+                                disabled={addToCartMutation.isPending}
+                                className="w-full bg-black text-white hover:bg-gray-900 rounded-lg py-2.5 sm:py-3 font-medium smooth-transition text-sm"
+                              >
+                                {addToCartMutation.isPending ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    {t('adding')}
+                                  </>
+                                ) : (
+                                  <>
+                                    <CreditCard className="w-4 h-4 mr-2" />
+                                    {language === 'ar' ? 'ادفع للتنزيل' : 'Pay to Download'}
+                                  </>
+                                )}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </Card>
@@ -583,33 +647,43 @@ export default function Gallery() {
 
             {/* Action Buttons */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3">
-              <Button
-                onClick={() => {
-                  handleAddToCart(filteredAndSortedPhotos[slideshowIndex]);
-                }}
-                disabled={addToCartMutation.isPending}
-                className="bg-white text-black hover:bg-gray-100 rounded-xl px-6 py-3 font-medium shadow-xl"
-              >
-                {addToCartMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t('adding')}
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    {t('addToCart')}
-                  </>
-                )}
-              </Button>
-              <Button
-                onClick={() => openShareDialog(filteredAndSortedPhotos[slideshowIndex])}
-                variant="outline"
-                className="bg-white/90 hover:bg-white rounded-xl px-6 py-3 font-medium shadow-xl"
-              >
-                <Share2 className="w-4 h-4 mr-2" />
-                {language === 'ar' ? 'مشاركة' : 'Share'}
-              </Button>
+              {filteredAndSortedPhotos[slideshowIndex] && isPhotoPaid(filteredAndSortedPhotos[slideshowIndex]) ? (
+                <>
+                  <Button
+                    onClick={() => handleDownloadPhoto(filteredAndSortedPhotos[slideshowIndex])}
+                    className="bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 rounded-xl px-6 py-3 font-medium shadow-xl"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    {language === 'ar' ? 'تنزيل' : 'Download'}
+                  </Button>
+                  <Button
+                    onClick={() => openShareDialog(filteredAndSortedPhotos[slideshowIndex])}
+                    variant="outline"
+                    className="bg-white/90 hover:bg-white rounded-xl px-6 py-3 font-medium shadow-xl"
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    {language === 'ar' ? 'مشاركة' : 'Share'}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => handleAddToCart(filteredAndSortedPhotos[slideshowIndex])}
+                  disabled={addToCartMutation.isPending}
+                  className="bg-white text-black hover:bg-gray-100 rounded-xl px-6 py-3 font-medium shadow-xl"
+                >
+                  {addToCartMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {t('adding')}
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      {language === 'ar' ? 'ادفع للتنزيل' : 'Pay to Download'}
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
 
             {/* Thumbnail Strip */}

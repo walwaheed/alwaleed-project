@@ -6,9 +6,10 @@ import { toast } from "sonner";
 import { useLanguage } from "./LanguageContext";
 import { getSession } from "@/lib/supabase";
 
-export default function PaymentOptions({ bookingData, packageInfo, onBack, items }) {
+export default function PaymentOptions({ bookingData, packageInfo, onBack, items, autoExpand = true }) {
   const { language } = useLanguage();
-  const [selectedMethod, setSelectedMethod] = useState(null);
+  // Auto-expand Paylink option by default
+  const [selectedMethod, setSelectedMethod] = useState(autoExpand ? 'paylink' : null);
   const [copiedField, setCopiedField] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 

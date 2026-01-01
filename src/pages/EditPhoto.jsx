@@ -4,7 +4,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Upload, Camera, Loader2, CheckCircle2, Sparkles, ShoppingCart, ArrowLeftRight, Download, RotateCw, ZoomIn } from "lucide-react";
+import { Upload, Camera, Loader2, CheckCircle2, Sparkles, ShoppingCart, ArrowLeftRight, Download, RotateCw, ZoomIn, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import BeforeAfterSlider from "../components/BeforeAfterSlider";
+import PaymentOptions from "../components/PaymentOptions";
 
 export default function EditPhoto() {
   const { t, language } = useLanguage();
@@ -241,6 +242,8 @@ export default function EditPhoto() {
   const [selectedVisaCountry, setSelectedVisaCountry] = useState("Schengen (Fr/Es/De)"); // New state for visa country
   const [selectedSaudiStyle, setSelectedSaudiStyle] = useState("Royal"); // New state for Saudi Look style
   const [selectedAbsherStyle, setSelectedAbsherStyle] = useState("Royal"); // New state for Absher Photo style
+  const [selectedKhutraColor, setSelectedKhutraColor] = useState("Red"); // New state for Khutra Color
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false); // Payment paywall dialog
 
   // Family Photo Editing Controls
   const [brightness, setBrightness] = useState(100);
@@ -530,7 +533,10 @@ export default function EditPhoto() {
         // Include selectedSaudiStyle only if the option is "saudi-look"
         ...(selectedOption.id === "saudi-look" && { style: selectedSaudiStyle }),
         // Include selectedAbsherStyle only if the option is "absher-photo" (male only)
-        ...(selectedOption.id === "absher-photo" && { style: selectedAbsherStyle })
+        ...(selectedOption.id === "absher-photo" && {
+          style: selectedAbsherStyle,
+          khutra_color: selectedKhutraColor
+        })
       };
 
       console.log("Step 2: Sending to webhook...");
@@ -642,18 +648,8 @@ export default function EditPhoto() {
       const savedPhoto = await base44.entities.Photo.create(photoData);
       console.log("✓ Photo saved to database:", savedPhoto);
 
-      const cartData = {
-        photo_id: savedPhoto.id,
-        photo_title: photoData.title,
-        photo_url: photoData.edited_url,
-        print_size: photoData.print_size,
-        quantity: 1,
-        price_per_item: photoData.price,
-        editing_settings: photoData.editing_settings
-      };
-
-      await base44.entities.CartItem.create(cartData);
-      console.log("✓ Photo added to cart");
+      // Note: Photo is saved to gallery but NOT added to cart
+      // Users will download it directly from gallery after payment confirmation
 
       const webhookUrl = 'https://n8n.renovaai.cloud/webhook/app-database';
 
@@ -713,7 +709,7 @@ export default function EditPhoto() {
       queryClient.invalidateQueries({ queryKey: ['photos'] });
       queryClient.invalidateQueries({ queryKey: ['cartItems'] });
       setPhotoSaved(true);
-      setShowSuccessDialog(true);
+      // No success dialog - we navigate to cart instead
     },
     onError: (error) => {
       console.error("=== SAVE PHOTO ERROR ===");
@@ -722,10 +718,11 @@ export default function EditPhoto() {
     }
   });
 
-  const handleDownloadAndSave = async () => {
+  // Handle Order to Download and Ship - saves photo as pending and adds to cart
+  const handleOrderToCart = async () => {
     if (!editedImageBase44Url || !currentUser || !selectedOption) return;
 
-    // Check authentication before saving
+    // Check authentication
     const isAuth = await base44.auth.isAuthenticated();
     if (!isAuth) {
       base44.auth.redirectToLogin(window.location.href);
@@ -733,29 +730,14 @@ export default function EditPhoto() {
     }
 
     if (!photoTitle.trim()) {
-      alert("Please enter a photo title");
+      alert(language === 'ar' ? 'يرجى إدخال عنوان الصورة' : 'Please enter a photo title');
       return;
     }
 
     setIsDownloading(true);
 
     try {
-      // If it's a family photo, we just want to save it to cart, not download immediately.
-      // The image displayed is the original with filters, we don't save a filtered version directly here.
-      if (selectedOption.category !== "family") {
-        const response = await fetch(editedImageBase44Url);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${photoTitle || 'photo'}-edited.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      }
-
-
+      // Save photo to gallery with "pending" payment status
       const photoData = {
         title: photoTitle || "Untitled Photo",
         ai_tool: selectedOption.id,
@@ -787,14 +769,94 @@ export default function EditPhoto() {
           vignette: selectedOption.category === "family" ? vignette : null,
           borderWidth: selectedOption.category === "family" ? borderWidth : null,
           borderColor: selectedOption.category === "family" ? borderColor : null,
-          filterPreset: selectedOption.category === "family" ? filterPreset : null
+          filterPreset: selectedOption.category === "family" ? filterPreset : null,
+          paid: false // Mark as unpaid initially
         },
-        status: "published",
+        status: "pending", // Will be updated to "paid" after payment
+        price: calculatePrice(),
+        print_size: selectedOption.category === "portrait" ? selectedSize : selectedOption.category === "id" ? ID_PACKAGE.base.size : familySize
+      };
+
+      const savedPhoto = await savePhotoMutation.mutateAsync(photoData);
+      console.log('Photo saved to gallery as pending:', savedPhoto);
+
+      // Now add to cart
+      const cartData = {
+        photo_id: savedPhoto.id,
+        photo_title: photoData.title,
+        photo_url: photoData.edited_url,
+        print_size: photoData.print_size,
+        quantity: 1,
+        price_per_item: photoData.price,
+        editing_settings: photoData.editing_settings
+      };
+
+      await base44.entities.CartItem.create(cartData);
+      console.log('Photo added to cart');
+
+      // Navigate to cart page
+      navigate(createPageUrl("Cart"));
+
+    } catch (error) {
+      console.error("Error saving photo:", error);
+      alert(`Failed to save photo: ${error.message}`);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // Save photo to gallery after successful payment
+  const savePhotoToGallery = async () => {
+    if (!editedImageBase44Url || !currentUser || !selectedOption) return;
+
+    setIsDownloading(true);
+
+    try {
+      const photoData = {
+        title: photoTitle || "Untitled Photo",
+        ai_tool: selectedOption.id,
+        original_url: originalImageUrl,
+        edited_url: selectedOption.category === "family" ? originalImageUrl : editedImageBase44Url,
+        thumbnail_url: selectedOption.category === "family" ? originalImageUrl : editedImageBase44Url,
+        editing_settings: {
+          ai_style: selectedOption.id,
+          category: selectedOption.category,
+          size: selectedSize,
+          quantity: selectedOption.category === "portrait" ? selectedQuantity : 1,
+          addFrame: selectedOption.category === "portrait" ? addFrame : false,
+          extraPrintSets: selectedOption.category === "id" ? extraPrintSets : 0,
+          visaCountry: selectedOption.id === "visa-photo" ? selectedVisaCountry : null,
+          familyVariant: selectedOption.category === "family" ? selectedFamilyVariant : null,
+          familySize: selectedOption.category === "family" ? familySize : null,
+          familyCountry: selectedOption.category === "family" ? familyCountry : null,
+          familyFinish: selectedOption.category === "family" ? familyFinish : null,
+          familyPaperType: selectedOption.category === "family" ? familyPaperType : null,
+          brightness: selectedOption.category === "family" ? brightness : null,
+          contrast: selectedOption.category === "family" ? contrast : null,
+          saturation: selectedOption.category === "family" ? saturation : null,
+          blur: selectedOption.category === "family" ? blur : null,
+          rotation: selectedOption.category === "family" ? rotation : null,
+          zoom: selectedOption.category === "family" ? zoom : null,
+          grayscale: selectedOption.category === "family" ? grayscale : null,
+          hueRotate: selectedOption.category === "family" ? hueRotate : null,
+          sepia: selectedOption.category === "family" ? sepia : null,
+          vignette: selectedOption.category === "family" ? vignette : null,
+          borderWidth: selectedOption.category === "family" ? borderWidth : null,
+          borderColor: selectedOption.category === "family" ? borderColor : null,
+          filterPreset: selectedOption.category === "family" ? filterPreset : null,
+          paid: true // Mark as paid
+        },
+        status: "paid", // Mark status as paid
         price: calculatePrice(),
         print_size: selectedOption.category === "portrait" ? selectedSize : selectedOption.category === "id" ? ID_PACKAGE.base.size : familySize
       };
 
       await savePhotoMutation.mutateAsync(photoData);
+
+      // Close payment dialog and navigate to gallery
+      setShowPaymentDialog(false);
+      navigate(createPageUrl("Profile") + "?tab=gallery");
+
     } catch (error) {
       console.error("Error saving photo:", error);
       alert(`Failed to save photo: ${error.message}`);
@@ -848,6 +910,8 @@ export default function EditPhoto() {
     setFamilyPaperType("");
     setSelectedVisaCountry("Schengen (Fr/Es/De)"); // Reset visa country when starting over
     setSelectedSaudiStyle("Royal"); // Reset Saudi style when starting over
+    setSelectedAbsherStyle("Royal"); // Reset Absher style
+    setSelectedKhutraColor("Red"); // Reset Khutra color
     setHasProcessedUrlParam(false);
     setViewMode("slider");
     setPhotoSaved(false);
@@ -1605,34 +1669,29 @@ export default function EditPhoto() {
 
                   {!photoSaved ? (
                     <Button
-                      onClick={handleDownloadAndSave}
+                      onClick={handleOrderToCart}
                       disabled={isDownloading || !photoTitle || !editedImageBase44Url || !currentUser}
-                      className="flex-1 bg-black text-white hover:bg-gray-900 rounded-xl py-4 text-lg font-medium shadow-lg"
+                      className="flex-1 bg-gradient-to-r from-[#E63946] to-[#FF6B6B] text-white hover:from-[#C1121F] hover:to-[#E63946] rounded-xl py-4 text-lg font-medium shadow-lg"
                     >
                       {isDownloading ? (
                         <>
                           <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                          {t('downloading')}
-                        </>
-                      ) : selectedOption?.category === "family" ? (
-                        <>
-                          <ShoppingCart className="w-5 h-5 mr-2" />
-                          {language === 'ar' ? 'اطلب الآن' : 'Order Now'}
+                          {language === 'ar' ? 'جاري الحفظ...' : 'Saving...'}
                         </>
                       ) : (
                         <>
-                          <Download className="w-5 h-5 mr-2" />
-                          {t('downloadPhoto')}
+                          <ShoppingCart className="w-5 h-5 mr-2" />
+                          {language === 'ar' ? 'اطلب للتنزيل والشحن' : 'Order to Download & Ship'}
                         </>
                       )}
                     </Button>
                   ) : (
                     <Button
-                      onClick={handleBuyPrints}
-                      className="flex-1 bg-gradient-to-r from-[#E63946] to-[#FF6B6B] text-white hover:from-[#C1121F] hover:to-[#E63946] rounded-xl py-4 text-lg font-medium shadow-lg"
+                      onClick={() => navigate(createPageUrl("Profile") + "?tab=gallery")}
+                      className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 rounded-xl py-4 text-lg font-medium shadow-lg"
                     >
-                      <ShoppingCart className="w-5 h-5 mr-2" />
-                      {t('buyPrints')}
+                      <Download className="w-5 h-5 mr-2" />
+                      {language === 'ar' ? 'عرض في المعرض' : 'View in Gallery'}
                     </Button>
                   )}
                 </div>
@@ -1709,23 +1768,37 @@ export default function EditPhoto() {
 
             {/* Style Selection - Only for Absher Photo (Male) */}
             {selectedOption?.id === "absher-photo" && (
-              <div>
-                <label className="block text-sm font-bold text-black mb-2">
-                  {language === 'ar' ? 'النمط:' : 'Style:'}
-                </label>
-                <Select value={selectedAbsherStyle} onValueChange={setSelectedAbsherStyle}>
-                  <SelectTrigger className="rounded-xl border-2">
-                    <SelectValue placeholder={language === 'ar' ? 'اختر النمط' : 'Select style'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Royal">{language === 'ar' ? 'الملكية' : 'Royal'}</SelectItem>
-                    <SelectItem value="sheyoukh">{language === 'ar' ? 'الشيوخ' : 'Sheyoukh'}</SelectItem>
-                    <SelectItem value="Eagle">{language === 'ar' ? 'الصقر' : 'Eagle'}</SelectItem>
-                    <SelectItem value="practical">{language === 'ar' ? 'العملية' : 'Practical'}</SelectItem>
-                    <SelectItem value="youth">{language === 'ar' ? 'الشبابية' : 'Youth'}</SelectItem>
-                    <SelectItem value="knight">{language === 'ar' ? 'الفارس' : 'Knight'}</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-black mb-2">
+                    {language === 'ar' ? 'النمط:' : 'Style:'}
+                  </label>
+                  <Select value={selectedAbsherStyle} onValueChange={setSelectedAbsherStyle}>
+                    <SelectTrigger className="rounded-xl border-2">
+                      <SelectValue placeholder={language === 'ar' ? 'اختر النمط' : 'Select style'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Royal">{language === 'ar' ? 'الملكية' : 'Royal'}</SelectItem>
+                      <SelectItem value="Practical">{language === 'ar' ? 'العملية' : 'Practical'}</SelectItem>
+                      <SelectItem value="Eagle">{language === 'ar' ? 'الصقر' : 'Eagle'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-black mb-2">
+                    {language === 'ar' ? 'لون الغطرة:' : 'Khutra Color:'}
+                  </label>
+                  <Select value={selectedKhutraColor} onValueChange={setSelectedKhutraColor}>
+                    <SelectTrigger className="rounded-xl border-2">
+                      <SelectValue placeholder={language === 'ar' ? 'اختر لون الغطرة' : 'Select Khutra Color'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Red">{language === 'ar' ? 'أحمر' : 'Red'}</SelectItem>
+                      <SelectItem value="White">{language === 'ar' ? 'أبيض' : 'White'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 
@@ -1814,43 +1887,77 @@ export default function EditPhoto() {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8 text-green-600" />
                 </div>
-                {t('photoSavedSuccess')}
+                {language === 'ar' ? 'تم الدفع بنجاح!' : 'Payment Successful!'}
               </div>
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4 text-center">
             <p className="text-gray-600">
               {language === 'ar'
-                ? 'تم تنزيل صورتك وحفظها في المعرض وإضافتها إلى سلة التسوق!'
-                : 'Your photo has been downloaded and saved to gallery, and added to your cart!'
+                ? 'تم حفظ صورتك في المعرض. يمكنك تنزيلها الآن من صفحة المعرض.'
+                : 'Your photo has been saved to gallery. You can download it from the gallery page.'
               }
             </p>
             <div className="flex flex-col gap-3 pt-2">
               <Button
                 onClick={() => {
                   setShowSuccessDialog(false);
-                  handleStartOver();
+                  navigate(createPageUrl("Profile") + "?tab=gallery");
                 }}
-                className="w-full bg-black text-white hover:bg-gray-900 rounded-xl py-4 text-lg font-medium"
+                className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 rounded-xl py-4 text-lg font-medium"
               >
-                <Sparkles className="w-5 h-5 mr-2" />
-                {language === 'ar' ? 'جرب أداة أخرى' : 'Try Another Tool'}
+                <Download className="w-5 h-5 mr-2" />
+                {language === 'ar' ? 'فتح المعرض للتنزيل' : 'Open Gallery to Download'}
               </Button>
               <Button
                 onClick={() => {
                   setShowSuccessDialog(false);
-                  navigate(createPageUrl("Cart"));
+                  handleStartOver();
                 }}
                 variant="outline"
                 className="w-full border-2 border-black text-black hover:bg-black hover:text-white rounded-xl py-4 text-lg font-medium"
               >
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                {language === 'ar' ? 'المتابعة إلى سلة التسوق' : 'Proceed to Cart'}
+                <Sparkles className="w-5 h-5 mr-2" />
+                {language === 'ar' ? 'تحرير صورة أخرى' : 'Edit Another Photo'}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+
+      {/* Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="sm:max-w-2xl w-full rounded-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#E63946] to-[#FF6B6B] rounded-xl flex items-center justify-center">
+                <CreditCard className="w-6 h-6 text-white" />
+              </div>
+              {language === 'ar' ? 'إتمام الدفع' : 'Complete Payment'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedOption && currentUser && (
+              <PaymentOptions
+                bookingData={{
+                  firstName: currentUser.full_name?.split(' ')[0] || currentUser.email?.split('@')[0] || '',
+                  lastName: currentUser.full_name?.split(' ')[1] || '',
+                  email: currentUser.email,
+                  phone: currentUser.phone || '',
+                  address: '',
+                  bookingDate: new Date().toISOString().split('T')[0]
+                }}
+                packageInfo={{
+                  title: `${selectedOption.title} - ${photoTitle}`,
+                  titleEn: `${selectedOption.title} - ${photoTitle}`,
+                  price: calculatePrice().toFixed(2)
+                }}
+                onBack={() => setShowPaymentDialog(false)}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div >
   );
 }
