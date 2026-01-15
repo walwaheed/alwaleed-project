@@ -49,7 +49,7 @@ export default function EditPhoto() {
       description: t('visaPhotoDesc'),
       beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Visa-Before.png",
       afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Visa-After.png",
-      webhook: "https://n8n.renovaai.cloud/webhook/visa-photo",
+      webhook: "https://n8n.alwaleed.pro/webhook/visa-photo",
       category: "id"
     },
     {
@@ -58,7 +58,7 @@ export default function EditPhoto() {
       description: t('absherPhotoMaleDesc'),
       beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Absher-Before.jpg",
       afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Absher-After.png",
-      webhook: "https://n8n.renovaai.cloud/webhook/absher",
+      webhook: "https://n8n.alwaleed.pro/webhook/absher",
       category: "id"
     },
     {
@@ -67,7 +67,7 @@ export default function EditPhoto() {
       description: t('absherPhotoFemaleDesc'),
       beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Absher-Female-Before.jpg",
       afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Absher-Female-After.png",
-      webhook: "https://n8n.renovaai.cloud/webhook/absher", // Assuming the same webhook can handle male/female variations or will be updated.
+      webhook: "https://n8n.alwaleed.pro/webhook/absher", // Assuming the same webhook can handle male/female variations or will be updated.
       category: "id"
     },
     {
@@ -76,7 +76,7 @@ export default function EditPhoto() {
       description: t('saudiLookDesc'),
       beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Saudi-Before.jpg",
       afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Saudi-After.png",
-      webhook: "https://n8n.renovaai.cloud/webhook/saudi-look",
+      webhook: "https://n8n.alwaleed.pro/webhook/saudi-look",
       category: "portrait"
     },
     {
@@ -85,7 +85,7 @@ export default function EditPhoto() {
       description: t('babyPhotoDesc'),
       beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Baby-Before.jpg",
       afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Home-Baby-After.png",
-      webhook: "https://n8n.renovaai.cloud/webhook/baby-photo",
+      webhook: "https://n8n.alwaleed.pro/webhook/baby-photo",
       category: "id"
     }
   ], [t, language]);
@@ -651,7 +651,7 @@ export default function EditPhoto() {
       // Note: Photo is saved to gallery but NOT added to cart
       // Users will download it directly from gallery after payment confirmation
 
-      const webhookUrl = 'https://n8n.renovaai.cloud/webhook/app-database';
+      const webhookUrl = 'https://n8n.alwaleed.pro/webhook/app-database';
 
       const webhookPayload = {
         action: 'photo_created',
