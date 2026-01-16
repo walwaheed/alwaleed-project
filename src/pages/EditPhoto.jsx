@@ -67,7 +67,7 @@ export default function EditPhoto() {
       description: t('absherPhotoFemaleDesc'),
       beforeImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Absher-Female-Before.jpg",
       afterImage: "https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/Edit-Absher-Female-After.png",
-      webhook: "https://n8n.alwaleed.pro/webhook/absher", // Assuming the same webhook can handle male/female variations or will be updated.
+      webhook: "https://n8n.alwaleed.pro/webhook/absher-female", // Assuming the same webhook can handle male/female variations or will be updated.
       category: "id"
     },
     {
