@@ -7,7 +7,8 @@ const supabase = require('../lib/supabase');
 const APP_ID = process.env.PAYLINK_APP_ID;
 const SECRET_KEY = process.env.PAYLINK_SECRET_KEY;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const IS_TEST_MODE = process.env.PAYLINK_TEST_MODE || 'true';
+// const IS_TEST_MODE = process.env.PAYLINK_TEST_MODE || 'true';
+const IS_TEST_MODE = false;
 
 // Paylink API Endpoints
 // Production: https://restapi.paylink.sa/api
@@ -26,26 +27,57 @@ async function getPaylinkToken() {
         throw new Error('Paylink credentials (APP_ID, SECRET_KEY) are missing in environment variables.');
     }
 
-    const response = await fetch(`${PAYLINK_BASE_URL}/auth`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'accept': '*/*'
-        },
-        body: JSON.stringify({
-            apiId: APP_ID,
-            secretKey: SECRET_KEY,
-            persistToken: false // We get a fresh one each time for safety, or we could cache it
-        })
-    });
+    // Debug: Log credential info (without exposing full values)
+    console.log('🔐 Paylink Authentication Debug:');
+    console.log('   - API URL:', `${PAYLINK_BASE_URL}/auth`);
+    console.log('   - APP_ID format:', APP_ID ? `${APP_ID.substring(0, 10)}...` : 'MISSING');
+    console.log('   - APP_ID length:', APP_ID ? APP_ID.length : 0);
+    console.log('   - SECRET_KEY format:', SECRET_KEY ? `${SECRET_KEY.substring(0, 8)}...` : 'MISSING');
+    console.log('   - SECRET_KEY length:', SECRET_KEY ? SECRET_KEY.length : 0);
+    console.log('   - Mode:', IS_TEST_MODE ? 'TEST' : 'PRODUCTION');
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Paylink Auth Failed: ${response.status} - ${errorText}`);
+    const startTime = Date.now();
+
+    try {
+        const response = await fetch(`${PAYLINK_BASE_URL}/auth`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': '*/*'
+            },
+            body: JSON.stringify({
+                apiId: APP_ID,
+                secretKey: SECRET_KEY,
+                persistToken: "false" // IMPORTANT: Must be string "false", not boolean!
+            }),
+            // Add timeout to prevent hanging indefinitely
+            signal: AbortSignal.timeout(15000) // 15 second timeout
+        });
+
+        const responseTime = Date.now() - startTime;
+        console.log(`   - Response received in ${responseTime}ms`);
+        console.log(`   - Status: ${response.status} ${response.statusText}`);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('   ❌ Auth failed:', errorText.substring(0, 200));
+            throw new Error(`Paylink Auth Failed: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log('   ✅ Authentication successful, token received');
+        return data.id_token;
+    } catch (error) {
+        const responseTime = Date.now() - startTime;
+        console.error(`   ❌ Auth error after ${responseTime}ms:`, error.name, error.message.substring(0, 100));
+
+        // Check if it's a timeout
+        if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+            throw new Error(`Paylink Auth Timeout: Request took longer than 15 seconds. Check network connectivity or Paylink server status.`);
+        }
+
+        throw error;
     }
-
-    const data = await response.json();
-    return data.id_token;
 }
 
 /**

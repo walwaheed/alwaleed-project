@@ -28,7 +28,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Logging
 app.use(morgan('dev'));
 
-// Health Check Route
+// Health Check Routes (for Docker and monitoring)
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        service: 'alwaleed-backend'
+    });
+});
+
+// Legacy health check (keep for backward compatibility)
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });

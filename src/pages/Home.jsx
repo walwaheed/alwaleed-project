@@ -110,7 +110,7 @@ export default function Home() {
 
                 <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden p-4">
                   <img
-                    src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&q=75"
+                    src="https://sfraqqkmzzdtcynyyebj.supabase.co/storage/v1/object/public/website-Images/hero.webp"
                     alt="AI Enhanced Portrait"
                     className="w-full h-full object-cover rounded-2xl"
                   />

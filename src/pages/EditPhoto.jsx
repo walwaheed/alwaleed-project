@@ -1794,8 +1794,8 @@ export default function EditPhoto() {
                       <SelectValue placeholder={language === 'ar' ? 'اختر لون الغطرة' : 'Select Khutra Color'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Red">{language === 'ar' ? 'أحمر' : 'Red'}</SelectItem>
-                      <SelectItem value="White">{language === 'ar' ? 'أبيض' : 'White'}</SelectItem>
+                      <SelectItem value="Red">{language === 'ar' ? 'سعودي' : 'Saudi'}</SelectItem>
+                      <SelectItem value="White">{language === 'ar' ? 'اماراتى' : 'Emirati'}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

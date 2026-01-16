@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # Traefik reverse proxy
+  traefik:
+    image: traefik:v2.11
+    container_name: alwaleed-traefik
+    restart: unless-stopped
+    command:
+      # API and dashboard
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      # Providers
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # Entry points
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # SSL/TLS
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=your-email@example.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # Logs
+      - "--log.level=INFO"
+      - "--accesslog=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-certificates:/letsencrypt
+    networks:
+      - alwaleed-network
+    labels:
+      # Dashboard
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.yourdomain.com`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth"
+      # Basic auth for dashboard (user: admin, pass: change-this-password)
+      # Generate with: echo $(htpasswd -nb admin your-password) | sed -e s/\\$/\\$\\$/g
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$abc123$$xyz"
+      # HTTPS redirect
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: alwaleed-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    volumes:
+      - backend-uploads:/app/uploads
+    networks:
+      - alwaleed-network
+    labels:
+      - "traefik.enable=true"
+      # HTTP router
+      - "traefik.http.routers.backend.rule=Host(`api.yourdomain.com`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=5000"
+      # Security headers
+      - "traefik.http.middlewares.backend-headers.headers.customResponseHeaders.X-Robots-Tag=none"
+      - "traefik.http.middlewares.backend-headers.headers.sslRedirect=true"
+      - "traefik.http.middlewares.backend-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.backend-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.backend-headers.headers.stsPreload=true"
+      - "traefik.http.routers.backend.middlewares=backend-headers"
+      # CORS headers (if needed)
+      - "traefik.http.middlewares.backend-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
+      - "traefik.http.middlewares.backend-cors.headers.accesscontrolalloworigin=https://yourdomain.com"
+      - "traefik.http.middlewares.backend-cors.headers.accesscontrolallowcredentials=true"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - traefik
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: alwaleed-frontend
+    restart: unless-stopped
+    networks:
+      - alwaleed-network
+    labels:
+      - "traefik.enable=true"
+      # HTTP router
+      - "traefik.http.routers.frontend.rule=Host(`yourdomain.com`) || Host(`www.yourdomain.com`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      # WWW redirect (optional)
+      - "traefik.http.middlewares.www-redirect.redirectregex.regex=^https://www\\.(.+)"
+      - "traefik.http.middlewares.www-redirect.redirectregex.replacement=https://$${1}"
+      - "traefik.http.middlewares.www-redirect.redirectregex.permanent=true"
+      # Security headers
+      - "traefik.http.middlewares.frontend-headers.headers.customResponseHeaders.X-Robots-Tag=all"
+      - "traefik.http.middlewares.frontend-headers.headers.sslRedirect=true"
+      - "traefik.http.middlewares.frontend-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.frontend-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.frontend-headers.headers.stsPreload=true"
+      - "traefik.http.middlewares.frontend-headers.headers.frameDeny=true"
+      - "traefik.http.middlewares.frontend-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.frontend-headers.headers.browserXssFilter=true"
+      - "traefik.http.routers.frontend.middlewares=frontend-headers"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - traefik
+      - backend
+
+networks:
+  alwaleed-network:
+    driver: bridge
+
+volumes:
+  traefik-certificates:
+  backend-uploads:
