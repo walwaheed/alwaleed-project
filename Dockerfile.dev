@@ -1,0 +1,36 @@
+# ================================
+# Dockerfile for Local Development
+# ================================
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install development tools
+RUN apk add --no-cache \
+    git \
+    python3 \
+    make \
+    g++
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including devDependencies)
+RUN npm install
+
+# Copy all source code
+COPY . .
+
+# Expose ports for frontend (Vite) and backend (Express)
+EXPOSE 5173 3000
+
+# Set environment to development
+ENV NODE_ENV=development
+
+# Health check for backend
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" || exit 0
+
+# Start both frontend and backend using concurrently
+CMD ["npm", "run", "dev:all"]
