@@ -82,8 +82,7 @@ services:
         max-size: "10m"
         max-file: "3"
     
-    networks:
-      - web
+
 
   # n8n - Workflow Automation
   n8n:
@@ -117,13 +116,6 @@ services:
       - n8n_data:/home/node/.n8n
       - /local-files:/files
     
-    networks:
-      - web
-
-networks:
-  web:
-    driver: bridge
-
 volumes:
   traefik_data:
     external: true
