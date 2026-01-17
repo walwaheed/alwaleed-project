@@ -657,6 +657,8 @@ export default function EditPhoto() {
         action: 'photo_created',
         event: 'photo_saved',
         timestamp: new Date().toISOString(),
+        user_email: currentUser?.email || '',
+        user_name: currentUser?.full_name || currentUser?.email?.split('@')[0] || '',
         data: {
           id: savedPhoto.id,
           user: savedPhoto.user,
