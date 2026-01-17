@@ -80,9 +80,9 @@ if (process.env.NODE_ENV === 'production') {
 // Error Handler (must be last)
 app.use(errorHandler);
 
-// Start Server
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+// Start Server - Bind to 0.0.0.0 for Docker networking
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
     console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
