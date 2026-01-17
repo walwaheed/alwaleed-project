@@ -1,20 +1,42 @@
 services:
+  traefik:
+    image: "traefik"
+    restart: always
+    command:
+      - "--api=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
+      - "--certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL}"
+      - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - traefik_data:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  # Main Application - Alwaleed Backend + Frontend
   alwaleed-app:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         # Build arguments for Vite (frontend build time)
-        # These are automatically read from .env file
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
         VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+        VITE_API_URL: ${VITE_API_URL:-https://${DOMAIN_NAME}}
     
     image: alwaleed-backend:latest
     container_name: alwaleed-app
+    restart: unless-stopped
     
     # Runtime environment variables (backend)
-    # These are loaded from .env at container startup
     environment:
       - NODE_ENV=production
       - PORT=${PORT:-3000}
@@ -26,10 +48,24 @@ services:
       - PAYLINK_APP_ID=${PAYLINK_APP_ID}
       - PAYLINK_TEST_MODE=${PAYLINK_TEST_MODE:-false}
     
-    ports:
-      - "3000:3000"
-    
-    restart: unless-stopped
+    # Traefik labels for routing and SSL
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.alwaleed.rule=Host(`${DOMAIN_NAME}`)
+      - traefik.http.routers.alwaleed.tls=true
+      - traefik.http.routers.alwaleed.entrypoints=web,websecure
+      - traefik.http.routers.alwaleed.tls.certresolver=mytlschallenge
+      - traefik.http.services.alwaleed.loadbalancer.server.port=3000
+      # Security headers
+      - traefik.http.middlewares.alwaleed-headers.headers.SSLRedirect=true
+      - traefik.http.middlewares.alwaleed-headers.headers.STSSeconds=315360000
+      - traefik.http.middlewares.alwaleed-headers.headers.browserXSSFilter=true
+      - traefik.http.middlewares.alwaleed-headers.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.alwaleed-headers.headers.forceSTSHeader=true
+      - traefik.http.middlewares.alwaleed-headers.headers.SSLHost=${DOMAIN_NAME}
+      - traefik.http.middlewares.alwaleed-headers.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.alwaleed-headers.headers.STSPreload=true
+      - traefik.http.routers.alwaleed.middlewares=alwaleed-headers@docker
     
     # Health check
     healthcheck:
@@ -45,3 +81,51 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    
+    networks:
+      - web
+
+  # n8n - Workflow Automation
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    ports:
+      - "127.0.0.1:5678:5678"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.n8n.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)
+      - traefik.http.routers.n8n.tls=true
+      - traefik.http.routers.n8n.entrypoints=web,websecure
+      - traefik.http.routers.n8n.tls.certresolver=mytlschallenge
+      - traefik.http.middlewares.n8n.headers.SSLRedirect=true
+      - traefik.http.middlewares.n8n.headers.STSSeconds=315360000
+      - traefik.http.middlewares.n8n.headers.browserXSSFilter=true
+      - traefik.http.middlewares.n8n.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.n8n.headers.forceSTSHeader=true
+      - traefik.http.middlewares.n8n.headers.SSLHost=${DOMAIN_NAME}
+      - traefik.http.middlewares.n8n.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.n8n.headers.STSPreload=true
+      - traefik.http.routers.n8n.middlewares=n8n@docker
+    environment:
+      - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - /local-files:/files
+    
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge
+
+volumes:
+  traefik_data:
+    external: true
+  n8n_data:
+    external: true
