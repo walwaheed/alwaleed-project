@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "node server/app.js",
-    "dev:all": "concurrently \"npm run dev\" \"npm run server\""
+    "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
+    "start:prod": "set NODE_ENV=production&& node server/app.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.2",

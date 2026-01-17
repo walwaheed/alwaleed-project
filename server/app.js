@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
 require('dotenv').config();
 
 const errorHandler = require('./middleware/errorHandler');
@@ -10,10 +11,12 @@ const errorHandler = require('./middleware/errorHandler');
 console.log('🔍 Checking CLOUD_PRINTER_KEY:', process.env.CLOUD_PRINTER_KEY ? '✅ Found' : '❌ Missing');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
-// Security Middleware
-app.use(helmet());
+// Security Middleware - CSP disabled to allow all external connections
+app.use(helmet({
+    contentSecurityPolicy: false // Disabled - was blocking external APIs
+}));
 
 // CORS Configuration - Whitelist React app origin
 app.use(cors({
@@ -52,10 +55,27 @@ app.use('/api/cloudprinter', require('./routes/cloudprinter'));
 app.use('/api/paylink', require('./routes/paylink'));
 app.use('/api/print-orders', require('./routes/printOrders'));
 
-// 404 Handler
-app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' });
-});
+// Production: Serve static frontend files from dist/
+if (process.env.NODE_ENV === 'production') {
+    const distPath = path.join(__dirname, '../dist');
+
+    // Serve static assets
+    app.use(express.static(distPath));
+
+    // Serve index.html for all non-API routes (SPA routing)
+    app.use((req, res, next) => {
+        // Skip API routes
+        if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
+            return next();
+        }
+        res.sendFile(path.join(distPath, 'index.html'));
+    });
+} else {
+    // 404 Handler for development (when using separate Vite dev server)
+    app.use((req, res) => {
+        res.status(404).json({ error: 'Route not found' });
+    });
+}
 
 // Error Handler (must be last)
 app.use(errorHandler);

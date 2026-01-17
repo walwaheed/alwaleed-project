@@ -5,6 +5,16 @@
 # Stage 1: Build Frontend (Vite React App)
 FROM node:20-alpine AS frontend-builder
 
+# Build arguments for Vite environment variables
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ARG VITE_API_URL
+
+# Set environment variables from build args
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+ENV VITE_API_URL=$VITE_API_URL
+
 WORKDIR /app
 
 # Copy package files
@@ -23,7 +33,7 @@ COPY components.json ./
 COPY eslint.config.js ./
 COPY src ./src
 
-# Build the frontend
+# Build the frontend (env vars are now available)
 RUN npm run build
 
 # Stage 2: Build Backend
@@ -69,9 +79,9 @@ USER nodejs
 # Expose port
 EXPOSE 3000
 
-# Health check
+# Health check - uses the /health endpoint
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]

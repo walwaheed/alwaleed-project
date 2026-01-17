@@ -8,6 +8,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
+import logoUrl from "../assets/alwaleed_Waleed-logo.png";
 
 function LayoutContent({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -62,8 +63,6 @@ function LayoutContent({ children, currentPageName }) {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname]);
-
-  const logoUrl = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/690011e6637df3b25a370af7/c39b6225f_Waleed-logo.png";
 
   return (
     <div className="min-h-screen bg-white">
