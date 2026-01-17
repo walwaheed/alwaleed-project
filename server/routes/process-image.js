@@ -57,6 +57,7 @@ router.post('/', authenticate, upload.single('image'), async (req, res, next) =>
 
         const { aiTool, title, printSize, price } = value;
         const userEmail = req.user.email;
+        const userName = req.user.user_metadata?.full_name || req.user.user_metadata?.name || 'User';
         const file = req.file;
 
         // Step 1: Upload original image to Supabase Storage
@@ -109,6 +110,7 @@ router.post('/', authenticate, upload.single('image'), async (req, res, next) =>
                 imageUrl: originalUrl,
                 aiTool: aiTool,
                 userEmail: userEmail,
+                userName: userName,
                 title: title
             })
         });

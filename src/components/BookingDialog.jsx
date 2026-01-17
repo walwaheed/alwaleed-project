@@ -50,6 +50,8 @@ export default function BookingDialog({ open, onOpenChange, packageInfo, current
       // Send booking data to webhook
       try {
         const webhookData = {
+          user_name: `${bookingData.firstName} ${bookingData.lastName}`,
+          user_email: bookingData.email,
           firstName: bookingData.firstName,
           lastName: bookingData.lastName,
           email: bookingData.email,
