@@ -651,7 +651,7 @@ export default function EditPhoto() {
       // Note: Photo is saved to gallery but NOT added to cart
       // Users will download it directly from gallery after payment confirmation
 
-      const webhookUrl = 'https://n8n.alwaleed.pro/webhook/app-database';
+      const webhookUrl = 'https://n8n.renovaai.cloud/webhook/app-database';
 
       const webhookPayload = {
         action: 'photo_created',
