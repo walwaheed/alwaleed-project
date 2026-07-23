@@ -63,7 +63,7 @@ export default function BookingDialog({ open, onOpenChange, packageInfo, current
           timestamp: new Date().toISOString()
         };
 
-        await fetch('https://n8n.renovaai.cloud/webhook/Alwaleed-booking-orders', {
+        await fetch('https://n8n.alwaleed.pro/webhook/alwaleed-booking-orders', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
