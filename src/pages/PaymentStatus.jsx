@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, CheckCircle2, XCircle, AlertTriangle, AlertCircle, Clock } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, AlertCircle, Clock } from "lucide-react";
 import { useQueryClient } from '@tanstack/react-query';
+
+// How long to keep polling before giving up and telling the user to check back later.
+const MAX_POLL_ATTEMPTS = 40; // 40 * 2.5s = 100 seconds
+const POLL_INTERVAL_MS = 2500;
 
 const PaymentStatus = () => {
     const [searchParams] = useSearchParams();
@@ -12,57 +16,86 @@ const PaymentStatus = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [paymentData, setPaymentData] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
+    const [timedOut, setTimedOut] = useState(false);
+    const attemptsRef = useRef(0);
+    const pollTimerRef = useRef(null);
 
-    // Paylink sends 'transactionNo' in the query string
-    const transactionNo = searchParams.get('transactionNo');
+    // Our new create-payment/webhook flow sends 'orderNumber' in the query string
+    // (Paylink used 'transactionNo' — no longer used, kept out entirely)
+    const orderNumber = searchParams.get('orderNumber');
+    const wasCancelled = searchParams.get('cancelled') === 'true';
 
     useEffect(() => {
-        console.log('🔍 PaymentStatus Page Loaded');
-        console.log('📋 Full URL:', window.location.href);
-        console.log('📋 Search Params:', Object.fromEntries(searchParams));
-        console.log('💳 Transaction No:', transactionNo);
-
-        if (!transactionNo) {
-            console.error('❌ No transaction number found in URL!');
+        if (!orderNumber) {
             setIsLoading(false);
-            setErrorMessage('No transaction number found in the URL.');
+            setErrorMessage('No order number found in the URL.');
             return;
         }
 
-        const verifyPayment = async () => {
+        if (wasCancelled) {
+            setIsLoading(false);
+            setPaymentData({
+                orderNumber,
+                orderStatus: 'cancelled',
+                status: 'failed',
+                title: 'Payment Cancelled',
+                message: 'You cancelled the payment. No charge was made.'
+            });
+            return;
+        }
+
+        const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const statusUrl = `${backendUrl}/api/moyasar/order-status/${orderNumber}`;
+
+        const checkStatus = async () => {
             try {
-                const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-                const verifyUrl = `${backendUrl}/api/paylink/verify-payment/${transactionNo}`;
-                console.log('🔄 Calling verify endpoint:', verifyUrl);
-
-                const response = await fetch(verifyUrl);
+                const response = await fetch(statusUrl);
                 const data = await response.json();
-                console.log('✅ Verify Response:', data);
 
-                if (data.success && data.authenticationResult) {
-                    setPaymentData(data);
+                if (!data.success) {
+                    setErrorMessage('Unable to check payment status. Please contact support.');
+                    setIsLoading(false);
+                    return;
+                }
 
-                    // Invalidate orders cache if payment was successful
-                    if (data.authenticationResult.status === 'success') {
-                        queryClient.invalidateQueries({ queryKey: ['orders'] });
-                        // Also invalidate cart to refresh it (should be empty now)
-                        queryClient.invalidateQueries({ queryKey: ['cartItems'] });
+                // Still processing — the webhook hasn't updated the order yet.
+                // Keep polling unless we've hit the attempt limit.
+                if (data.orderStatus === 'processing') {
+                    attemptsRef.current += 1;
+
+                    if (attemptsRef.current >= MAX_POLL_ATTEMPTS) {
+                        setTimedOut(true);
+                        setIsLoading(false);
+                        return;
                     }
-                } else {
-                    setErrorMessage('Unable to verify payment status. Please contact support.');
+
+                    pollTimerRef.current = setTimeout(checkStatus, POLL_INTERVAL_MS);
+                    return;
+                }
+
+                // Reached a final state (paid or cancelled)
+                setPaymentData(data);
+                setIsLoading(false);
+
+                if (data.orderStatus === 'paid') {
+                    queryClient.invalidateQueries({ queryKey: ['orders'] });
+                    queryClient.invalidateQueries({ queryKey: ['cartItems'] });
                 }
             } catch (error) {
-                console.error('❌ Verification Error:', error);
-                setErrorMessage('Error verifying payment. Please contact support.');
-            } finally {
+                console.error('❌ Status Check Error:', error);
+                setErrorMessage('Error checking payment status. Please contact support.');
                 setIsLoading(false);
             }
         };
 
-        verifyPayment();
-    }, [transactionNo, queryClient]);
+        checkStatus();
 
-    // Render loading state
+        return () => {
+            if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+        };
+    }, [orderNumber, wasCancelled, queryClient]);
+
+    // Loading / polling state
     if (isLoading) {
         return (
             <div className="container mx-auto py-20 flex justify-center items-center min-h-[50vh]">
@@ -70,12 +103,12 @@ const PaymentStatus = () => {
                     <CardHeader>
                         <CardTitle className="flex flex-col items-center gap-4">
                             <Loader2 className="h-16 w-16 animate-spin text-blue-600" />
-                            <span className="text-2xl">Verifying Payment</span>
+                            <span className="text-2xl">Confirming Payment</span>
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-lg text-muted-foreground">
-                            Please wait while we verify your payment...
+                            Please wait while we confirm your payment. This usually takes a few seconds.
                         </p>
                     </CardContent>
                 </Card>
@@ -83,7 +116,45 @@ const PaymentStatus = () => {
         );
     }
 
-    // Render error state (no transaction number or verification failed)
+    // Timed out still waiting — don't say it failed, we genuinely don't know yet
+    if (timedOut) {
+        return (
+            <div className="container mx-auto py-20 flex justify-center items-center min-h-[50vh] px-4">
+                <Card className="w-full max-w-lg text-center border-blue-200 bg-blue-50/50">
+                    <CardHeader>
+                        <CardTitle className="flex flex-col items-center gap-4">
+                            <Clock className="h-16 w-16 text-blue-500" />
+                            <span className="text-2xl font-bold text-blue-700">Still Processing</span>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <p className="text-lg text-gray-700">
+                            Your payment is taking longer than usual to confirm. If your payment succeeded,
+                            your order will update automatically — check your orders page shortly, or contact
+                            support if you don't see it confirmed within a few minutes.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <Button variant="outline" onClick={() => navigate('/Profile')} className="w-full">
+                                View My Orders
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={() => window.open('https://wa.me/966133444101', '_blank')}
+                                className="w-full"
+                            >
+                                Contact Support via WhatsApp
+                            </Button>
+                            <Button variant="ghost" onClick={() => navigate('/')} className="w-full">
+                                Return to Home
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    // Error state (no order number, or the status check itself failed)
     if (errorMessage) {
         return (
             <div className="container mx-auto py-20 flex justify-center items-center min-h-[50vh]">
@@ -105,131 +176,65 @@ const PaymentStatus = () => {
         );
     }
 
-    // Get the authentication result details
-    const authResult = paymentData?.authenticationResult;
-    if (!authResult) return null;
+    if (!paymentData) return null;
 
-    // Map icon types to actual icon components
-    const getIconComponent = (iconType) => {
-        switch (iconType) {
-            case 'success':
-                return <CheckCircle2 className="h-16 w-16 text-green-500" />;
-            case 'error':
-                return <XCircle className="h-16 w-16 text-red-500" />;
-            case 'warning':
-                return <AlertTriangle className="h-16 w-16 text-amber-500" />;
-            case 'pending':
-                return <Clock className="h-16 w-16 text-blue-500" />;
-            default:
-                return <AlertCircle className="h-16 w-16 text-gray-500" />;
-        }
-    };
+    const isSuccess = paymentData.status === 'success';
+    const isFailed = paymentData.status === 'failed';
 
-    // Map status to card styling
-    const getCardStyle = (status) => {
-        switch (status) {
-            case 'success':
-                return 'border-green-200 bg-green-50/50';
-            case 'denied':
-            case 'rejected':
-            case 'server_error':
-            case 'gateway_error':
-                return 'border-red-200 bg-red-50/50';
-            case 'cancelled':
-            case 'unavailable':
-                return 'border-amber-200 bg-amber-50/50';
-            case 'pending':
-                return 'border-blue-200 bg-blue-50/50';
-            default:
-                return 'border-gray-200';
-        }
-    };
+    const iconComponent = isSuccess
+        ? <CheckCircle2 className="h-16 w-16 text-green-500" />
+        : isFailed
+            ? <XCircle className="h-16 w-16 text-red-500" />
+            : <AlertCircle className="h-16 w-16 text-gray-500" />;
 
-    // Map status to title color
-    const getTitleColor = (status) => {
-        switch (status) {
-            case 'success':
-                return 'text-green-700';
-            case 'denied':
-            case 'rejected':
-            case 'server_error':
-            case 'gateway_error':
-                return 'text-red-700';
-            case 'cancelled':
-            case 'unavailable':
-                return 'text-amber-700';
-            case 'pending':
-                return 'text-blue-700';
-            default:
-                return 'text-gray-700';
-        }
-    };
+    const cardStyle = isSuccess
+        ? 'border-green-200 bg-green-50/50'
+        : isFailed
+            ? 'border-red-200 bg-red-50/50'
+            : 'border-gray-200';
+
+    const titleColor = isSuccess
+        ? 'text-green-700'
+        : isFailed
+            ? 'text-red-700'
+            : 'text-gray-700';
 
     return (
         <div className="container mx-auto py-20 flex justify-center items-center min-h-[50vh] px-4">
-            <Card className={`w-full max-w-lg text-center ${getCardStyle(authResult.status)}`}>
+            <Card className={`w-full max-w-lg text-center ${cardStyle}`}>
                 <CardHeader>
                     <CardTitle className="flex flex-col items-center gap-4">
-                        {getIconComponent(authResult.icon)}
-                        <span className={`text-2xl font-bold ${getTitleColor(authResult.status)}`}>
-                            {authResult.title}
+                        {iconComponent}
+                        <span className={`text-2xl font-bold ${titleColor}`}>
+                            {paymentData.title}
                         </span>
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {/* Authentication Message */}
                     <div className="bg-white/70 p-4 rounded-lg border border-gray-200">
                         <p className="text-lg text-gray-800 leading-relaxed">
-                            {authResult.message}
+                            {paymentData.message}
                         </p>
                     </div>
 
-                    {/* Transaction Details */}
                     <div className="space-y-2 text-sm">
-                        {transactionNo && (
-                            <div className="bg-white/70 p-3 rounded-lg border border-gray-200">
-                                <p className="text-gray-600 mb-1">Transaction Number</p>
-                                <p className="font-mono font-bold text-gray-900">{transactionNo}</p>
-                            </div>
-                        )}
-
-                        {paymentData?.orderNumber && (
+                        {paymentData.orderNumber && (
                             <div className="bg-white/70 p-3 rounded-lg border border-gray-200">
                                 <p className="text-gray-600 mb-1">Order Number</p>
                                 <p className="font-mono font-bold text-gray-900">{paymentData.orderNumber}</p>
                             </div>
                         )}
 
-                        {paymentData?.amount && (
+                        {paymentData.amount && (
                             <div className="bg-white/70 p-3 rounded-lg border border-gray-200">
                                 <p className="text-gray-600 mb-1">Amount</p>
                                 <p className="font-bold text-gray-900 text-lg">{paymentData.amount} SAR</p>
                             </div>
                         )}
-
-                        {authResult.code && (
-                            <div className="bg-white/70 p-3 rounded-lg border border-gray-200">
-                                <p className="text-gray-600 mb-1">Authentication Code</p>
-                                <p className="font-mono font-bold text-gray-900">({authResult.code})</p>
-                            </div>
-                        )}
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="flex flex-col gap-3 pt-4">
-                        {/* View Receipt Button - Only for successful payments */}
-                        {authResult.status === 'success' && paymentData?.receiptUrl && (
-                            <Button
-                                variant="default"
-                                onClick={() => window.open(paymentData.receiptUrl, '_blank')}
-                                className="w-full bg-green-600 hover:bg-green-700 text-white"
-                            >
-                                View Receipt
-                            </Button>
-                        )}
-
-                        {/* View Orders Button - For successful payments */}
-                        {authResult.status === 'success' && (
+                        {isSuccess && (
                             <Button
                                 variant="outline"
                                 onClick={() => navigate('/Profile')}
@@ -239,36 +244,26 @@ const PaymentStatus = () => {
                             </Button>
                         )}
 
-                        {/* Try Again Button - For failed/cancelled payments */}
-                        {(authResult.status === 'denied' ||
-                            authResult.status === 'cancelled' ||
-                            authResult.status === 'rejected' ||
-                            authResult.status === 'unavailable' ||
-                            authResult.status === 'server_error' ||
-                            authResult.status === 'gateway_error') && (
-                                <Button
-                                    variant="default"
-                                    onClick={() => navigate('/Pricing')}
-                                    className="w-full"
-                                >
-                                    Try Again
-                                </Button>
-                            )}
+                        {isFailed && (
+                            <Button
+                                variant="default"
+                                onClick={() => navigate('/Pricing')}
+                                className="w-full"
+                            >
+                                Try Again
+                            </Button>
+                        )}
 
-                        {/* Contact Support Button - For errors */}
-                        {(authResult.status === 'server_error' ||
-                            authResult.status === 'gateway_error' ||
-                            authResult.status === 'rejected') && (
-                                <Button
-                                    variant="outline"
-                                    onClick={() => window.open('https://wa.me/966133444101', '_blank')}
-                                    className="w-full"
-                                >
-                                    Contact Support via WhatsApp
-                                </Button>
-                            )}
+                        {isFailed && (
+                            <Button
+                                variant="outline"
+                                onClick={() => window.open('https://wa.me/966133444101', '_blank')}
+                                className="w-full"
+                            >
+                                Contact Support via WhatsApp
+                            </Button>
+                        )}
 
-                        {/* Return Home Button - Always available */}
                         <Button
                             variant="ghost"
                             onClick={() => navigate('/')}

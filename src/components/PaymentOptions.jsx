@@ -8,12 +8,12 @@ import { getSession } from "@/lib/supabase";
 
 export default function PaymentOptions({ bookingData, packageInfo, onBack, items, autoExpand = true }) {
   const { language } = useLanguage();
-  // Auto-expand Paylink option by default
-  const [selectedMethod, setSelectedMethod] = useState(autoExpand ? 'paylink' : null);
+  // Auto-expand payment option by default
+  const [selectedMethod, setSelectedMethod] = useState(autoExpand ? 'moyasar' : null);
   const [copiedField, setCopiedField] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handlePaylinkPayment = async () => {
+  const handleMoyasarPayment = async () => {
     setIsProcessing(true);
     try {
       const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -49,7 +49,7 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack, items
         }));
       }
 
-      const response = await fetch(`${backendUrl}/api/paylink/create-payment`, {
+      const response = await fetch(`${backendUrl}/api/moyasar/create-payment`, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(payload)
@@ -62,7 +62,7 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack, items
       }
 
       if (data.success && data.paymentUrl) {
-        // Redirect to Paylink
+        // Redirect to Moyasar's hosted checkout page
         window.location.href = data.paymentUrl;
       } else {
         toast.error("Failed to get payment URL");
@@ -96,7 +96,7 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack, items
 
   const paymentMethods = [
     {
-      id: 'paylink',
+      id: 'moyasar',
       title: language === 'ar' ? 'دفع إلكتروني (مدى / فيزا / أبل باي)' : 'Online Payment (Mada / Visa / Apple Pay)',
       icon: CreditCard,
       isOnline: true
@@ -171,7 +171,7 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack, items
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handlePaylinkPayment();
+                        handleMoyasarPayment();
                       }}
                       className="w-full bg-[#1e3a8a] hover:bg-[#1e40af] text-white"
                       disabled={isProcessing}

@@ -52,7 +52,7 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/process-image', require('./routes/process-image'));
 app.use('/api/cloudprinter', require('./routes/cloudprinter'));
-app.use('/api/paylink', require('./routes/paylink'));
+app.use('/api/moyasar', require('./routes/moyasar'));
 app.use('/api/print-orders', require('./routes/printOrders'));
 
 // Production: Serve static frontend files from dist/

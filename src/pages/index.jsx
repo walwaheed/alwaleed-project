@@ -112,7 +112,7 @@ function PagesContent() {
                 <Route path="/TestSetup" element={<ProtectedRoute><TestSetup /></ProtectedRoute>} />
 
                 <Route path="/Payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
-                <Route path="/payment-status" element={<ProtectedRoute><PaymentStatus /></ProtectedRoute>} />
+                <Route path="/payment-status" element={<PaymentStatus />} />
 
             </Routes>
         </Layout>
