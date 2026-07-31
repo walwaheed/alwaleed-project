@@ -1,0 +1,54 @@
+table_name,column_name,data_type,is_nullable,column_default
+cart_items,id,uuid,NO,uuid_generate_v4()
+cart_items,created_at,timestamp with time zone,YES,now()
+cart_items,updated_at,timestamp with time zone,YES,now()
+cart_items,user_email,text,NO,null
+cart_items,photo_id,uuid,YES,null
+cart_items,photo_title,text,YES,null
+cart_items,photo_url,text,YES,null
+cart_items,print_size,text,YES,'8x10'::text
+cart_items,quantity,integer,YES,1
+cart_items,price_per_item,numeric,NO,null
+cart_items,total_price,numeric,NO,null
+cart_items,editing_settings,jsonb,YES,'{}'::jsonb
+orders,id,uuid,NO,uuid_generate_v4()
+orders,created_at,timestamp with time zone,YES,now()
+orders,updated_at,timestamp with time zone,YES,now()
+orders,user_email,text,NO,null
+orders,order_number,text,NO,null
+orders,items,jsonb,NO,'[]'::jsonb
+orders,subtotal,numeric,NO,null
+orders,shipping_cost,numeric,YES,0
+orders,vat_percentage,numeric,YES,0.15
+orders,vat_amount,numeric,YES,0
+orders,total_amount,numeric,NO,null
+orders,shipping_address,jsonb,NO,null
+orders,status,text,YES,'processing'::text
+orders,tracking_number,text,YES,null
+orders,order_date,timestamp with time zone,YES,now()
+photos,id,uuid,NO,uuid_generate_v4()
+photos,created_at,timestamp with time zone,YES,now()
+photos,updated_at,timestamp with time zone,YES,now()
+photos,user_email,text,NO,null
+photos,title,text,NO,null
+photos,ai_tool,text,YES,null
+photos,original_url,text,YES,null
+photos,edited_url,text,YES,null
+photos,thumbnail_url,text,YES,null
+photos,editing_settings,jsonb,YES,'{}'::jsonb
+photos,price,numeric,YES,0
+photos,print_size,text,YES,null
+photos,status,text,YES,'draft'::text
+print_orders,id,uuid,NO,uuid_generate_v4()
+print_orders,created_at,timestamp with time zone,YES,now()
+print_orders,updated_at,timestamp with time zone,YES,now()
+print_orders,user_email,text,NO,null
+print_orders,product_type,text,NO,null
+print_orders,order_data,jsonb,NO,null
+print_orders,payment_status,text,YES,'pending'::text
+print_orders,paylink_transaction_id,text,YES,null
+print_orders,cloudprinter_order_ref,text,YES,null
+print_orders,cloudprinter_status,text,YES,null
+print_orders,status,text,YES,'pending'::text
+print_orders,total_amount,numeric,YES,null
+print_orders,currency,text,YES,'SAR'::text

@@ -1,0 +1,101 @@
+table_name,column_name,data_type,is_nullable,column_default
+bookings,id,uuid,NO,gen_random_uuid()
+bookings,customer_id,uuid,YES,null
+bookings,wa_id,text,NO,null
+bookings,service_type,text,YES,null
+bookings,booking_date,date,YES,null
+bookings,booking_time,text,YES,null
+bookings,duration_hours,numeric,YES,null
+bookings,amount_sar,numeric,YES,null
+bookings,amount_halala,integer,YES,null
+bookings,status,text,YES,'pending'::text
+bookings,payment_link,text,YES,null
+bookings,moyasar_invoice_id,text,YES,null
+bookings,source_number,text,YES,'studio'::text
+bookings,notes,text,YES,null
+bookings,created_at,timestamp with time zone,YES,now()
+bookings,updated_at,timestamp with time zone,YES,now()
+branches,id,uuid,NO,gen_random_uuid()
+branches,branch_code,text,NO,null
+branches,name,text,NO,null
+branches,city,text,YES,null
+branches,active,boolean,YES,true
+branches,created_at,timestamp with time zone,YES,now()
+conversations,id,uuid,NO,gen_random_uuid()
+conversations,wa_id,text,NO,null
+conversations,source_number,text,YES,'studio'::text
+conversations,role,text,NO,null
+conversations,content,text,NO,null
+conversations,created_at,timestamp with time zone,YES,now()
+conversations,platform,text,YES,'telegram'::text
+conversations,conversation_id,text,YES,null
+conversations,message_id,text,YES,null
+conversations,booking_status,text,YES,null
+currencies,code,text,NO,null
+currencies,symbol,text,NO,null
+currencies,is_default,boolean,YES,false
+currencies,exchange_rate_to_sar,numeric,NO,null
+currencies,updated_at,timestamp with time zone,YES,now()
+customers,id,uuid,NO,gen_random_uuid()
+customers,wa_id,text,NO,null
+customers,name,text,YES,null
+customers,email,text,YES,null
+customers,source_number,text,YES,'studio'::text
+customers,notes,text,YES,null
+customers,created_at,timestamp with time zone,YES,now()
+customers,updated_at,timestamp with time zone,YES,now()
+customers,lifecycle_stage,text,YES,'new_lead'::text
+customers,lead_source,text,YES,null
+customers,customer_type,text,YES,'individual'::text
+customers,last_seen,timestamp with time zone,YES,now()
+customers,phone,text,YES,null
+customers,service_interest,text,YES,null
+customers,last_interaction_channel,text,YES,null
+customers,contacted_at,timestamp with time zone,YES,null
+customers,qualified_at,timestamp with time zone,YES,null
+customers,quotation_sent_at,timestamp with time zone,YES,null
+customers,payment_pending_at,timestamp with time zone,YES,null
+customers,paid_at,timestamp with time zone,YES,null
+customers,booked_at,timestamp with time zone,YES,null
+customers,completed_at,timestamp with time zone,YES,null
+customers,returning_customer_at,timestamp with time zone,YES,null
+equipment,id,uuid,NO,gen_random_uuid()
+equipment,equipment_code,text,NO,null
+equipment,name_en,text,NO,null
+equipment,name_ar,text,NO,null
+equipment,equipment_type,text,NO,null
+equipment,purchase_cost,numeric,NO,null
+equipment,purchase_date,date,NO,null
+equipment,useful_life_months,integer,NO,null
+equipment,salvage_value,numeric,NO,0
+equipment,estimated_monthly_usage_units,numeric,YES,null
+equipment,maintenance_monthly_cost,numeric,NO,0
+equipment,currency_code,text,NO,'SAR'::text
+equipment,branch_id,uuid,YES,null
+equipment,active,boolean,YES,true
+equipment,notes,text,YES,null
+equipment,created_at,timestamp with time zone,YES,now()
+equipment,updated_at,timestamp with time zone,YES,now()
+equipment_rental_costs,id,uuid,NO,gen_random_uuid()
+equipment_rental_costs,rental_code,text,NO,null
+equipment_rental_costs,name_en,text,NO,null
+equipment_rental_costs,name_ar,text,NO,null
+equipment_rental_costs,cost_per_unit,numeric,NO,null
+equipment_rental_costs,unit_label,text,NO,'per_day'::text
+equipment_rental_costs,currency_code,text,NO,'SAR'::text
+equipment_rental_costs,branch_id,uuid,YES,null
+equipment_rental_costs,active,boolean,YES,true
+equipment_rental_costs,notes,text,YES,null
+equipment_rental_costs,created_at,timestamp with time zone,YES,now()
+fixed_costs,id,uuid,NO,gen_random_uuid()
+fixed_costs,cost_code,text,NO,null
+fixed_costs,name_en,text,NO,null
+fixed_costs,name_ar,text,NO,null
+fixed_costs,cost_type,text,NO,null
+fixed_costs,monthly_amount,numeric,NO,null
+fixed_costs,currency_code,text,NO,'SAR'::text
+fixed_costs,branch_id,uuid,YES,null
+fixed_costs,effective_from,date,NO,CURRENT_DATE
+fixed_costs,effective_to,date,YES,null
+fixed_costs,active,boolean,YES,true
+fixed_costs,notes,text,YES,null
