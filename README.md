@@ -200,7 +200,7 @@ All Supabase HTTP Request nodes use a **Custom Auth** credential (`Supabase CRM 
 
 ## Google Sheets Integration
 
-The `Studio AlWaleed Database` Google Sheet (ID: `19ZNcqR6Sti3xC46MJiyZmSxjx1UIoqt2SZs9tpeAMkE`) syncs customer stage changes from n8n.
+The `Studio AlWaleed Database` Google Sheet (ID: `<sheet_id>`) syncs customer stage changes from n8n.
 
 ### Important: OAuth Token Expiry
 The Google Sheets OAuth token expires every 7 days if the Google Cloud OAuth consent screen is in **Testing** mode. To fix permanently:
