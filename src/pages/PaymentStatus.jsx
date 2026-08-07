@@ -5,6 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle2, XCircle, AlertCircle, Clock } from "lucide-react";
 import { useQueryClient } from '@tanstack/react-query';
 
+const retryPayment = async (orderNumber) => {
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const response = await fetch(`${backendUrl}/api/moyasar/retry-payment/${orderNumber}`, {
+        method: 'POST'
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to retry payment');
+    return data;
+};
+
 // How long to keep polling before giving up and telling the user to check back later.
 const MAX_POLL_ATTEMPTS = 40; // 40 * 2.5s = 100 seconds
 const POLL_INTERVAL_MS = 2500;
@@ -247,7 +257,17 @@ const PaymentStatus = () => {
                         {isFailed && (
                             <Button
                                 variant="default"
-                                onClick={() => navigate('/Pricing')}
+                                onClick={async () => {
+                                    try {
+                                        const result = await retryPayment(paymentData.orderNumber);
+                                        if (result.success && result.paymentUrl) {
+                                            window.location.href = result.paymentUrl;
+                                        }
+                                    } catch (error) {
+                                        console.error('Retry failed:', error);
+                                        navigate('/Pricing');
+                                    }
+                                }}
                                 className="w-full"
                             >
                                 Try Again

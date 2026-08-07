@@ -423,3 +423,82 @@ router.get('/order-status/:orderNumber', async (req, res) => {
 });
 
 module.exports = router;
+
+/**
+ * @route POST /api/moyasar/retry-payment/:orderNumber
+ * @desc Generate a new Moyasar invoice for an existing order (failed/cancelled payment).
+ *       Prevents duplicate bookings by only allowing retry on processing/cancelled orders.
+ * @access Public
+ */
+router.post('/retry-payment/:orderNumber', async (req, res) => {
+    try {
+        const { orderNumber } = req.params;
+
+        if (!orderNumber) {
+            return res.status(400).json({ error: 'Order number is required' });
+        }
+
+        // Fetch the existing order
+        const { data: order, error: fetchError } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('order_number', orderNumber)
+            .single();
+
+        if (fetchError || !order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        // Only allow retry on processing or cancelled orders  never on paid orders
+        if (order.status === 'paid') {
+            return res.status(400).json({ error: 'This order has already been paid.' });
+        }
+
+        // Get the package title from order items for the description
+        const packageTitle = order.items?.[0]?.photo_title || 'Studio AlWaleed purchase';
+
+        // Create a new Moyasar invoice for the same amount
+        let payment;
+        try {
+            payment = await paymentProvider.createPayment({
+                amount: parseFloat(order.total_amount),
+                description: `Order #${orderNumber} (retry) - ${packageTitle}`,
+                callbackUrl: `${BACKEND_URL}/api/moyasar/webhook`,
+                successUrl: `${FRONTEND_URL}/payment-status?orderNumber=${orderNumber}`,
+                backUrl: `${FRONTEND_URL}/payment-status?orderNumber=${orderNumber}&cancelled=true`
+            });
+        } catch (providerError) {
+            console.error('Payment Provider Retry Error:', providerError);
+            return res.status(502).json({ error: 'Failed to create new payment invoice' });
+        }
+
+        // Update the order with the new invoice id and reset status to processing
+        const { error: updateError } = await supabase
+            .from('orders')
+            .update({
+                tracking_number: payment.id,
+                status: 'processing',
+                updated_at: new Date().toISOString()
+            })
+            .eq('order_number', orderNumber);
+
+        if (updateError) {
+            console.error('Order Update Error on Retry:', updateError);
+            return res.status(500).json({ error: 'Failed to update order record' });
+        }
+
+        console.log(' Retry payment created for order:', orderNumber, '| New invoice:', payment.id);
+
+        res.json({
+            success: true,
+            paymentUrl: payment.checkoutUrl,
+            invoiceId: payment.id,
+            orderNumber: orderNumber
+        });
+
+    } catch (error) {
+        console.error('Retry Payment Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+module.exports = router;
