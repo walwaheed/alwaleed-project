@@ -254,3 +254,4 @@ alwaleed-project/
 | M2 | Telegram AI sales agent, n8n CRM workflows |
 | M3 | Supabase schema, pricing engine, knowledge base |
 | M4 | Moyasar migration (replacing Paylink), website CRM automation, RLS security hardening, provider-independent payment layer |
+| M5 | Admin Telegram notifications, customer email notifications (Resend), payment retry, order lifecycle automation, error monitoring |
