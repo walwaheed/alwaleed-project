@@ -489,6 +489,13 @@ router.post('/retry-payment/:orderNumber', async (req, res) => {
 
         console.log(' Retry payment created for order:', orderNumber, '| New invoice:', payment.id);
 
+        // Notify n8n to update Google Sheet with Payment Retry status
+        fetch('https://n8n.alwaleed.pro/webhook/e732c27e-382f-4bfd-8b25-578deee4fcd3', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_email: order.user_email, order_number: orderNumber })
+        }).catch(err => console.error('Sheet sync webhook error:', err));
+
         res.json({
             success: true,
             paymentUrl: payment.checkoutUrl,
