@@ -35,7 +35,7 @@ router.post('/create-payment', async (req, res) => {
             quantity: parseInt(item.qty || 1),
             price: parseFloat(item.price || 0)
         })) : [{
-            photo_title: packageTitle || 'Service Package',
+            photo_title: (packageTitle && packageTitle !== 'undefined') ? packageTitle : 'Studio AlWaleed Service',
             photo_url: 'https://placehold.co/400?text=Service',
             print_size: 'Service',
             quantity: 1,
@@ -255,7 +255,7 @@ async function handlePaymentSuccess(order, paymentId) {
 
     // Send Booking Confirmed email via Resend
     if (userEmail && process.env.RESEND_API_KEY) {
-        const packageTitle = order.items?.[0]?.photo_title || 'Studio AlWaleed service';
+        const packageTitle = (order.items?.[0]?.photo_title && order.items[0].photo_title !== 'Untitled') ? order.items[0].photo_title : 'Studio AlWaleed Service';
         const amount = order.total_amount;
         fetch('https://api.resend.com/emails', {
             method: 'POST',
