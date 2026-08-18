@@ -30,10 +30,11 @@ router.post('/create-payment', async (req, res) => {
 
         const orderItems = items ? items.map(item => ({
             photo_title: item.title || 'Product',
-            photo_url: 'https://placehold.co/400?text=Package',
-            print_size: 'Package',
+            photo_url: item.photo_url || 'https://placehold.co/400?text=Package',
+            print_size: item.description || 'Package',
             quantity: parseInt(item.qty || 1),
-            price: parseFloat(item.price || 0)
+            price: parseFloat(item.price || 0),
+            photo_id: item.photo_id || null
         })) : [{
             photo_title: (packageTitle && packageTitle !== 'undefined') ? packageTitle : 'Studio AlWaleed Service',
             photo_url: 'https://placehold.co/400?text=Service',

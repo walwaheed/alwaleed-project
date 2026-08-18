@@ -45,7 +45,9 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack, items
           title: item.photo_title,
           price: item.total_price / item.quantity, // Unit price
           qty: item.quantity,
-          description: item.print_size
+          description: item.print_size,
+          photo_id: item.photo_id || null,
+          photo_url: item.photo_url || null
         }));
       }
 
