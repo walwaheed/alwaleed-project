@@ -54,6 +54,7 @@ app.use('/api/process-image', require('./routes/process-image'));
 app.use('/api/cloudprinter', require('./routes/cloudprinter'));
 app.use('/api/moyasar', require('./routes/moyasar'));
 app.use('/api/print-orders', require('./routes/printOrders'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Production: Serve static frontend files from dist/
 if (process.env.NODE_ENV === 'production') {

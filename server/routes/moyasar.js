@@ -364,7 +364,8 @@ async function handlePaymentSuccess(order, paymentId) {
                     .from('photos')
                     .update({
                         status: 'paid',
-                        editing_settings: updatedSettings
+                        editing_settings: updatedSettings,
+                                order_id: order.id
                     })
                     .eq('id', photoId);
 

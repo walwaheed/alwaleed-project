@@ -53,6 +53,7 @@ services:
       - RESEND_API_KEY=${RESEND_API_KEY}
       - CRM_SUPABASE_URL=${CRM_SUPABASE_URL}
       - CRM_SUPABASE_SERVICE_ROLE_KEY=${CRM_SUPABASE_SERVICE_ROLE_KEY}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
     
     # Traefik labels for routing and SSL
     labels:

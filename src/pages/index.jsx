@@ -26,6 +26,7 @@ import Login from "./Login";
 
 import Payment from "./Payment";
 import PaymentStatus from "./PaymentStatus";
+import Admin from "./Admin";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -113,6 +114,7 @@ function PagesContent() {
 
                 <Route path="/Payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
                 <Route path="/payment-status" element={<PaymentStatus />} />
+                <Route path="/Admin" element={<Admin />} />
 
             </Routes>
         </Layout>
