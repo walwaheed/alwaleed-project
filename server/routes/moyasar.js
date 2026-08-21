@@ -201,9 +201,19 @@ router.post('/webhook', async (req, res) => {
 
         const order = orders[0];
 
+        // Idempotency guard  skip if already processed
+        if (order.status === 'paid' && paymentStatus.status === 'paid') {
+            console.log(' Duplicate webhook  order already paid, skipping:', order.order_number);
+            return;
+        }
+
         if (paymentStatus.status === 'paid') {
             await handlePaymentSuccess(order, paymentId);
         } else if (paymentStatus.status === 'failed') {
+            if (order.status === 'cancelled') {
+                console.log(' Duplicate webhook  order already cancelled, skipping:', order.order_number);
+                return;
+            }
             await handlePaymentFailure(order, paymentStatus.status);
         } else {
             console.log(`ℹ️ Payment status "${paymentStatus.status}" — no action taken yet.`);
