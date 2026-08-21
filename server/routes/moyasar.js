@@ -209,7 +209,7 @@ router.post('/webhook', async (req, res) => {
 
         if (paymentStatus.status === 'paid') {
             await handlePaymentSuccess(order, paymentId);
-        } else if (paymentStatus.status === 'failed') {
+        } else if (paymentStatus.status === 'failed' || paymentStatus.status === 'expired') {
             if (order.status === 'cancelled') {
                 console.log(' Duplicate webhook  order already cancelled, skipping:', order.order_number);
                 return;
