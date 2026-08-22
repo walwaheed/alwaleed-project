@@ -149,7 +149,7 @@ const PaymentStatus = () => {
                             </Button>
                             <Button
                                 variant="outline"
-                                onClick={() => window.open('https://wa.me/966133444101', '_blank')}
+                                onClick={() => window.open('https://wa.me/966500096949', '_blank')}
                                 className="w-full"
                             >
                                 Contact Support via WhatsApp
@@ -277,7 +277,7 @@ const PaymentStatus = () => {
                         {isFailed && (
                             <Button
                                 variant="outline"
-                                onClick={() => window.open('https://wa.me/966133444101', '_blank')}
+                                onClick={() => window.open('https://wa.me/966500096949', '_blank')}
                                 className="w-full"
                             >
                                 Contact Support via WhatsApp

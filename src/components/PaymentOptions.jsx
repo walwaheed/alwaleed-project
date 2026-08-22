@@ -93,7 +93,7 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack, items
       `${language === 'ar' ? 'الباقة' : 'Package'}: ${language === 'ar' ? packageInfo?.title : packageInfo?.titleEn}\n` +
       `${language === 'ar' ? 'المبلغ' : 'Amount'}: ${packageInfo?.price} SAR`
     );
-    window.open(`https://wa.me/966133444101?text=${message}`, '_blank');
+    window.open(`https://wa.me/966500096949?text=${message}`, '_blank');
   };
 
   const paymentMethods = [
@@ -290,11 +290,11 @@ export default function PaymentOptions({ bookingData, packageInfo, onBack, items
             }
           </p>
           <div className="flex items-center justify-center gap-2">
-            <p className="text-2xl font-bold text-green-700 font-mono" dir="ltr">+966 13 344 4101</p>
+            <p className="text-2xl font-bold text-green-700 font-mono" dir="ltr">+966 50 009 6949</p>
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => copyToClipboard('+966133444101', 'phone')}
+              onClick={() => copyToClipboard('+966500096949', 'phone')}
             >
               {copiedField === 'phone' ? (
                 <Check className="w-4 h-4 text-green-600" />
