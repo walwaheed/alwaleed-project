@@ -278,7 +278,7 @@ async function handlePaymentSuccess(order, paymentId) {
                 from: 'Studio AlWaleed <studio@send.alwaleed.pro>',
                 to: [userEmail],
                 subject: 'Booking Confirmed - Studio AlWaleed',
-                html: `<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'><h2 style='color: #16a34a;'>Your Booking is Confirmed!</h2><p>Dear Customer,</p><p>Your payment has been received and your booking is confirmed.</p><p>Order: ${order.order_number} | Service: ${packageTitle} | Amount: ${amount} SAR</p><p>Contact us via WhatsApp: +966 13 344 4101</p></div>`
+                html: `<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'><h2 style='color: #16a34a;'>Your Booking is Confirmed!</h2><p>Dear Customer,</p><p>Your payment has been received and your booking is confirmed.</p><p>Order: ${order.order_number} | Service: ${packageTitle} | Amount: ${amount} SAR</p><p>Contact us via WhatsApp: +966 50 009 6949</p></div>`
             })
         }).catch(err => console.error('Booking Confirmed email failed:', err));
         console.log('Booking Confirmed email queued for:', userEmail);
