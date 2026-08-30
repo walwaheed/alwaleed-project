@@ -52,9 +52,9 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/process-image', require('./routes/process-image'));
 app.use('/api/cloudprinter', require('./routes/cloudprinter'));
-app.use('/api/moyasar', require('./routes/moyasar'));
+app.use('/api/paylink', require('./routes/paylink'));
 app.use('/api/print-orders', require('./routes/printOrders'));
-app.use('/api/admin', require('./routes/admin'));
+app.use('/api/global-products', require('./routes/globalProducts'));
 
 // Production: Serve static frontend files from dist/
 if (process.env.NODE_ENV === 'production') {
