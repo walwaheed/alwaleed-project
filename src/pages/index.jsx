@@ -24,9 +24,9 @@ import TestSetup from "./TestSetup";
 
 import Login from "./Login";
 
-import Payment from "./Payment";
 import PaymentStatus from "./PaymentStatus";
 import Admin from "./Admin";
+import IndustrialGrowthLandingPage from "./IndustrialGrowthLandingPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -58,7 +58,6 @@ const PAGES = {
 
     Login: Login,
 
-    Payment: Payment,
     PaymentStatus: PaymentStatus,
 
 }
@@ -81,6 +80,22 @@ function PagesContent() {
     const location = useLocation();
     const currentPage = _getCurrentPage(location.pathname);
 
+    // Standalone executive B2B landing pages (isolated from consumer layout)
+    const isStandaloneExecutivePage = 
+        location.pathname.toLowerCase().startsWith('/industrial-growth') || 
+        location.pathname.toLowerCase() === '/audit' ||
+        location.pathname.toLowerCase() === '/industrialgrowth';
+
+    if (isStandaloneExecutivePage) {
+        return (
+            <Routes>
+                <Route path="/industrial-growth" element={<IndustrialGrowthLandingPage />} />
+                <Route path="/IndustrialGrowth" element={<IndustrialGrowthLandingPage />} />
+                <Route path="/audit" element={<IndustrialGrowthLandingPage />} />
+            </Routes>
+        );
+    }
+
     return (
         <Layout currentPageName={currentPage}>
             <Routes>
@@ -101,6 +116,7 @@ function PagesContent() {
 
                 {/* Protected Routes */}
                 <Route path="/EditPhoto" element={<ProtectedRoute><EditPhoto /></ProtectedRoute>} />
+                <Route path="/passport-photo" element={<ProtectedRoute><EditPhoto initialTool="visa-photo" /></ProtectedRoute>} />
 
                 <Route path="/Gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
 
@@ -112,9 +128,11 @@ function PagesContent() {
 
                 <Route path="/TestSetup" element={<ProtectedRoute><TestSetup /></ProtectedRoute>} />
 
-                <Route path="/Payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
                 <Route path="/payment-status" element={<PaymentStatus />} />
                 <Route path="/Admin" element={<Admin />} />
+                <Route path="/industrial-growth" element={<IndustrialGrowthLandingPage />} />
+                <Route path="/IndustrialGrowth" element={<IndustrialGrowthLandingPage />} />
+                <Route path="/audit" element={<IndustrialGrowthLandingPage />} />
 
             </Routes>
         </Layout>

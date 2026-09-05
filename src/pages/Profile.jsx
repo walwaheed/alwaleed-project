@@ -154,7 +154,7 @@ export default function Profile() {
   const fetchReceiptUrl = async (order) => {
     try {
       const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${backendUrl}/api/paylink/verify-payment/${order.tracking_number}`);
+      const response = await fetch(`${backendUrl}/api/moyasar/order-status/${order.order_number}`);
       const data = await response.json();
 
       if (data.success && data.receiptUrl) {
