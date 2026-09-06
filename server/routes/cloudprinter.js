@@ -6,6 +6,55 @@ const crypto = require('crypto');
 const CLOUDPRINTER_API_KEY = process.env.CLOUD_PRINTER_KEY;
 const CLOUDPRINTER_API_URL = 'https://api.cloudprinter.com/cloudcore/1.0';
 
+const productMappingBySize = {
+    'aluminum': {
+        '300x300 mm': 'wall_decor_300x300_alu_fc',
+        '400x400 mm': 'wall_decor_400x400_alu_fc',
+        '450x450 mm': 'wall_decor_450x450_alu_fc',
+        '500x500 mm': 'wall_decor_500x500_alu_fc',
+        '700x700 mm': 'wall_decor_700x700_alu_fc',
+        '300x450 mm': 'wall_decor_300x450_alu_p_fc',
+        '500x600 mm': 'wall_decor_500x600_alu_p_fc',
+        '600x800 mm': 'wall_decor_600x800_alu_p_fc',
+        '600x900 mm': 'wall_decor_600x900_alu_p_fc',
+    },
+    'wood': {
+        '300x300 mm': 'wall_decor_300x300_wood_fc',
+        '400x400 mm': 'wall_decor_400x400_wood_fc',
+        '450x450 mm': 'wall_decor_450x450_wood_fc',
+        '500x500 mm': 'wall_decor_500x500_wood_fc',
+        '700x700 mm': 'wall_decor_700x700_wood_fc',
+        '300x450 mm': 'wall_decor_300x450_wood_p_fc',
+        '400x600 mm': 'wall_decor_400x600_wood_p_fc',
+        '600x800 mm': 'wall_decor_600x800_wood_p_fc',
+        '600x900 mm': 'wall_decor_600x900_wood_p_fc',
+    },
+    'canva': {
+        '1000x500 mm': 'wall_decor_1000x500_mm_canvas_fc',
+        '200x200 mm': 'wall_decor_200x200_mm_canvas_fc',
+        '200x300 mm': 'wall_decor_200x300_mm_canvas_fc',
+        '300x300 mm': 'wall_decor_300x300_mm_canvas_fc',
+        '300x400 mm': 'wall_decor_300x400_mm_canvas_fc',
+        '300x450 mm': 'wall_decor_300x450_mm_canvas_fc',
+        '400x400 mm': 'wall_decor_400x400_mm_canvas_fc',
+        '400x600 mm': 'wall_decor_400x600_mm_canvas_fc',
+        '500x700 mm': 'wall_decor_500x700_mm_canvas_fc',
+        '500x750 mm': 'wall_decor_500x750_mm_canvas_fc',
+        '600x600 mm': 'wall_decor_600x600_mm_canvas_fc',
+        '600x800 mm': 'wall_decor_600x800_mm_canvas_fc',
+        '800x800 mm': 'wall_decor_800x800_mm_canvas_fc',
+    },
+    'photobook': {
+        'A6 Portrait': 'photobook_pb_148x200_mm_p_fc',
+        'A6 Landscape': 'photobook_pb_200x148mm_l_fc',
+        'A5 Portrait': 'photobook_pb_210x250_mm_p_fc',
+        'A5 Landscape': 'photobook_pb_250x210_mm_l_fc',
+        'A4 Portrait': 'photobook_pb_240x300_p_fc',
+        'A4 Landscape': 'photobook_pb_270x200_mm_l_fc',
+    }
+};
+
+
 // Debug: Log API key status on module load
 console.log('🔑 CloudPrinter API Key Status:', CLOUDPRINTER_API_KEY ? '✅ Loaded' : '❌ Not Found');
 if (!CLOUDPRINTER_API_KEY) {
@@ -137,53 +186,7 @@ router.post('/order', async (req, res) => {
 
         // Map product types to CloudPrinter product reference codes
         // These are the actual codes from CloudPrinter's API
-        const productMappingBySize = {
-            'aluminum': {
-                '300x300 mm': 'wall_decor_300x300_alu_fc',
-                '400x400 mm': 'wall_decor_400x400_alu_fc',
-                '450x450 mm': 'wall_decor_450x450_alu_fc',
-                '500x500 mm': 'wall_decor_500x500_alu_fc',
-                '700x700 mm': 'wall_decor_700x700_alu_fc',
-                '300x450 mm': 'wall_decor_300x450_alu_p_fc',
-                '500x600 mm': 'wall_decor_500x600_alu_p_fc',
-                '600x800 mm': 'wall_decor_600x800_alu_p_fc',
-                '600x900 mm': 'wall_decor_600x900_alu_p_fc',
-            },
-            'wood': {
-                '300x300 mm': 'wall_decor_300x300_wood_fc',
-                '400x400 mm': 'wall_decor_400x400_wood_fc',
-                '450x450 mm': 'wall_decor_450x450_wood_fc',
-                '500x500 mm': 'wall_decor_500x500_wood_fc',
-                '700x700 mm': 'wall_decor_700x700_wood_fc',
-                '300x450 mm': 'wall_decor_300x450_wood_p_fc',
-                '400x600 mm': 'wall_decor_400x600_wood_p_fc',
-                '600x800 mm': 'wall_decor_600x800_wood_p_fc',
-                '600x900 mm': 'wall_decor_600x900_wood_p_fc',
-            },
-            'canva': {
-                '1000x500 mm': 'wall_decor_1000x500_mm_canvas_fc',
-                '200x200 mm': 'wall_decor_200x200_mm_canvas_fc',
-                '200x300 mm': 'wall_decor_200x300_mm_canvas_fc',
-                '300x300 mm': 'wall_decor_300x300_mm_canvas_fc',
-                '300x400 mm': 'wall_decor_300x400_mm_canvas_fc',
-                '300x450 mm': 'wall_decor_300x450_mm_canvas_fc',
-                '400x400 mm': 'wall_decor_400x400_mm_canvas_fc',
-                '400x600 mm': 'wall_decor_400x600_mm_canvas_fc',
-                '500x700 mm': 'wall_decor_500x700_mm_canvas_fc',
-                '500x750 mm': 'wall_decor_500x750_mm_canvas_fc',
-                '600x600 mm': 'wall_decor_600x600_mm_canvas_fc',
-                '600x800 mm': 'wall_decor_600x800_mm_canvas_fc',
-                '800x800 mm': 'wall_decor_800x800_mm_canvas_fc',
-            },
-            'photobook': {
-                'A6 Portrait': 'photobook_pb_148x200_mm_p_fc',
-                'A6 Landscape': 'photobook_pb_200x148mm_l_fc',
-                'A5 Portrait': 'photobook_pb_210x250_mm_p_fc',
-                'A5 Landscape': 'photobook_pb_250x210_mm_l_fc',
-                'A4 Portrait': 'photobook_pb_240x300_p_fc',
-                'A4 Landscape': 'photobook_pb_270x200_mm_l_fc',
-            }
-        };
+
 
         // Get product code from mapping
         let productCode;
@@ -298,7 +301,10 @@ router.post('/order', async (req, res) => {
             if (finish) {
                 options.push({ type: 'finish', value: finish });
             }
-            if (paperType) {
+            // Canvas product codes already define the canvas material.
+            // Do not send the internal frontend paperType as a CloudPrinter
+            // paper option unless an explicit CloudPrinter option mapping exists.
+            if (paperType && productType !== 'canva') {
                 options.push({ type: 'paper', value: paperType });
             }
         }
@@ -419,17 +425,37 @@ router.post('/quote', async (req, res) => {
             });
         }
 
+        // Resolve the actual CloudPrinter product code from product type + size.
+        const quoteProductCode =
+            productMappingBySize[productType]?.[size] ||
+            productType;
+
+        if (!quoteProductCode) {
+            return res.status(400).json({
+                success: false,
+                error: `Product configuration not supported: ${productType} ${size}`
+            });
+        }
+
+        const quoteItemReference = `QUOTE-ITEM-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
         const quotePayload = {
             apikey: CLOUDPRINTER_API_KEY,
             country: shippingAddress?.country || 'SA',
             items: [
                 {
-                    product: productType || 'alu_dibond_30x30',
-                    count: String(quantity),
-                    shipping_level: 'cp_postal'
+                    reference: quoteItemReference,
+                    product: quoteProductCode,
+                    count: Number(quantity),
+                    options: []
                 }
             ]
         };
+
+        console.log('🧪 QUOTE PAYLOAD DEBUG:', JSON.stringify({
+            ...quotePayload,
+            apikey: quotePayload.apikey ? '[REDACTED]' : undefined
+        }, null, 2));
 
         const response = await fetch(`${CLOUDPRINTER_API_URL}/orders/quote`, {
             method: 'POST',

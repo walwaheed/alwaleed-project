@@ -54,7 +54,14 @@ app.use('/api/process-image', require('./routes/process-image'));
 app.use('/api/cloudprinter', require('./routes/cloudprinter'));
 app.use('/api/moyasar', require('./routes/moyasar'));
 app.use('/api/print-orders', require('./routes/printOrders'));
+app.use('/api/global-products', require('./routes/globalProducts'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/leads/industrial', require('./routes/industrialLead'));
+
+app.get('/whatsapp-connect', (req, res) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  res.sendFile(require('path').join(__dirname, 'public', 'whatsapp-connect.html'));
+});
 
 // Production: Serve static frontend files from dist/
 if (process.env.NODE_ENV === 'production') {

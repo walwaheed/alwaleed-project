@@ -119,6 +119,7 @@ services:
       - NODE_ENV=production
       - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - GHL_PRIVATE_INTEGRATION_TOKEN=${GHL_PRIVATE_INTEGRATION_TOKEN}
     volumes:
       - n8n_data:/home/node/.n8n
       - /local-files:/files

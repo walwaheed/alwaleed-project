@@ -4,12 +4,27 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
   	extend: {
+  		fontFamily: {
+  			display: ['Tajawal', 'Lato', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+  			body: ['Tajawal', 'Lato', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+  			lato: ['Lato', 'system-ui', 'sans-serif'],
+  			tajawal: ['Tajawal', 'Lato', 'system-ui', 'sans-serif'],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			// Studio AlWaleed — Luxury Minimal Web System V1 Tokens
+  			alw: {
+  				red: '#B5121B', // Attention / Catch
+  				blue: '#175CD3', // Technical / Intelligence
+  				black: '#0A0A0A', // Authority
+  				white: '#FFFFFF', // Luxury Canvas
+  				neutral: '#F9FAFB', // Off-White Editorial Neutral
+  				charcoal: '#475467', // Body Copy
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

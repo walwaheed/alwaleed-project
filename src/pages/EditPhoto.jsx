@@ -27,7 +27,7 @@ import { Slider } from "@/components/ui/slider";
 import BeforeAfterSlider from "../components/BeforeAfterSlider";
 import PaymentOptions from "../components/PaymentOptions";
 
-export default function EditPhoto() {
+export default function EditPhoto({ initialTool } = {}) {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -291,7 +291,7 @@ export default function EditPhoto() {
     if (hasProcessedUrlParam) return;
 
     const urlParams = new URLSearchParams(location.search);
-    const toolId = urlParams.get('tool');
+    const toolId = urlParams.get('tool') || initialTool || (location.pathname.toLowerCase().includes('passport') ? 'visa-photo' : null);
 
     if (toolId && EDITING_OPTIONS.length > 0) {
       const tool = EDITING_OPTIONS.find(opt => opt.id === toolId);

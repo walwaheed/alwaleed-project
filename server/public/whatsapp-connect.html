@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Studio AlWaleed — WhatsApp Connect</title>
+<style>
+  body {
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #f5f5f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .card {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    max-width: 420px;
+    text-align: center;
+  }
+  h1 { font-size: 20px; margin-bottom: 8px; }
+  p { color: #555; font-size: 14px; line-height: 1.5; }
+  button {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  button:hover { background: #1ebe5b; }
+  #status {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #333;
+    text-align: left;
+    background: #f0f0f0;
+    padding: 12px;
+    border-radius: 6px;
+    display: none;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Connect WhatsApp Number</h1>
+  <p>Click below to connect +966 50 009 6949 to the Cloud API.
+     Keep the WhatsApp Business App open on your phone — you'll be asked to scan a QR code partway through.</p>
+  <button onclick="launchWhatsAppSignup()">Connect WhatsApp</button>
+  <div id="status"></div>
+</div>
+
+<script>
+  window.fbAsyncInit = function () {
+    FB.init({
+      appId: '1492657048526305',
+      cookie: true,
+      xfbml: true,
+      version: 'v22.0'
+    });
+  };
+
+  (function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = 'https://connect.facebook.net/en_US/sdk.js';
+    js.setAttribute('defer', true);
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+
+  function showStatus(text) {
+    var el = document.getElementById('status');
+    el.style.display = 'block';
+    el.textContent += text + '\n\n';
+  }
+
+  function launchWhatsAppSignup() {
+    FB.login(
+      function (response) {
+        if (response.authResponse && response.authResponse.code) {
+          showStatus('Received code (not sent anywhere yet):\n' + response.authResponse.code);
+        } else {
+          showStatus('Login did not complete or was cancelled.\n' + JSON.stringify(response));
+        }
+      },
+      {
+        config_id: '904423162307438',
+        response_type: 'code',
+        override_default_response_type: true,
+        extras: {
+          setup: {},
+          featureType: 'whatsapp_business_app_onboarding',
+          sessionInfoVersion: 3
+        }
+      }
+    );
+  }
+
+  // Listen for Embedded Signup session info events (step-by-step progress + asset IDs)
+  window.addEventListener('message', function (event) {
+    if (!event.origin || event.origin.indexOf('facebook.com') === -1) return;
+    try {
+      var data = JSON.parse(event.data);
+      if (data.type === 'WA_EMBEDDED_SIGNUP') {
+        showStatus('Signup event: ' + JSON.stringify(data, null, 2));
+      }
+    } catch (e) {
+      // not a JSON message we care about, ignore
+    }
+  });
+</script>
+
+</body>
+</html>
