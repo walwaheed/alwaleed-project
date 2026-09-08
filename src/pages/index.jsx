@@ -27,6 +27,8 @@ import Login from "./Login";
 import PaymentStatus from "./PaymentStatus";
 import Admin from "./Admin";
 import IndustrialGrowthLandingPage from "./IndustrialGrowthLandingPage";
+import PassportExpressLanding from "./PassportExpressLanding";
+import ExecutiveHeadshotsLanding from "./ExecutiveHeadshotsLanding";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -96,6 +98,30 @@ function PagesContent() {
         );
     }
 
+    // Standalone high-conversion B2C landing funnels (isolated from consumer layout)
+    const isStandaloneB2CFunnel = 
+        location.pathname.toLowerCase().startsWith('/express-passport') || 
+        location.pathname.toLowerCase() === '/passport-express' ||
+        location.pathname.toLowerCase().startsWith('/passport-express/') ||
+        location.pathname.toLowerCase().startsWith('/executive-headshots') ||
+        location.pathname.toLowerCase() === '/headshots' ||
+        location.pathname.toLowerCase().startsWith('/headshots/');
+
+    if (isStandaloneB2CFunnel) {
+        return (
+            <Routes>
+                <Route path="/express-passport" element={<PassportExpressLanding />} />
+                <Route path="/Express-Passport" element={<PassportExpressLanding />} />
+                <Route path="/passport-express" element={<PassportExpressLanding />} />
+                <Route path="/Passport-Express" element={<PassportExpressLanding />} />
+                <Route path="/executive-headshots" element={<ExecutiveHeadshotsLanding />} />
+                <Route path="/Executive-Headshots" element={<ExecutiveHeadshotsLanding />} />
+                <Route path="/headshots" element={<ExecutiveHeadshotsLanding />} />
+                <Route path="/Headshots" element={<ExecutiveHeadshotsLanding />} />
+            </Routes>
+        );
+    }
+
     return (
         <Layout currentPageName={currentPage}>
             <Routes>
@@ -133,6 +159,10 @@ function PagesContent() {
                 <Route path="/industrial-growth" element={<IndustrialGrowthLandingPage />} />
                 <Route path="/IndustrialGrowth" element={<IndustrialGrowthLandingPage />} />
                 <Route path="/audit" element={<IndustrialGrowthLandingPage />} />
+
+                {/* Direct routes inside layout fallback */}
+                <Route path="/express-passport" element={<PassportExpressLanding />} />
+                <Route path="/executive-headshots" element={<ExecutiveHeadshotsLanding />} />
 
             </Routes>
         </Layout>
