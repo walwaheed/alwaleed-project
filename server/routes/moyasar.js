@@ -525,7 +525,12 @@ router.post('/retry-payment/:orderNumber', async (req, res) => {
         fetch('https://n8n.alwaleed.pro/webhook/e732c27e-382f-4bfd-8b25-578deee4fcd3', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_email: order.user_email, order_number: orderNumber })
+            body: JSON.stringify({
+                user_email: order.user_email,
+                order_number: orderNumber,
+                old_tracking_number: order.tracking_number,
+                new_tracking_number: payment.id
+            })
         }).catch(err => console.error('Sheet sync webhook error:', err));
 
         res.json({
