@@ -1,0 +1,50 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [
+    "server",
+    "db",
+    "user"
+  ],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://2ZbSoj9242sLdJW.e43a6d25ed4f:5Oo3Hzmw7c1p1PsXWJA9@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/TCRS9qMLYAYXLQUgNZHyr2?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": [
+    "no_db_push"
+  ],
+  "git_remote": {
+    "repo_url": "https://7f0548f6b28a1758d9bf7be630d36cb4.artifacts.cloudflare.net/git/prod/TCRS9qMLYAYXLQUgNZHyr2.git",
+    "expiration": "2026-09-10T15:44:39.258Z",
+    "token": "art_v2_x_c6b57afee4a8031eb1531401c222075d22f58527?expires=1789055079",
+    "backend": "GIT_BACKEND_ARTIFACTS"
+  },
+  "name": "alwaleed-photo-assistant",
+  "path": "/home/ubuntu/alwaleed-photo-assistant",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "cmsoYfhGawJDiZXjg6qXL7",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "EXPO_APP_QR_URL": "exps://8081-i0y6xg0a4knk58dlrnmu6-8034bcd5.sg2.manus.computer",
+    "EXPO_PACKAGER_PROXY_URL": "https://8081-i0y6xg0a4knk58dlrnmu6-8034bcd5.sg2.manus.computer",
+    "EXPO_PUBLIC_API_BASE_URL": "https://3000-i0y6xg0a4knk58dlrnmu6-8034bcd5.sg2.manus.computer",
+    "EXPO_PUBLIC_OAUTH_PORTAL_URL": "https://manus.im",
+    "EXPO_PUBLIC_OAUTH_SERVER_URL": "https://api.manus.im",
+    "EXPO_PUBLIC_OWNER_NAME": "Waleed Alwaheed",
+    "EXPO_PUBLIC_OWNER_OPEN_ID": "4q3rtuFQArWpxNLS2mQX5k",
+    "JWT_SECRET": "96Kg652AUr3Y3JfYwr95W6",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "Waleed Alwaheed",
+    "OWNER_OPEN_ID": "4q3rtuFQArWpxNLS2mQX5k",
+    "REACT_NATIVE_PACKAGER_HOSTNAME": "8081-i0y6xg0a4knk58dlrnmu6-8034bcd5.sg2.manus.computer",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "328d769c-ecc8-45cd-a2e9-15c300b75f36",
+    "VITE_APP_ID": "TCRS9qMLYAYXLQUgNZHyr2",
+    "VITE_APP_LOGO": "",
+    "VITE_APP_TITLE": "Studio AlWaleed — Smart Photo Assistant",
+    "VITE_FRONTEND_FORGE_API_KEY": "QoPWAqKiJCk4AoTeUmRioX",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "app",
+  "test_command": "pnpm test"
+}
