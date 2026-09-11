@@ -1,6 +1,6 @@
 import { normalizeProduct, normalizeQuote, type Phase4AProduct, type Phase4AQuote, type Phase4AQuoteRequest, validateQuoteRequest } from "./phase4a-contract";
 
-export type Phase4BUpload = { file_id: string; filename: string; mime_type: string; size_bytes: number; width?: number; height?: number; purpose: "print"; status: "PENDING" | "VALIDATED" | "REJECTED" };
+export type Phase4BUpload = { file_id: string; filename: string; mime_type: string; size_bytes: number; width?: number; height?: number; purpose: "print"; status: "PENDING" | "VALIDATED" | "REJECTED"; url?: string };
 export type Phase4BOrder = { order_id: string; order_number: string; status: "PENDING_PAYMENT" | "PROCESSING" | "CANCELLED"; payment_status: "UNPAID" | "PENDING" | "PAID" | "FAILED" | "CANCELLED" | "EXPIRED"; amount: number; currency: "SAR" };
 export type Phase4BStatus = { order: Phase4BOrder; payment_verification: { verified: boolean; amount_match: boolean; currency_match: boolean }; fulfillment: unknown | null; tracking: unknown };
 

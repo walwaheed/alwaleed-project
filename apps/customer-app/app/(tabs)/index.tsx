@@ -267,5 +267,372 @@ export default function HomeScreen() {
     return (
       <>
         {renderTopBar(() => setScreen("upload"), "خطوة 03 · التحليل")}
-        <View style={styles.resultHeader}><View><Text style={styles.pageKicker}>نتيجة محاكاة الذكاء الاصطناعي</Text><Text style={styles.pageTitle}>الصورة مفهومة الآن</Text></View><View style={styles.prototypePill}><MaterialIcons name="science" size={15} color={WARNING} /><Text style={styles.prototypeText}>PROTOTYPE</Text></View></View>        <View style={styles.analysisHero}>{photo ? <Image source={{ uri: photo.uri }} style={styles.analysisImage} /> : <View style={styles.analysisPlaceholder}><MaterialIcons name="image" size={40} color={MUTED} /></View>}<View style={styles.analysisStamp}><MaterialIcons name="auto-awesome" size={18} color={GOLD} /><Text style={styles.analysisStampText}>تحل
-(Content truncated due to size limit. Use line ranges to read remaining content)
+        <View style={styles.resultHeader}>
+          <View>
+            <Text style={styles.pageKicker}>نتيجة محاكاة الذكاء الاصطناعي</Text>
+            <Text style={styles.pageTitle}>الصورة مفهومة الآن</Text>
+          </View>
+          <View style={styles.prototypePill}>
+            <MaterialIcons name="science" size={15} color={WARNING} />
+            <Text style={styles.prototypeText}>PROTOTYPE</Text>
+          </View>
+        </View>
+        <View style={styles.analysisHero}>
+          {photo ? (
+            <Image source={{ uri: photo.uri }} style={styles.analysisImage} />
+          ) : (
+            <View style={styles.analysisPlaceholder}>
+              <MaterialIcons name="image" size={40} color={MUTED} />
+            </View>
+          )}
+          <View style={styles.analysisStamp}>
+            <MaterialIcons name="auto-awesome" size={18} color={GOLD} />
+            <Text style={styles.analysisStampText}>تحليل الصورة</Text>
+          </View>
+        </View>
+        <View style={styles.metricList}>
+          {metrics.map(([label, value, status]) => (
+            <View key={label} style={styles.metricRow}>
+              <Text style={styles.metricLabel}>{label}</Text>
+              <View style={styles.metricRight}>
+                <Text style={styles.metricValue}>{value}</Text>
+                <Text style={styles.metricStatus}>{status}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+        <Pressable
+          onPress={() => setScreen("recommendation")}
+          style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.primaryButtonText}>عرض التوصية الذكية</Text>
+          <MaterialIcons name="arrow-back" size={20} color={CREAM} />
+        </Pressable>
+      </>
+    );
+  };
+
+  const renderRecommendation = () => (
+    <>
+      {renderTopBar(() => setScreen("analysis"), "خطوة 04 · التوصية")}
+      <View style={styles.simpleIntro}>
+        <Text style={styles.pageKicker}>التوصية المخصصة</Text>
+        <Text style={styles.pageTitle}>أفضل خيار لصورتك</Text>
+        <Text style={styles.pageBody}>بناءً على دقة الصورة واستخدامك المستهدف، نوصي بالتالي:</Text>
+      </View>
+      <View style={styles.recommendationCard}>
+        <View style={styles.recIconWrap}>
+          <MaterialIcons name="auto-awesome" size={28} color={GOLD} />
+        </View>
+        <Text style={styles.recTitle}>{selectedRecommendation.best}</Text>
+        <Text style={styles.recSubtitle}>المقاس المقترح: {selectedRecommendation.size}</Text>
+        <View style={styles.recPill}>
+          <Text style={styles.recPillText}>الجودة المتوقعة: {selectedRecommendation.quality}</Text>
+        </View>
+      </View>
+      <Pressable
+        onPress={() => setScreen("print")}
+        style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
+      >
+        <Text style={styles.primaryButtonText}>اختيار المقاس والطلب</Text>
+        <MaterialIcons name="arrow-back" size={20} color={CREAM} />
+      </Pressable>
+      <Pressable
+        onPress={() => setScreen("passport")}
+        style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+      >
+        <Text style={styles.secondaryButtonText}>فحص متطلبات الجواز / الفيزا</Text>
+      </Pressable>
+    </>
+  );
+
+  const renderPrint = () => {
+    const options = printGroups[printGroup];
+    return (
+      <>
+        {renderTopBar(() => setScreen("recommendation"), "خطوة 05 · المقاسات")}
+        <View style={styles.simpleIntro}>
+          <Text style={styles.pageKicker}>كتالوج الطباعة</Text>
+          <Text style={styles.pageTitle}>اختر مقاس الطباعة</Text>
+          <Text style={styles.pageBody}>أسعار استرشادية واضحة ومقاسات معتمدة لطباعة عالية الدقة.</Text>
+        </View>
+        <View style={styles.groupTabs}>
+          {(Object.keys(printGroups) as PrintGroup[]).map((group) => (
+            <Pressable
+              key={group}
+              onPress={() => choosePrintGroup(group)}
+              style={[styles.groupTab, printGroup === group && styles.groupTabActive]}
+            >
+              <Text style={[styles.groupTabText, printGroup === group && styles.groupTabTextActive]}>{group}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <View style={styles.optionsList}>
+          {options.map((opt) => (
+            <Pressable
+              key={opt.name}
+              onPress={() => {
+                setPrintOption(opt.name);
+                setProductPreview({ group: printGroup, name: opt.name, size: opt.size, price: opt.price });
+              }}
+              style={[styles.optionCard, printOption === opt.name && styles.optionCardActive]}
+            >
+              <View>
+                <Text style={styles.optionCardName}>{opt.name}</Text>
+                <Text style={styles.optionCardSize}>{opt.size}</Text>
+              </View>
+              <Text style={styles.optionCardPrice}>{opt.price}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <View style={styles.quantityRow}>
+          <Text style={styles.quantityLabel}>الكمية:</Text>
+          <View style={styles.quantityControls}>
+            <Pressable
+              onPress={() => setPreviewQuantity((q) => Math.max(1, q - 1))}
+              style={styles.quantityBtn}
+            >
+              <Text style={styles.quantityBtnText}>-</Text>
+            </Pressable>
+            <Text style={styles.quantityValue}>{previewQuantity}</Text>
+            <Pressable
+              onPress={() => setPreviewQuantity((q) => q + 1)}
+              style={styles.quantityBtn}
+            >
+              <Text style={styles.quantityBtnText}>+</Text>
+            </Pressable>
+          </View>
+        </View>
+        <Pressable
+          onPress={() => {
+            const selectedOpt = options.find((o) => o.name === printOption) ?? options[0];
+            addToCart({
+              id: `${printGroup}-${selectedOpt.name}`,
+              name: `${printGroup} · ${selectedOpt.name}`,
+              detail: selectedOpt.size,
+              price: parseFloat(selectedOpt.price.replace(/[^0-9.]/g, "")) || 18,
+            });
+            setDoneMessage(`تمت إضافة ${selectedOpt.name} إلى السلة بنجاح.`);
+          }}
+          style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.primaryButtonText}>إضافة إلى السلة</Text>
+          <MaterialIcons name="add-shopping-cart" size={20} color={CREAM} />
+        </Pressable>
+      </>
+    );
+  };
+
+  const renderPassport = () => (
+    <>
+      {renderTopBar(goHome, "فحص الجواز والهوية")}
+      <View style={styles.simpleIntro}>
+        <Text style={styles.pageKicker}>الاستخدام الرسمي</Text>
+        <Text style={styles.pageTitle}>فحص صورة الجواز والفيزا</Text>
+        <Text style={styles.pageBody}>حدد نوع الوثيقة لمعرفة الاشتراطات القياسية.</Text>
+      </View>
+      <View style={styles.passportTypes}>
+        {passportTypes.map((type) => (
+          <Pressable
+            key={type}
+            onPress={() => {
+              setPassportType(type);
+              setPassportResult(null);
+            }}
+            style={[styles.passportTypeCard, passportType === type && styles.passportTypeCardActive]}
+          >
+            <Text style={[styles.passportTypeText, passportType === type && styles.passportTypeTextActive]}>{type}</Text>
+          </Pressable>
+        ))}
+      </View>
+      <Pressable
+        onPress={runPassportCheck}
+        style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
+      >
+        <Text style={styles.primaryButtonText}>فحص اشتراطات {passportType}</Text>
+        <MaterialIcons name="verified-user" size={20} color={CREAM} />
+      </Pressable>
+      {passportResult && (
+        <View
+          style={[
+            styles.passportResultCard,
+            passportResult === "PASS"
+              ? styles.resultPass
+              : passportResult === "NEEDS ADJUSTMENT"
+              ? styles.resultWarn
+              : styles.resultFail,
+          ]}
+        >
+          <MaterialIcons
+            name={passportResult === "PASS" ? "check-circle" : passportResult === "NEEDS ADJUSTMENT" ? "warning" : "error"}
+            size={24}
+            color={passportResult === "PASS" ? SUCCESS : passportResult === "NEEDS ADJUSTMENT" ? WARNING : ERROR}
+          />
+          <View style={styles.passportResultCopy}>
+            <Text style={styles.passportResultTitle}>
+              {passportResult === "PASS"
+                ? "مطابقة للاشتراطات الأساسية"
+                : passportResult === "NEEDS ADJUSTMENT"
+                ? "تحتاج إلى ضبط بسيط"
+                : "غير مطابقة للمواصفات"}
+            </Text>
+            <Text style={styles.passportResultBody}>
+              {passportResult === "PASS"
+                ? "خلفية بيضاء نقية، الوجه في المنتصف، والملامح واضحة بدون ظلال حادة."
+                : "تأكد من استقامة الرأس وإزالة النظارات الشمسية وأن تكون الخلفية بيضاء موحدة."}
+            </Text>
+          </View>
+        </View>
+      )}
+      <Pressable
+        onPress={() => setScreen("upload")}
+        style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed, { marginTop: 12 }]}
+      >
+        <Text style={styles.secondaryButtonText}>رفع صورة للفحص</Text>
+      </Pressable>
+    </>
+  );
+
+  return (
+    <ScreenContainer className="px-5 pb-6" containerClassName="bg-[#F7F5F0]">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} style={styles.rtl}>
+        {screen === "home" && renderHome()}
+        {screen === "unknown" && renderUnknown()}
+        {screen === "upload" && renderUpload()}
+        {screen === "analysis" && renderAnalysis()}
+        {screen === "recommendation" && renderRecommendation()}
+        {screen === "print" && renderPrint()}
+        {screen === "passport" && renderPassport()}
+        {doneMessage && (
+          <View style={styles.doneCard}>
+            <MaterialIcons name="info" size={18} color={INK} />
+            <Text style={styles.doneText}>{doneMessage}</Text>
+          </View>
+        )}
+      </ScrollView>
+    </ScreenContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  rtl: { direction: "rtl" },
+  content: { paddingBottom: 35 },
+  topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 14, paddingBottom: 16 },
+  iconButton: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#EDE8DE", alignItems: "center", justifyContent: "center" },
+  iconButtonGhost: { width: 40, height: 40 },
+  pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
+  brandLockup: { alignItems: "center" },
+  eyebrow: { color: MUTED, fontSize: 9, letterSpacing: 1.1, fontWeight: "800" },
+  brand: { color: INK, fontSize: 13, fontWeight: "900", letterSpacing: 0.5 },
+  brandDot: { color: GOLD },
+  hero: { backgroundColor: INK, borderRadius: 24, padding: 22, marginBottom: 20, overflow: "hidden", position: "relative" },
+  heroGlowOne: { position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: 50, backgroundColor: "#C8974B22" },
+  heroGlowTwo: { position: "absolute", bottom: -20, left: -20, width: 80, height: 80, borderRadius: 40, backgroundColor: "#C9D8D022" },
+  heroKicker: { color: GOLD, fontSize: 10, fontWeight: "900", letterSpacing: 0.8 },
+  heroTitle: { color: "#FFF", fontSize: 26, fontWeight: "900", lineHeight: 34, marginTop: 10 },
+  heroBody: { color: "#C6D0D0", fontSize: 12, lineHeight: 19, marginTop: 8 },
+  heroFooter: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 18, paddingTop: 14, borderTopWidth: 0.5, borderTopColor: "#ffffff22" },
+  heroBadge: { backgroundColor: "#ffffff18", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5 },
+  heroBadgeText: { color: CREAM, fontSize: 10, fontWeight: "700" },
+  heroNumber: { color: GOLD, fontSize: 12, fontWeight: "900" },
+  sectionHeader: { marginBottom: 14 },
+  sectionTitle: { color: INK, fontSize: 18, fontWeight: "900" },
+  sectionSubtitle: { color: MUTED, fontSize: 11, marginTop: 3 },
+  stepDot: { width: 22, height: 22, borderRadius: 11, backgroundColor: GOLD, alignItems: "center", justifyContent: "center" },
+  stepDotText: { color: "#FFF", fontSize: 10, fontWeight: "900" },
+  intentGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  intentCard: { width: "48.2%", minHeight: 110, borderRadius: 18, padding: 13, justifyContent: "space-between" },
+  cardPressed: { opacity: 0.78, transform: [{ scale: 0.97 }] },
+  intentIcon: { width: 36, height: 36, borderRadius: 12, backgroundColor: "#ffffffaa", alignItems: "center", justifyContent: "center" },
+  intentTitle: { color: INK, fontSize: 13, fontWeight: "900", marginTop: 8 },
+  intentSubtitle: { color: "#5F6B70", fontSize: 10, marginTop: 2 },
+  reassurance: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 18 },
+  reassuranceText: { color: MUTED, fontSize: 10 },
+  progressRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 },
+  progressLabel: { color: MUTED, fontSize: 10, fontWeight: "800" },
+  progressTrack: { flex: 1, height: 5, backgroundColor: "#E4DED4", borderRadius: 3, overflow: "hidden" },
+  progressFill: { height: "100%", backgroundColor: GOLD, borderRadius: 3 },
+  simpleIntro: { marginBottom: 16 },
+  pageKicker: { color: GOLD, fontSize: 10, fontWeight: "900", letterSpacing: 0.6 },
+  pageTitle: { color: INK, fontSize: 24, fontWeight: "900", marginTop: 4 },
+  pageBody: { color: MUTED, fontSize: 12, lineHeight: 19, marginTop: 6 },
+  optionStack: { gap: 10, marginVertical: 14 },
+  optionButton: { backgroundColor: CARD, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#E8E2D8" },
+  optionText: { color: INK, fontSize: 14, fontWeight: "800", textAlign: "right" },
+  microNote: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10 },
+  microNoteText: { color: MUTED, fontSize: 10 },
+  photoCard: { backgroundColor: CARD, borderRadius: 20, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8" },
+  photoPreview: { width: "100%", height: 200, borderRadius: 14 },
+  photoOverlay: { position: "absolute", top: 22, right: 22 },
+  photoChip: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#FFFFFFEE", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+  photoChipText: { color: INK, fontSize: 10, fontWeight: "800" },
+  photoName: { color: MUTED, fontSize: 11, textAlign: "center", marginTop: 10 },
+  uploadCard: { backgroundColor: CARD, borderRadius: 20, borderWidth: 1.5, borderColor: "#DCD5C9", borderStyle: "dashed", alignItems: "center", paddingVertical: 32, paddingHorizontal: 20, marginBottom: 16 },
+  uploadOrb: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#F0EAE0", alignItems: "center", justifyContent: "center", marginBottom: 12 },
+  uploadTitle: { color: INK, fontSize: 16, fontWeight: "900" },
+  uploadBody: { color: MUTED, fontSize: 11, marginTop: 4, textAlign: "center" },
+  uploadButton: { backgroundColor: INK, borderRadius: 14, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 18, paddingVertical: 10, marginTop: 14 },
+  uploadButtonText: { color: CREAM, fontWeight: "900", fontSize: 13 },
+  metricPreview: { backgroundColor: CARD, borderRadius: 18, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8" },
+  metricPreviewTitle: { color: INK, fontSize: 12, fontWeight: "900", marginBottom: 10 },
+  metricPills: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  metricPill: { backgroundColor: "#F0EAE0", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
+  metricPillText: { color: INK, fontSize: 11, fontWeight: "700" },
+  primaryButton: { minHeight: 52, backgroundColor: INK, borderRadius: 16, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 8 },
+  primaryButtonMuted: { opacity: 0.6 },
+  primaryButtonText: { color: CREAM, fontWeight: "900", fontSize: 14 },
+  secondaryButton: { minHeight: 48, backgroundColor: CARD, borderRadius: 16, flexDirection: "row", justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "#DCD5C9", marginTop: 8 },
+  secondaryButtonText: { color: INK, fontWeight: "800", fontSize: 13 },
+  centerHint: { color: MUTED, fontSize: 10, textAlign: "center", marginTop: 10 },
+  resultHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 },
+  prototypePill: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#FFF4DD", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
+  prototypeText: { color: WARNING, fontSize: 9, fontWeight: "900" },
+  analysisHero: { backgroundColor: CARD, borderRadius: 20, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8", position: "relative" },
+  analysisImage: { width: "100%", height: 200, borderRadius: 14 },
+  analysisPlaceholder: { width: "100%", height: 160, borderRadius: 14, backgroundColor: "#EDE8DE", alignItems: "center", justifyContent: "center" },
+  analysisStamp: { position: "absolute", bottom: 22, right: 22, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#FFFFFFEE", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
+  analysisStampText: { color: INK, fontSize: 11, fontWeight: "900" },
+  metricList: { backgroundColor: CARD, borderRadius: 18, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8" },
+  metricRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 9, borderBottomWidth: 0.5, borderBottomColor: "#F0ECE5" },
+  metricLabel: { color: MUTED, fontSize: 12, fontWeight: "700" },
+  metricRight: { flexDirection: "row", alignItems: "center", gap: 8 },
+  metricValue: { color: INK, fontSize: 12, fontWeight: "800" },
+  metricStatus: { color: SUCCESS, fontSize: 10, fontWeight: "900", backgroundColor: "#E6F4EA", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
+  recommendationCard: { backgroundColor: CARD, borderRadius: 20, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8", alignItems: "center" },
+  recIconWrap: { width: 56, height: 56, borderRadius: 28, backgroundColor: "#FFF8E9", alignItems: "center", justifyContent: "center", marginBottom: 12 },
+  recTitle: { color: INK, fontSize: 18, fontWeight: "900", textAlign: "center" },
+  recSubtitle: { color: MUTED, fontSize: 12, marginTop: 4, textAlign: "center" },
+  recPill: { backgroundColor: "#F0EAE0", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, marginTop: 12 },
+  recPillText: { color: INK, fontSize: 11, fontWeight: "700" },
+  groupTabs: { flexDirection: "row", gap: 8, marginBottom: 14 },
+  groupTab: { flex: 1, paddingVertical: 10, borderRadius: 12, backgroundColor: "#EDE8DE", alignItems: "center" },
+  groupTabActive: { backgroundColor: INK },
+  groupTabText: { color: MUTED, fontSize: 12, fontWeight: "800" },
+  groupTabTextActive: { color: CREAM },
+  optionsList: { gap: 8, marginBottom: 16 },
+  optionCard: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: CARD, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: "#E8E2D8" },
+  optionCardActive: { borderColor: GOLD, backgroundColor: "#FFFBF2" },
+  optionCardName: { color: INK, fontSize: 14, fontWeight: "900" },
+  optionCardSize: { color: MUTED, fontSize: 11, marginTop: 2 },
+  optionCardPrice: { color: GOLD, fontSize: 14, fontWeight: "900" },
+  quantityRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: CARD, borderRadius: 16, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8" },
+  quantityLabel: { color: INK, fontSize: 13, fontWeight: "800" },
+  quantityControls: { flexDirection: "row", alignItems: "center", gap: 14 },
+  quantityBtn: { width: 32, height: 32, borderRadius: 10, backgroundColor: "#EDE8DE", alignItems: "center", justifyContent: "center" },
+  quantityBtnText: { color: INK, fontSize: 16, fontWeight: "900" },
+  quantityValue: { color: INK, fontSize: 15, fontWeight: "900", minWidth: 20, textAlign: "center" },
+  passportTypes: { gap: 8, marginBottom: 16 },
+  passportTypeCard: { backgroundColor: CARD, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#E8E2D8" },
+  passportTypeCardActive: { borderColor: GOLD, backgroundColor: "#FFFBF2" },
+  passportTypeText: { color: INK, fontSize: 13, fontWeight: "800", textAlign: "right" },
+  passportTypeTextActive: { color: GOLD },
+  passportResultCard: { flexDirection: "row", gap: 12, padding: 16, borderRadius: 16, marginTop: 14, borderWidth: 1 },
+  resultPass: { backgroundColor: "#E6F4EA", borderColor: SUCCESS },
+  resultWarn: { backgroundColor: "#FFF8E9", borderColor: WARNING },
+  resultFail: { backgroundColor: "#FCE8E6", borderColor: ERROR },
+  passportResultCopy: { flex: 1 },
+  passportResultTitle: { color: INK, fontSize: 13, fontWeight: "900" },
+  passportResultBody: { color: MUTED, fontSize: 11, lineHeight: 17, marginTop: 4 },
+  doneCard: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#E6F4EA", borderRadius: 14, padding: 12, marginTop: 14 },
+  doneText: { color: SUCCESS, fontSize: 12, fontWeight: "800", flex: 1 }
+});

@@ -1,4 +1,4 @@
-export type InvitationOccasion = "wedding" | "engagement" | "henna" | "graduation" | "new-baby" | "corporate";
+export type InvitationOccasion = "wedding" | "engagement" | "henna" | "graduation" | "new-baby" | "corporate" | "private-event";
 export type InvitationStyle = "saudi-luxury" | "white-gold" | "contemporary-floral";
 
 export type InvitationTemplate = {

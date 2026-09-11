@@ -1,0 +1,7 @@
+.expo/
+dist/
+web-build/
+node_modules/
+.pnpm-store/
+*.log
+.env.local
