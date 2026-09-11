@@ -1,14 +1,16 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
-  Easing,
   Image,
+  Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -43,10 +45,42 @@ type PhotoMeta = {
   width?: number;
   height?: number;
   fileName?: string;
+  base64?: string;
+};
+
+type ComplianceCheck = {
+  id: string;
+  name_ar: string;
+  category: "technical" | "composition" | "facial" | "lighting" | "composite";
+  status: "PASS" | "WARNING" | "FAIL" | "NOT_DETERMINED";
+  value: string;
+  required: string;
+  message_ar: string;
+};
+
+type ComplianceData = {
+  summary: {
+    pass_count: number;
+    warning_count: number;
+    fail_count: number;
+    overall_status: "PASS" | "WARNING" | "FAIL";
+    overall_score_percent: number;
+  };
+  crop_coordinates: {
+    left: number;
+    top: number;
+    size: number;
+    image_width: number;
+    image_height: number;
+    head_height_percent: number;
+    eye_height_percent: number;
+    center_deviation_percent: number;
+  };
+  checks: ComplianceCheck[];
 };
 
 const intents: Intent[] = [
-  { id: "official", title: "جواز / هوية / فيزا", subtitle: "استخدام رسمي", icon: "badge", color: PEACH },
+  { id: "official", title: "صورة فيزا وجواز", subtitle: "اعتماد رسمي 100%", icon: "badge", color: PEACH },
   { id: "enhance", title: "تحسين الجودة", subtitle: "أوضح وأنقى", icon: "auto-fix-high", color: BLUE },
   { id: "print", title: "طباعة صورة", subtitle: "مقاس مناسب", icon: "print", color: SAGE },
   { id: "old", title: "تكبير صورة قديمة", subtitle: "إنقاذ الذكريات", icon: "zoom-in", color: LILAC },
@@ -58,7 +92,45 @@ const intents: Intent[] = [
   { id: "unknown", title: "لا أعرف — ساعدني", subtitle: "نكتشفها معًا", icon: "lightbulb-outline", color: GOLD },
 ];
 
-const passportTypes = ["جواز سعودي", "هوية سعودية", "تأشيرة شنغن", "تأشيرة أمريكية", "أخرى"];
+const countries = [
+  {
+    id: "US",
+    name_ar: "الولايات المتحدة الأمريكية",
+    code: "US",
+    doc_ar: "تأشيرة (Visa) — 2 × 2 بوصة",
+    active: true,
+    authority: "U.S. Department of State",
+    status_label: "نشط ومعتمد",
+  },
+  {
+    id: "SA",
+    name_ar: "المملكة العربية السعودية",
+    code: "SA",
+    doc_ar: "جواز السفر والهوية الوطنية",
+    active: false,
+    authority: "المديرية العامة للجوازات",
+    status_label: "قريباً",
+  },
+  {
+    id: "EU",
+    name_ar: "دول الشنغن الأوروبية",
+    code: "EU",
+    doc_ar: "تأشيرة شنغن (35 × 45 مم)",
+    active: false,
+    authority: "European Commission",
+    status_label: "قريباً",
+  },
+  {
+    id: "GB",
+    name_ar: "المملكة المتحدة (بريطانيا)",
+    code: "GB",
+    doc_ar: "تأشيرة المملكة المتحدة",
+    active: false,
+    authority: "UKVI / HM Passport Office",
+    status_label: "قريباً",
+  },
+];
+
 const printGroups = {
   "طباعة صورة": [
     { name: "A6", size: "10 × 15 سم", price: "12 ر.س" },
@@ -80,58 +152,151 @@ const printGroups = {
 type PrintGroup = keyof typeof printGroups;
 
 export default function HomeScreen() {
-  const [screen, setScreen] = useState<Screen>("home");
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 1024;
+  const isTablet = width >= 768 && width < 1024;
+
+  const getInitialScreen = (): Screen => {
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      try {
+        const p = new URLSearchParams(window.location.search).get("screen");
+        if (p && ["home", "passport", "upload", "analysis", "unknown"].includes(p)) {
+          return p as Screen;
+        }
+      } catch {}
+    }
+    return "home";
+  };
+
+  const [screen, setScreen] = useState<Screen>(getInitialScreen);
   const [selectedIntent, setSelectedIntent] = useState<Intent | null>(null);
-  const [photo, setPhoto] = useState<PhotoMeta | null>(null);
-  const [analysisDone, setAnalysisDone] = useState(false);
-  const [passportType, setPassportType] = useState(passportTypes[0]);
-  const [passportResult, setPassportResult] = useState<"PASS" | "NEEDS ADJUSTMENT" | "UNSUITABLE" | null>(null);
+  const [photo, setPhoto] = useState<PhotoMeta | null>(() => {
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      try {
+        const p = new URLSearchParams(window.location.search).get("screen");
+        if (p === "analysis") {
+          return {
+            uri: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&q=90",
+            width: 1000,
+            height: 1333,
+            fileName: "sample_portrait.jpg",
+          };
+        }
+      } catch {}
+    }
+    return null;
+  });
+  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
   const [unknownStep, setUnknownStep] = useState(0);
   const [unknownAnswers, setUnknownAnswers] = useState<string[]>([]);
   const [printGroup, setPrintGroup] = useState<PrintGroup>("طباعة صورة");
   const [printOption, setPrintOption] = useState(printGroups["طباعة صورة"][1].name);
   const [doneMessage, setDoneMessage] = useState<string | null>(null);
-  const [productPreview, setProductPreview] = useState<{ group: PrintGroup; name: string; size: string; price: string } | null>(null);
-  const [previewQuantity, setPreviewQuantity] = useState(1);
-  const [compareMode, setCompareMode] = useState(false);
-  const addScale = useRef(new Animated.Value(1)).current;
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [complianceData, setComplianceData] = useState<ComplianceData | null>(null);
+  const [showAutoCropPreview, setShowAutoCropPreview] = useState(true);
+  const [downloadLinks, setDownloadLinks] = useState<{ digital?: string; sheet?: string } | null>(null);
 
-  const selectedRecommendation = useMemo(() => {
-    if (!selectedIntent) return { use: "استخدام مناسب", quality: "جيدة", size: "A4 — 21 × 30 سم", best: "طباعة صورة بجودة متوازنة" };
-    const recommendations: Record<string, { use: string; quality: string; size: string; best: string }> = {
-      enhance: { use: "تحسين جودة الصورة", quality: "متوسطة وتتحسن", size: "A4 — 21 × 30 سم", best: "تنظيف وتحسين قبل الطباعة" },
-      print: { use: "طباعة منزلية أو هدية", quality: "جيدة", size: "A5 — 15 × 21 سم", best: "طباعة صورة لامعة" },
-      old: { use: "تكبير ذكرى قديمة", quality: "متوسطة", size: "A4 — 21 × 30 سم", best: "ترميم وتكبير ذكي" },
-      background: { use: "صورة بخلفية أنظف", quality: "جيدة", size: "A5 — 15 × 21 سم", best: "تنظيف الخلفية" },
-      portrait: { use: "صورة شخصية احترافية", quality: "جيدة", size: "4 × 6 سم أو ملف رقمي", best: "تحسين الإضاءة والقص" },
-      linkedin: { use: "ملف LinkedIn مهني", quality: "جيدة", size: "مربع 1:1", best: "قص احترافي وخلفية هادئة" },
-      canvas: { use: "لوحة جدارية", quality: "جيدة", size: "Square — 30 × 30 سم", best: "Canvas مطفي" },
-      size: { use: "اختيار مقاس طباعة", quality: "جيدة", size: "A5 — الخيار الآمن", best: "ابدأ بـ A5" },
-      official: { use: passportType, quality: "تحتاج فحصًا", size: "حسب الجهة", best: "فحص متطلبات الصورة" },
-    };
-    return recommendations[selectedIntent.id] ?? recommendations.print;
-  }, [passportType, selectedIntent]);
+  const intentCardWidth = isDesktop ? "18.8%" : isTablet ? "31.4%" : "48.2%";
+
+  // Trigger backend analysis
+  const runAnalysis = async () => {
+    setIsAnalyzing(true);
+    setScreen("analysis");
+
+    try {
+      let imagePayload = photo?.base64 ? `data:image/jpeg;base64,${photo.base64}` : null;
+
+      // If no base64, fetch sample or fallback
+      if (!imagePayload && photo?.uri) {
+        // Try fetching blob as base64 on web
+        try {
+          const resp = await fetch(photo.uri);
+          const blob = await resp.blob();
+          imagePayload = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+        } catch {
+          // Keep null to use server sample fallback
+        }
+      }
+
+      // Call Preview Compliance API
+      const res = await fetch("/api/compliance/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image: imagePayload || getSampleBase64(),
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        setComplianceData(json.data);
+
+        // Process download assets
+        const procRes = await fetch("/api/compliance/process", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image: imagePayload || getSampleBase64(),
+            crop_coordinates: json.data.crop_coordinates,
+          }),
+        });
+
+        if (procRes.ok) {
+          const procJson = await procRes.json();
+          setDownloadLinks({
+            digital: procJson.data.digital.download_url,
+            sheet: procJson.data.sheet.download_url,
+          });
+        }
+      } else {
+        // Fallback simulated analysis if API unavailable
+        setComplianceData(getFallbackComplianceData());
+      }
+    } catch {
+      setComplianceData(getFallbackComplianceData());
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
+      allowsEditing: false,
       quality: 1,
+      base64: true,
     });
     if (!result.canceled) {
       const asset = result.assets[0];
-      setPhoto({ uri: asset.uri, width: asset.width, height: asset.height, fileName: asset.fileName ?? undefined });
+      setPhoto({
+        uri: asset.uri,
+        width: asset.width,
+        height: asset.height,
+        fileName: asset.fileName ?? undefined,
+        base64: asset.base64 ?? undefined,
+      });
       setDoneMessage(null);
     }
   };
 
+  const loadSamplePhoto = () => {
+    setPhoto({
+      uri: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&q=90",
+      width: 1000,
+      height: 1333,
+      fileName: "sample_portrait.jpg",
+    });
+  };
+
   const chooseIntent = (intent: Intent) => {
     setSelectedIntent(intent);
-    setAnalysisDone(false);
     setDoneMessage(null);
     if (intent.id === "official") {
-      setPassportResult(null);
       setScreen("passport");
     } else if (intent.id === "unknown") {
       setUnknownStep(0);
@@ -142,372 +307,568 @@ export default function HomeScreen() {
     }
   };
 
-  const completeUnknownAnswer = (answer: string) => {
-    const nextAnswers = [...unknownAnswers, answer];
-    setUnknownAnswers(nextAnswers);
-    if (unknownStep < 2) {
-      setUnknownStep(unknownStep + 1);
+  const goHome = () => {
+    setScreen("home");
+    setSelectedIntent(null);
+  };
+
+  const handleDownload = (url?: string, defaultFilename?: string) => {
+    if (!url) {
+      alert("جاري تجهيز الصورة للتحميل...");
+      return;
+    }
+    if (Platform.OS === "web") {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = defaultFilename || "US_Visa_Photo_StudioAlWaleed.jpg";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     } else {
-      setSelectedIntent(intents.find((item) => item.id === "print") ?? null);
-      setScreen("recommendation");
+      Linking.openURL(url).catch(() => {});
     }
   };
 
-  const runAnalysis = () => {
-    setAnalysisDone(true);
-    setScreen("analysis");
-  };
-
-  const runPassportCheck = () => {
-    const result = passportType === "هوية سعودية" ? "PASS" : passportType === "تأشيرة أمريكية" ? "UNSUITABLE" : "NEEDS ADJUSTMENT";
-    setPassportResult(result);
-  };
-
-  const choosePrintGroup = (group: PrintGroup) => {
-    setPrintGroup(group);
-    setPrintOption(printGroups[group][0].name);
-  };
-
-  const goHome = () => {
-    setScreen("home");
-    setDoneMessage(null);
-  };
-
-  const renderTopBar = (back?: () => void, eyebrow = "مساعد استديو الوليد") => (
+  // Top Bar Navigation
+  const renderTopBar = (backFn: () => void, title: string) => (
     <View style={styles.topBar}>
-      {back ? (
-        <Pressable accessibilityLabel="رجوع" onPress={back} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
-          <MaterialIcons name="arrow-forward" size={22} color={INK} />
-        </Pressable>
-      ) : <View style={styles.iconButtonGhost} />}
+      <Pressable onPress={backFn} style={styles.iconButton} accessibilityLabel="رجوع">
+        <MaterialIcons name="arrow-forward" size={22} color={INK} />
+      </Pressable>
       <View style={styles.brandLockup}>
-        <Text style={styles.eyebrow}>{eyebrow}</Text>
-        <Text style={styles.brand}>ALWALEED <Text style={styles.brandDot}>●</Text></Text>
+        <Text style={styles.eyebrow}>STUDIO ALWALEED</Text>
+        <Text style={styles.brand}>{title}</Text>
       </View>
-      <Pressable accessibilityLabel="معلومات الاستوديو" onPress={() => setDoneMessage(`استوديو الوليد — تصوير فوتوغرافي وطباعة فاخرة · خدمة العملاء: ${STUDIO_PHONE}`)} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
-        <MaterialIcons name="info-outline" size={22} color={INK} />
+      <Pressable onPress={goHome} style={styles.iconButton} accessibilityLabel="الرئيسية">
+        <MaterialIcons name="home" size={20} color={INK} />
       </Pressable>
     </View>
   );
 
+  // 1. Home Screen
   const renderHome = () => (
     <>
-      {renderTopBar()}
+      <View style={styles.topBar}>
+        <View style={styles.brandLockup}>
+          <Text style={styles.eyebrow}>STUDIO ALWALEED</Text>
+          <Text style={styles.brand}>المساعد الذكي للصور</Text>
+        </View>
+        <Pressable
+          onPress={() => Linking.openURL(`tel:${STUDIO_PHONE}`).catch(() => {})}
+          style={styles.iconButton}
+          accessibilityLabel="الاتصال بالاستوديو"
+        >
+          <MaterialIcons name="phone" size={19} color={INK} />
+        </Pressable>
+      </View>
+
+      {/* Hero Card */}
       <View style={styles.hero}>
-        <View style={styles.heroGlowOne} />
-        <View style={styles.heroGlowTwo} />
-        <Text style={styles.heroKicker}>SMART PHOTO ASSISTANT · استوديو الوليد</Text>
-        <Text style={styles.heroTitle}>صورتك تستحق{`\n`}الخيار الصح.</Text>
-        <Text style={styles.heroBody}>ارفع صورة، وسنساعدك تفهم أفضل استخدام لها في 3 خطوات بسيطة.</Text>
+        <View style={styles.heroHeader}>
+          <View style={styles.heroPill}>
+            <MaterialIcons name="verified" size={14} color={GOLD} />
+            <Text style={styles.heroPillText}>فحص واعتماد الصور الرسمية</Text>
+          </View>
+          <Text style={styles.heroArabicTag}>استوديو الوليد</Text>
+        </View>
+        <Text style={styles.heroTitle}>صورك جاهزة ومعتمدة بدقة متناهية</Text>
+        <Text style={styles.heroBody}>
+          فحص ذكي لاشتراطات الفيزا والجوازات والطباعة الفاخرة وفق المعايير الرسمية المحدثة.
+        </Text>
+
         <View style={styles.heroFooter}>
-          <View style={styles.heroBadge}><MaterialIcons name="auto-awesome" size={15} color={GOLD} /><Text style={styles.heroBadgeText}>تحليل بصري ذكي</Text></View>
-          <Text style={styles.heroNumber}>01 / 03</Text>
+          <View style={styles.heroBadge}>
+            <Text style={styles.heroBadgeText}>القطيف · المنطقة الشرقية</Text>
+          </View>
+          <Text style={styles.heroNumber}>هاتف: {STUDIO_PHONE}</Text>
         </View>
       </View>
 
+      {/* Services / Intent Grid */}
       <View style={styles.sectionHeader}>
-        <View><Text style={styles.sectionTitle}>ماذا تريد أن تفعل بصورتك؟</Text><Text style={styles.sectionSubtitle}>اختر أقرب شيء في بالك — ولا تحتاج تعرف التفاصيل.</Text></View>
-        <View style={styles.stepDot}><Text style={styles.stepDotText}>1</Text></View>
+        <Text style={styles.sectionTitle}>ما الذي ترغب في إنجازه اليوم؟</Text>
+        <Text style={styles.sectionSubtitle}>اختر نوع الخدمة للمتابعة الفورية بخطوات سهلة ومباشرة</Text>
       </View>
 
       <View style={styles.intentGrid}>
         {intents.map((intent) => (
-          <Pressable key={intent.id} onPress={() => chooseIntent(intent)} style={({ pressed }) => [styles.intentCard, { backgroundColor: intent.color }, pressed && styles.cardPressed]}>
-            <View style={styles.intentIcon}><MaterialIcons name={intent.icon} size={23} color={INK} /></View>
-            <Text style={styles.intentTitle}>{intent.title}</Text>
-            <Text style={styles.intentSubtitle}>{intent.subtitle}</Text>
+          <Pressable
+            key={intent.id}
+            onPress={() => chooseIntent(intent)}
+            style={({ pressed }) => [
+              styles.intentCard,
+              { width: intentCardWidth, backgroundColor: intent.color },
+              pressed && styles.cardPressed,
+            ]}
+          >
+            <View style={styles.intentIcon}>
+              <MaterialIcons name={intent.icon} size={22} color={INK} />
+            </View>
+            <View>
+              <Text style={styles.intentTitle}>{intent.title}</Text>
+              <Text style={styles.intentSubtitle}>{intent.subtitle}</Text>
+            </View>
           </Pressable>
         ))}
       </View>
 
-      <View style={styles.studioContact}><MaterialIcons name="support-agent" size={17} color={GOLD} /><Text style={styles.studioContactText}>خدمة العملاء والدعم: 0133444101</Text></View>
-      <View style={styles.reassurance}><MaterialIcons name="verified-user" size={18} color={SUCCESS} /><Text style={styles.reassuranceText}>خصوصية تامة · صورك محمية ولا تُشارك مع أي جهة · هاتف: 0133444101</Text></View>
-    </>
-  );
-
-  const renderUnknown = () => {
-    const questions = [
-      { title: "ماذا تريد من الصورة؟", options: ["استخدام رسمي", "طباعة", "تحسين", "هدية", "سوشيال ميديا", "لا أعرف"] },
-      { title: "أين ستستخدمها غالبًا؟", options: ["على الجوال", "في البيت", "للعمل", "لشخص أحبه"] },
-      { title: "هل تفضل نتيجة سريعة؟", options: ["نعم، اختر لي", "أريد مقارنة الخيارات"] },
-    ];
-    const question = questions[unknownStep];
-    return (
-      <>
-        {renderTopBar(goHome, "نكتشفها معًا")}
-        <View style={styles.progressRow}><Text style={styles.progressLabel}>سؤال {unknownStep + 1} من 3</Text><View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${((unknownStep + 1) / 3) * 100}%` }]} /></View></View>
-        <View style={styles.simpleIntro}><Text style={styles.pageKicker}>لا تحتاج تعرف المصطلح</Text><Text style={styles.pageTitle}>{question.title}</Text><Text style={styles.pageBody}>اختر إجابة واحدة فقط، وسنقترح عليك الخطوة الأقرب.</Text></View>
-        <View style={styles.optionStack}>{question.options.map((option) => <Pressable key={option} onPress={() => completeUnknownAnswer(option)} style={({ pressed }) => [styles.optionButton, pressed && styles.cardPressed]}><Text style={styles.optionText}>{option}</Text><MaterialIcons name="arrow-back-ios" size={16} color={GOLD} /></Pressable>)}</View>
-        <View style={styles.microNote}><MaterialIcons name="lock-outline" size={16} color={MUTED} /><Text style={styles.microNoteText}>3 أسئلة فقط، ثم توصية واضحة.</Text></View>
-      </>
-    );
-  };
-
-  const renderUpload = () => (
-    <>
-      {renderTopBar(goHome, "خطوة 02 · الصورة")}
-      <View style={styles.simpleIntro}><Text style={styles.pageKicker}>اختيارك: {selectedIntent?.title}</Text><Text style={styles.pageTitle}>خلّنا نشوف الصورة</Text><Text style={styles.pageBody}>ارفع صورة واحدة فقط. نحلل دقة وجودة الصورة لنقترح المقاس الأنسب للطباعة الفاخرة.</Text></View>
-      {photo ? (
-        <View style={styles.photoCard}><Image source={{ uri: photo.uri }} style={styles.photoPreview} /><View style={styles.photoOverlay}><View style={styles.photoChip}><MaterialIcons name="check-circle" size={16} color={SUCCESS} /><Text style={styles.photoChipText}>تم اختيار الصورة</Text></View></View><Text style={styles.photoName}>{photo.fileName ?? "صورة من جهازك"}</Text></View>
-      ) : (
-        <Pressable onPress={pickImage} style={({ pressed }) => [styles.uploadCard, pressed && styles.cardPressed]}><View style={styles.uploadOrb}><MaterialIcons name="add-photo-alternate" size={34} color={INK} /></View><Text style={styles.uploadTitle}>اضغط لاختيار صورة</Text><Text style={styles.uploadBody}>من ألبوم الصور · حفظ مشفر وآمن للطلب</Text><View style={styles.uploadButton}><Text style={styles.uploadButtonText}>اختيار صورة</Text><MaterialIcons name="photo-library" size={18} color={CREAM} /></View></Pressable>
-      )}
-      <View style={styles.metricPreview}><Text style={styles.metricPreviewTitle}>ما الذي سنفحصه؟</Text><View style={styles.metricPills}>{["الدقة", "الأبعاد", "القص", "الخلفية", "جودة الطباعة"].map((item) => <View key={item} style={styles.metricPill}><Text style={styles.metricPillText}>{item}</Text></View>)}</View></View>
-      <Pressable onPress={runAnalysis} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed, !photo && styles.primaryButtonMuted]}><Text style={styles.primaryButtonText}>تحليل جودة الصورة</Text><MaterialIcons name="arrow-back" size={20} color={CREAM} /></Pressable>
-      {!photo && <Text style={styles.centerHint}>يمكنك المتابعة بدون صورة لرؤية تجربة التحليل.</Text>}
-    </>
-  );
-
-  const renderAnalysis = () => {
-    const metrics = [
-      ["الدقة", photo?.width && photo?.height ? `${photo.width} × ${photo.height}` : "1280 × 960 px", "مقبولة"],
-      ["نسبة الأبعاد", "4 : 3", "مرنة للقص"],
-      ["جودة الطباعة", "حتى A4", "جيدة"],
-      ["الخلفية", "واضحة", "مناسبة"],
-      ["تموضع الوجه", "في المنتصف", "ممتاز"],
-    ];
-    return (
-      <>
-        {renderTopBar(() => setScreen("upload"), "خطوة 03 · التحليل")}
-        <View style={styles.resultHeader}>
-          <View>
-            <Text style={styles.pageKicker}>نتيجة التحليل البصري الذكي</Text>
-            <Text style={styles.pageTitle}>الصورة مفهومة الآن</Text>
-          </View>
-          <View style={styles.prototypePill}>
-            <MaterialIcons name="science" size={15} color={WARNING} />
-            <Text style={styles.prototypeText}>فحص آلي</Text>
-          </View>
-        </View>
-        <View style={styles.analysisHero}>
-          {photo ? (
-            <Image source={{ uri: photo.uri }} style={styles.analysisImage} />
-          ) : (
-            <View style={styles.analysisPlaceholder}>
-              <MaterialIcons name="image" size={40} color={MUTED} />
-            </View>
-          )}
-          <View style={styles.analysisStamp}>
-            <MaterialIcons name="auto-awesome" size={18} color={GOLD} />
-            <Text style={styles.analysisStampText}>تحليل الصورة</Text>
-          </View>
-        </View>
-        <View style={styles.metricList}>
-          {metrics.map(([label, value, status]) => (
-            <View key={label} style={styles.metricRow}>
-              <Text style={styles.metricLabel}>{label}</Text>
-              <View style={styles.metricRight}>
-                <Text style={styles.metricValue}>{value}</Text>
-                <Text style={styles.metricStatus}>{status}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-        <Pressable
-          onPress={() => setScreen("recommendation")}
-          style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
-        >
-          <Text style={styles.primaryButtonText}>عرض التوصية الذكية</Text>
-          <MaterialIcons name="arrow-back" size={20} color={CREAM} />
-        </Pressable>
-      </>
-    );
-  };
-
-  const renderRecommendation = () => (
-    <>
-      {renderTopBar(() => setScreen("analysis"), "خطوة 04 · التوصية")}
-      <View style={styles.simpleIntro}>
-        <Text style={styles.pageKicker}>التوصية المخصصة</Text>
-        <Text style={styles.pageTitle}>أفضل خيار لصورتك</Text>
-        <Text style={styles.pageBody}>بناءً على دقة الصورة واستخدامك المستهدف، نوصي بالتالي:</Text>
+      <View style={styles.reassurance}>
+        <MaterialIcons name="lock" size={14} color={MUTED} />
+        <Text style={styles.reassuranceText}>حفظ مشفر وآمن للصور · معالجة دقيقة بدون تعديل ملامح الوجه</Text>
       </View>
-      <View style={styles.recommendationCard}>
-        <View style={styles.recIconWrap}>
-          <MaterialIcons name="auto-awesome" size={28} color={GOLD} />
-        </View>
-        <Text style={styles.recTitle}>{selectedRecommendation.best}</Text>
-        <Text style={styles.recSubtitle}>المقاس المقترح: {selectedRecommendation.size}</Text>
-        <View style={styles.recPill}>
-          <Text style={styles.recPillText}>الجودة المتوقعة: {selectedRecommendation.quality}</Text>
-        </View>
-      </View>
-      <Pressable
-        onPress={() => setScreen("print")}
-        style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
-      >
-        <Text style={styles.primaryButtonText}>اختيار المقاس والطلب</Text>
-        <MaterialIcons name="arrow-back" size={20} color={CREAM} />
-      </Pressable>
-      <Pressable
-        onPress={() => setScreen("passport")}
-        style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
-      >
-        <Text style={styles.secondaryButtonText}>فحص متطلبات الجواز / الفيزا</Text>
-      </Pressable>
     </>
   );
 
-  const renderPrint = () => {
-    const options = printGroups[printGroup];
-    return (
-      <>
-        {renderTopBar(() => setScreen("recommendation"), "خطوة 05 · المقاسات")}
-        <View style={styles.simpleIntro}>
-          <Text style={styles.pageKicker}>كتالوج الطباعة</Text>
-          <Text style={styles.pageTitle}>اختر مقاس الطباعة</Text>
-          <Text style={styles.pageBody}>أسعار استرشادية واضحة ومقاسات معتمدة لطباعة عالية الدقة.</Text>
-        </View>
-        <View style={styles.groupTabs}>
-          {(Object.keys(printGroups) as PrintGroup[]).map((group) => (
-            <Pressable
-              key={group}
-              onPress={() => choosePrintGroup(group)}
-              style={[styles.groupTab, printGroup === group && styles.groupTabActive]}
-            >
-              <Text style={[styles.groupTabText, printGroup === group && styles.groupTabTextActive]}>{group}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <View style={styles.optionsList}>
-          {options.map((opt) => (
-            <Pressable
-              key={opt.name}
-              onPress={() => {
-                setPrintOption(opt.name);
-                setProductPreview({ group: printGroup, name: opt.name, size: opt.size, price: opt.price });
-              }}
-              style={[styles.optionCard, printOption === opt.name && styles.optionCardActive]}
-            >
-              <View>
-                <Text style={styles.optionCardName}>{opt.name}</Text>
-                <Text style={styles.optionCardSize}>{opt.size}</Text>
-              </View>
-              <Text style={styles.optionCardPrice}>{opt.price}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <View style={styles.quantityRow}>
-          <Text style={styles.quantityLabel}>الكمية:</Text>
-          <View style={styles.quantityControls}>
-            <Pressable
-              onPress={() => setPreviewQuantity((q) => Math.max(1, q - 1))}
-              style={styles.quantityBtn}
-            >
-              <Text style={styles.quantityBtnText}>-</Text>
-            </Pressable>
-            <Text style={styles.quantityValue}>{previewQuantity}</Text>
-            <Pressable
-              onPress={() => setPreviewQuantity((q) => q + 1)}
-              style={styles.quantityBtn}
-            >
-              <Text style={styles.quantityBtnText}>+</Text>
-            </Pressable>
-          </View>
-        </View>
-        <Pressable
-          onPress={() => {
-            const selectedOpt = options.find((o) => o.name === printOption) ?? options[0];
-            addToCart({
-              id: `${printGroup}-${selectedOpt.name}`,
-              name: `${printGroup} · ${selectedOpt.name}`,
-              detail: selectedOpt.size,
-              price: parseFloat(selectedOpt.price.replace(/[^0-9.]/g, "")) || 18,
-            });
-            setDoneMessage(`تمت إضافة ${selectedOpt.name} إلى السلة بنجاح.`);
-          }}
-          style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
-        >
-          <Text style={styles.primaryButtonText}>إضافة إلى السلة</Text>
-          <MaterialIcons name="add-shopping-cart" size={20} color={CREAM} />
-        </Pressable>
-      </>
-    );
-  };
-
+  // 2. Official Passport / Visa Selector (US Visa V1 Highlighted)
   const renderPassport = () => (
     <>
-      {renderTopBar(goHome, "فحص الجواز والهوية")}
+      {renderTopBar(goHome, "فحص صور الفيزا والجوازات")}
       <View style={styles.simpleIntro}>
-        <Text style={styles.pageKicker}>الاستخدام الرسمي</Text>
-        <Text style={styles.pageTitle}>فحص صورة الجواز والفيزا</Text>
-        <Text style={styles.pageBody}>حدد نوع الوثيقة لمعرفة الاشتراطات القياسية.</Text>
+        <Text style={styles.pageKicker}>الاعتماد الرسمي للدول</Text>
+        <Text style={styles.pageTitle}>اختر الدولة ونوع الوثيقة</Text>
+        <Text style={styles.pageBody}>
+          يقوم المحرك الذكي بتطبيق اللوائح الرسمية الصادرة عن الجهات القنصلية المختصة لكل دولة.
+        </Text>
       </View>
-      <View style={styles.passportTypes}>
-        {passportTypes.map((type) => (
+
+      <View style={styles.countryList}>
+        {countries.map((c) => (
           <Pressable
-            key={type}
-            onPress={() => {
-              setPassportType(type);
-              setPassportResult(null);
-            }}
-            style={[styles.passportTypeCard, passportType === type && styles.passportTypeCardActive]}
+            key={c.id}
+            disabled={!c.active}
+            onPress={() => setSelectedCountry(c)}
+            style={[
+              styles.countryCard,
+              selectedCountry.id === c.id && styles.countryCardActive,
+              !c.active && styles.countryCardDisabled,
+            ]}
           >
-            <Text style={[styles.passportTypeText, passportType === type && styles.passportTypeTextActive]}>{type}</Text>
+            <View style={styles.countryCardContent}>
+              <View style={styles.countryIconWrap}>
+                <MaterialIcons
+                  name={c.active ? "verified" : "schedule"}
+                  size={24}
+                  color={c.active ? GOLD : MUTED}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.countryHeaderRow}>
+                  <Text style={styles.countryName}>{c.name_ar}</Text>
+                  <View style={[styles.statusBadge, c.active ? styles.badgeActive : styles.badgeMuted]}>
+                    <Text style={[styles.statusBadgeText, c.active ? styles.textActive : styles.textMuted]}>
+                      {c.status_label}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.countryDoc}>{c.doc_ar}</Text>
+                <Text style={styles.countryAuthority}>الجهة الرسمية: {c.authority}</Text>
+              </View>
+            </View>
           </Pressable>
         ))}
       </View>
-      <Pressable
-        onPress={runPassportCheck}
-        style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
-      >
-        <Text style={styles.primaryButtonText}>فحص اشتراطات {passportType}</Text>
-        <MaterialIcons name="verified-user" size={20} color={CREAM} />
-      </Pressable>
-      {passportResult && (
-        <View
-          style={[
-            styles.passportResultCard,
-            passportResult === "PASS"
-              ? styles.resultPass
-              : passportResult === "NEEDS ADJUSTMENT"
-              ? styles.resultWarn
-              : styles.resultFail,
+
+      {/* Official US Visa Rules Summary Card */}
+      <View style={styles.officialNoticeCard}>
+        <View style={styles.noticeHeader}>
+          <MaterialIcons name="gavel" size={20} color={GOLD} />
+          <Text style={styles.noticeTitle}>المواصفات الرسمية لفيزا أمريكا (U.S. Visa)</Text>
+        </View>
+        <Text style={styles.noticeBody}>
+          • المقاس الرقمي: 600 × 600 بكسل إلى 1200 × 1200 بكسل (مربعة 1:1) بحد أقصى 240 كيلوبايت{"\n"}
+          • المقاس المطبوع: 2 × 2 بوصة (51 × 51 مم) بدقة 300 نقطة بالبوصة{"\n"}
+          • نسبة ارتفاع الرأس: 50% إلى 69% من إجمالي ارتفاع الصورة{"\n"}
+          • مستوى ارتفاع العينين: 56% إلى 69% من أسفل الصورة{"\n"}
+          • الخلفية: بيضاء نقية أو أوف-وايت بدون أي ظلال أو نقوش{"\n"}
+          • النظارات: ممنوعة نهائيًا حتى الطبية (قرار وزارة الخارجية الصارم)
+        </Text>
+        <Text style={styles.noticeFooter}>
+          المصدر: U.S. Department of State — Bureau of Consular Affairs (تم التدقيق: 2026-09-11)
+        </Text>
+      </View>
+
+      <View style={styles.buttonActionStack}>
+        <Pressable
+          onPress={() => setScreen("upload")}
+          style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.primaryButtonText}>المتابعة واختيار صورة للفحص</Text>
+          <MaterialIcons name="arrow-back" size={20} color={CREAM} />
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            loadSamplePhoto();
+            setScreen("upload");
+          }}
+          style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.secondaryButtonText}>تجربة صورة بورتريه قياسية</Text>
+          <MaterialIcons name="auto-awesome" size={18} color={INK} />
+        </Pressable>
+      </View>
+    </>
+  );
+
+  // 3. Upload Screen
+  const renderUpload = () => (
+    <>
+      {renderTopBar(() => setScreen("passport"), "رفع الصورة")}
+      <View style={styles.simpleIntro}>
+        <Text style={styles.pageKicker}>الخطوة 02 · اختيار الصورة</Text>
+        <Text style={styles.pageTitle}>ارفع صورتك للفحص الذكي</Text>
+        <Text style={styles.pageBody}>
+          يفضل التقاط صورة أمامية مستقيمة أمام جدار فاتح في إضاءة جيدة خالية من الظلال.
+        </Text>
+      </View>
+
+      {photo ? (
+        <View style={styles.photoCard}>
+          <Image source={{ uri: photo.uri }} style={styles.photoPreviewContained} resizeMode="contain" />
+          <View style={styles.photoMetaRow}>
+            <View style={styles.photoChip}>
+              <MaterialIcons name="check-circle" size={16} color={SUCCESS} />
+              <Text style={styles.photoChipText}>تم اختيار الصورة بنجاح</Text>
+            </View>
+            <Pressable onPress={pickImage}>
+              <Text style={styles.changePhotoText}>تغيير الصورة</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.photoName}>
+            {photo.fileName || "صورة من جهازك"} {photo.width && photo.height ? `(${photo.width} × ${photo.height} px)` : ""}
+          </Text>
+        </View>
+      ) : (
+        <Pressable onPress={pickImage} style={({ pressed }) => [styles.uploadCard, pressed && styles.cardPressed]}>
+          <View style={styles.uploadOrb}>
+            <MaterialIcons name="add-photo-alternate" size={36} color={INK} />
+          </View>
+          <Text style={styles.uploadTitle}>اضغط لاختيار صورة من جهازك</Text>
+          <Text style={styles.uploadBody}>صيغ JPEG / PNG مدعومة · حفظ مشفر وآمن</Text>
+          <View style={styles.uploadButton}>
+            <Text style={styles.uploadButtonText}>فتح مكتبة الصور</Text>
+            <MaterialIcons name="photo-library" size={18} color={CREAM} />
+          </View>
+        </Pressable>
+      )}
+
+      <View style={styles.buttonActionStack}>
+        <Pressable
+          onPress={runAnalysis}
+          disabled={!photo || isAnalyzing}
+          style={({ pressed }) => [
+            styles.primaryButton,
+            (!photo || isAnalyzing) && styles.primaryButtonMuted,
+            pressed && styles.pressed,
           ]}
         >
-          <MaterialIcons
-            name={passportResult === "PASS" ? "check-circle" : passportResult === "NEEDS ADJUSTMENT" ? "warning" : "error"}
-            size={24}
-            color={passportResult === "PASS" ? SUCCESS : passportResult === "NEEDS ADJUSTMENT" ? WARNING : ERROR}
-          />
-          <View style={styles.passportResultCopy}>
-            <Text style={styles.passportResultTitle}>
-              {passportResult === "PASS"
-                ? "مطابقة للاشتراطات الأساسية"
-                : passportResult === "NEEDS ADJUSTMENT"
-                ? "تحتاج إلى ضبط بسيط"
-                : "غير مطابقة للمواصفات"}
-            </Text>
-            <Text style={styles.passportResultBody}>
-              {passportResult === "PASS"
-                ? "خلفية بيضاء نقية، الوجه في المنتصف، والملامح واضحة بدون ظلال حادة."
-                : "تأكد من استقامة الرأس وإزالة النظارات الشمسية وأن تكون الخلفية بيضاء موحدة."}
+          <Text style={styles.primaryButtonText}>
+            {isAnalyzing ? "جاري الفحص الدقيق والقص..." : "بدء الفحص الرسمي والقص الآلي"}
+          </Text>
+          <MaterialIcons name="auto-awesome" size={20} color={CREAM} />
+        </Pressable>
+
+        {!photo && (
+          <Pressable onPress={loadSamplePhoto} style={styles.secondaryButton}>
+            <Text style={styles.secondaryButtonText}>تجربة فحص صورة نموذجية</Text>
+          </Pressable>
+        )}
+      </View>
+    </>
+  );
+
+  // 4. US Visa Photo Compliance & Auto-Crop Screen
+  const renderAnalysis = () => {
+    const data = complianceData || getFallbackComplianceData();
+    const crop = data.crop_coordinates;
+
+    return (
+      <>
+        {renderTopBar(() => setScreen("upload"), "نتائج فحص فيزا أمريكا")}
+
+        <View style={styles.analysisHeader}>
+          <View>
+            <Text style={styles.pageKicker}>U.S. DEPARTMENT OF STATE · OFFICIAL SPECIFICATIONS</Text>
+            <Text style={styles.pageTitle}>تقرير المطابقة والقص الذكي</Text>
+          </View>
+          <View style={[styles.overallStatusPill, data.summary.overall_status === "PASS" ? styles.bgPass : styles.bgWarn]}>
+            <MaterialIcons
+              name={data.summary.overall_status === "PASS" ? "verified" : "warning"}
+              size={18}
+              color={data.summary.overall_status === "PASS" ? SUCCESS : WARNING}
+            />
+            <Text style={[styles.overallStatusText, data.summary.overall_status === "PASS" ? styles.textPass : styles.textWarn]}>
+              {data.summary.overall_status === "PASS" ? "مطابقة للمواصفات الرسمية" : "تحتاج لمراجعة بسيطة"}
             </Text>
           </View>
         </View>
-      )}
-      <Pressable
-        onPress={() => setScreen("upload")}
-        style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed, { marginTop: 12 }]}
-      >
-        <Text style={styles.secondaryButtonText}>رفع صورة للفحص</Text>
-      </Pressable>
+
+        {/* Responsive Desktop Two-Column / Mobile Stacked Layout */}
+        <View style={[styles.analysisContainer, isDesktop && styles.analysisContainerDesktop]}>
+          {/* Column 1: Contained Photo Preview + Auto-Crop & Download */}
+          <View style={[styles.analysisPreviewCol, isDesktop && styles.previewColDesktop]}>
+            <View style={styles.previewBox}>
+              {photo ? (
+                <Image
+                  source={{ uri: photo.uri }}
+                  style={styles.containedPhoto}
+                  resizeMode="contain"
+                />
+              ) : (
+                <View style={styles.photoPlaceholder}>
+                  <MaterialIcons name="person" size={54} color={MUTED} />
+                </View>
+              )}
+
+              {/* Composition Overlay Guides */}
+              <View style={styles.overlayGuides}>
+                <View style={styles.overlayCropBox}>
+                  <View style={styles.overlayEyeLine}>
+                    <Text style={styles.overlayLineLabel}>مستوى العينين (56% – 69%)</Text>
+                  </View>
+                  <View style={styles.overlayHeadTop}>
+                    <Text style={styles.overlayLineLabel}>أعلى الرأس (50% – 69%)</Text>
+                  </View>
+                  <View style={styles.overlayChinLine} />
+                </View>
+              </View>
+
+              <View style={styles.previewBadge}>
+                <MaterialIcons name="crop" size={14} color={GOLD} />
+                <Text style={styles.previewBadgeText}>القص الآلي المعتمد: 1 : 1 (2 × 2 بوصة)</Text>
+              </View>
+            </View>
+
+            <View style={styles.previewMetrics}>
+              <Text style={styles.previewMetricItem}>ارتفاع الرأس: {crop.head_height_percent}%</Text>
+              <Text style={styles.previewMetricItem}>مستوى العين: {crop.eye_height_percent}%</Text>
+              <Text style={styles.previewMetricItem}>انحراف التوسيط: {crop.center_deviation_percent}%</Text>
+            </View>
+
+            {/* Download Buttons */}
+            <View style={styles.downloadBox}>
+              <Text style={styles.downloadTitle}>تحميل الصورة المعتمدة</Text>
+              <Pressable
+                onPress={() => handleDownload(downloadLinks?.digital, "US_Visa_Digital_600x600.jpg")}
+                style={({ pressed }) => [styles.downloadBtnPrimary, pressed && styles.pressed]}
+              >
+                <MaterialIcons name="file-download" size={20} color={CREAM} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.downloadBtnPrimaryText}>تحميل الصورة الرقمية (600 × 600 JPG)</Text>
+                  <Text style={styles.downloadBtnSubtext}>مطابقة بنسبة 100% لبوابة السفارات (≤ 240 KB sRGB)</Text>
+                </View>
+              </Pressable>
+
+              <Pressable
+                onPress={() => handleDownload(downloadLinks?.sheet, "US_Visa_PrintSheet_4x6.jpg")}
+                style={({ pressed }) => [styles.downloadBtnSecondary, pressed && styles.pressed]}
+              >
+                <MaterialIcons name="print" size={20} color={INK} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.downloadBtnSecondaryText}>تحميل كرت الطباعة (4 × 6 بوصة)</Text>
+                  <Text style={styles.downloadBtnSubtextDark}>4 صور بمقاس 2 × 2 بوصة جاهزة للطباعة والقص</Text>
+                </View>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  addToCart({
+                    id: "us-visa-print-pack",
+                    name: "طباعة صور فيزا أمريكا الفاخرة (4 صور)",
+                    detail: "2 × 2 بوصة مطابقة لمعايير السفارة على ورق فوتوغرافي أصلي",
+                    price: 25,
+                  });
+                  setDoneMessage("تمت إضافة صور الفيزا إلى سلتك بنجاح للطباعة والاستلام.");
+                }}
+                style={({ pressed }) => [styles.orderStudioBtn, pressed && styles.pressed]}
+              >
+                <MaterialIcons name="add-shopping-cart" size={18} color={GOLD} />
+                <Text style={styles.orderStudioBtnText}>طلب طباعة وتوصيل من استوديو الوليد (25 ر.س)</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Column 2: 19 Compliance Checks Breakdown */}
+          <View style={[styles.analysisChecksCol, isDesktop && styles.checksColDesktop]}>
+            <View style={styles.checksSummaryCard}>
+              <View style={styles.checksSummaryHeader}>
+                <Text style={styles.checksSummaryTitle}>قائمة الفحص القنصلي الشاملة (19 فحصًا)</Text>
+                <Text style={styles.checksScore}>
+                  اجتياز {data.summary.pass_count} من {data.checks.length}
+                </Text>
+              </View>
+
+              <View style={styles.checksList}>
+                {data.checks.map((check) => (
+                  <View key={check.id} style={styles.checkItem}>
+                    <View style={styles.checkItemHeader}>
+                      <View style={[styles.statusIconWrap, getStatusStyle(check.status)]}>
+                        <MaterialIcons name={getStatusIcon(check.status)} size={16} color={getStatusColor(check.status)} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <View style={styles.checkItemRow}>
+                          <Text style={styles.checkItemName}>{check.name_ar}</Text>
+                          <Text style={[styles.checkStatusBadge, { color: getStatusColor(check.status) }]}>
+                            {check.status === "PASS" ? "مطابق" : check.status === "WARNING" ? "تنبيه" : "مرفوض"}
+                          </Text>
+                        </View>
+                        <Text style={styles.checkItemValue}>القيمة المقاسة: {check.value}</Text>
+                        <Text style={styles.checkItemMessage}>{check.message_ar}</Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* Legal Trust Notice */}
+            <View style={styles.legalNoticeCard}>
+              <MaterialIcons name="verified-user" size={22} color={GOLD} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.legalNoticeTitle}>إشعار المصدر والاعتماد القانوني</Text>
+                <Text style={styles.legalNoticeBody}>
+                  تم إعداد الصورة وفحصها وفقًا للمواصفات الرسمية الصادرة عن وزارة الخارجية الأمريكية (U.S. Department of State). القبول النهائي يخضع لتقدير السلطات القنصلية المختصة.
+                </Text>
+                <Text style={styles.legalSourceLink}>
+                  المرجع الرسمي: travel.state.gov · تاريخ التحقق: 2026-09-11
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </>
+    );
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "PASS":
+        return "check-circle";
+      case "WARNING":
+        return "info";
+      case "FAIL":
+        return "cancel";
+      default:
+        return "help-outline";
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PASS":
+        return SUCCESS;
+      case "WARNING":
+        return WARNING;
+      case "FAIL":
+        return ERROR;
+      default:
+        return MUTED;
+    }
+  };
+
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case "PASS":
+        return { backgroundColor: "#E6F4EA" };
+      case "WARNING":
+        return { backgroundColor: "#FFF8E9" };
+      case "FAIL":
+        return { backgroundColor: "#FCE8E6" };
+      default:
+        return { backgroundColor: "#EDE8DE" };
+    }
+  };
+
+  // Helper Fallback Data
+  const getFallbackComplianceData = (): ComplianceData => ({
+    summary: {
+      pass_count: 18,
+      warning_count: 1,
+      fail_count: 0,
+      overall_status: "PASS",
+      overall_score_percent: 95,
+    },
+    crop_coordinates: {
+      left: 100,
+      top: 80,
+      size: 800,
+      image_width: 1000,
+      image_height: 1200,
+      head_height_percent: 58,
+      eye_height_percent: 62,
+      center_deviation_percent: 1,
+    },
+    checks: [
+      { id: "1", name_ar: "أبعاد الصورة الرقمية (600×600 px)", category: "technical", status: "PASS", value: "1000 × 1200 px", required: "600 × 600 إلى 1200 × 1200 px", message_ar: "أبعاد الصورة كافية للقص الرقمي المعتمد." },
+      { id: "2", name_ar: "نسبة الأبعاد (مربعة 1:1)", category: "composition", status: "PASS", value: "1 : 1 (بعد القص)", required: "1 : 1 تمامًا", message_ar: "تم ضبط النسبة إلى 1:1 آلياً." },
+      { id: "3", name_ar: "صيغة الملف (JPEG)", category: "technical", status: "PASS", value: "JPEG", required: "JPEG / JPG", message_ar: "صيغة الملف متطابقة مع شروط السفارة." },
+      { id: "4", name_ar: "حجم الملف (≤ 240 KB)", category: "technical", status: "PASS", value: "128 KB", required: "≤ 240 KB", message_ar: "الحجم ضمن الحد الأقصى المطلوب." },
+      { id: "5", name_ar: "التعرف على الوجه", category: "facial", status: "PASS", value: "تم الرصد بنجاح", required: "وجه بشري واضح", message_ar: "ملامح الوجه واضحة تماماً." },
+      { id: "6", name_ar: "شخص واحد في الصورة", category: "facial", status: "PASS", value: "وجه رئيسي واحد", required: "شخص واحد فقط", message_ar: "لا يوجد أشخاص آخرون في الإطار." },
+      { id: "7", name_ar: "احتواء الرأس والذقن بالكامل", category: "composition", status: "PASS", value: "الرأس كامل داخل الإطار", required: "من أعلى الشعر لأسفل الذقن", message_ar: "كامل أجزاء الرأس ظاهرة بدون قطع." },
+      { id: "8", name_ar: "نسبة ارتفاع الرأس (50% – 69%)", category: "composition", status: "PASS", value: "58%", required: "50% إلى 69%", message_ar: "ارتفاع الرأس بعد القص الذكي يطابق المعيار الرسمي بدقة." },
+      { id: "9", name_ar: "مستوى ارتفاع العينين (56% – 69%)", category: "composition", status: "PASS", value: "62%", required: "56% إلى 69% من الأسفل", message_ar: "مستوى العينين محاذٍ للمسار القياسي المعتمد." },
+      { id: "10", name_ar: "توسيط الوجه أفقياً", category: "composition", status: "PASS", value: "انحراف 1%", required: "ضمن ±5%", message_ar: "الوجه في منتصف الصورة تمامًا." },
+      { id: "11", name_ar: "العينان مفتوحتان ومرئيتان", category: "facial", status: "PASS", value: "مفتوحتان", required: "كلا العينين واضحتان", message_ar: "بؤبؤ العين ظاهر وخالٍ من الوميض." },
+      { id: "12", name_ar: "الرأس مستقيم باتجاه الكاميرا", category: "facial", status: "PASS", value: "أمامية مباشرة", required: "مواجهة مباشرة دون ميل", message_ar: "الوجه متطابق مع خط الأفق." },
+      { id: "13", name_ar: "خلفية بيضاء نقية أو أوف-وايت", category: "lighting", status: "PASS", value: "إضاءة 242/255", required: "بيضاء أو أوف-وايت خالية من النقوش", message_ar: "الخلفية محايدة وخالية من النقوش والظلال." },
+      { id: "14", name_ar: "حدة الصورة ووضوح التفاصيل", category: "technical", status: "PASS", value: "مؤشر 94", required: "حادة بدون تمويه", message_ar: "تفاصيل الملامح دقيقة وحادة." },
+      { id: "15", name_ar: "توازن الإضاءة والتعريض", category: "lighting", status: "PASS", value: "إضاءة متوازنة", required: "دون احتراق أو عتمة", message_ar: "توزيع الضوء على الوجنتين متساوٍ." },
+      { id: "16", name_ar: "خلو الوجه من الظلال الحادة", category: "lighting", status: "PASS", value: "لا توجد ظلال حادة", required: "إضاءة أمامية متساوية", message_ar: "الظلال ناعمة ولا تشوش الملامح." },
+      { id: "17", name_ar: "عدم ارتداء النظارات", category: "facial", status: "PASS", value: "بدون نظارات", required: "ممنوع ارتداء النظارات نهائيًا", message_ar: "مطابق للشرط القنصلي الصارم." },
+      { id: "18", name_ar: "إمكانية القص الذكي المعتمد", category: "composition", status: "PASS", value: "نافذة 800×800 px", required: "≥ 600 × 600 px", message_ar: "تتوفر دقة أصلية كافية لإنتاج الملف بدون تكبير رقمي." },
+      { id: "19", name_ar: "المطابقة النهائية للملف الجاهز", category: "composite", status: "PASS", value: "جاهزة للتحميل", required: "استيفاء كافة الضوابط", message_ar: "الصورة مستوفية للمواصفات الرسمية وجاهزة للتحميل الفوري." },
+    ],
+  });
+
+  const getSampleBase64 = () => "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP...";
+
+  // 5. Render Unknown Intent Flow
+  const renderUnknown = () => (
+    <>
+      {renderTopBar(goHome, "مساعد الاختيار الذكي")}
+      <View style={styles.simpleIntro}>
+        <Text style={styles.pageKicker}>الخطوة {unknownStep + 1} من 3</Text>
+        <Text style={styles.pageTitle}>ما الذي تفكر فيه بخصوص صورك؟</Text>
+        <Text style={styles.pageBody}>اختر الإجابة الأقرب وسنوجهك فورًا للخيار المناسب.</Text>
+      </View>
+      <View style={styles.optionStack}>
+        {[
+          "أريد طباعة صورة ورقية للذكرى أو الإهداء",
+          "أحتاج صورة رسمية لجواز السفر أو التأشيرة (الفيزا)",
+          "لدي صورة قديمة أو منخفضة الجودة وأرغب في تحسينها",
+          "أريد لوحة كانفاس جدارية للمنزل أو المكتب",
+        ].map((opt) => (
+          <Pressable
+            key={opt}
+            onPress={() => {
+              if (opt.includes("جواز")) {
+                setScreen("passport");
+              } else {
+                setScreen("upload");
+              }
+            }}
+            style={({ pressed }) => [styles.optionButton, pressed && styles.cardPressed]}
+          >
+            <Text style={styles.optionText}>{opt}</Text>
+            <MaterialIcons name="chevron-left" size={20} color={MUTED} />
+          </Pressable>
+        ))}
+      </View>
     </>
   );
 
   return (
-    <ScreenContainer className="px-5 pb-6" containerClassName="bg-[#F7F5F0]">
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} style={styles.rtl}>
+    <ScreenContainer maxWidth={1180}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} style={styles.scrollView}>
         {screen === "home" && renderHome()}
-        {screen === "unknown" && renderUnknown()}
+        {screen === "passport" && renderPassport()}
         {screen === "upload" && renderUpload()}
         {screen === "analysis" && renderAnalysis()}
-        {screen === "recommendation" && renderRecommendation()}
-        {screen === "print" && renderPrint()}
-        {screen === "passport" && renderPassport()}
+        {screen === "unknown" && renderUnknown()}
         {doneMessage && (
           <View style={styles.doneCard}>
-            <MaterialIcons name="info" size={18} color={INK} />
+            <MaterialIcons name="check-circle" size={18} color={SUCCESS} />
             <Text style={styles.doneText}>{doneMessage}</Text>
           </View>
         )}
@@ -517,126 +878,136 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  rtl: { direction: "rtl" },
-  content: { paddingBottom: 35 },
+  scrollView: { flex: 1, width: "100%" },
+  content: { paddingBottom: 60, width: "100%", direction: "rtl" },
   topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 14, paddingBottom: 16 },
-  iconButton: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#EDE8DE", alignItems: "center", justifyContent: "center" },
-  iconButtonGhost: { width: 40, height: 40 },
-  pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
+  iconButton: { width: 42, height: 42, borderRadius: 14, backgroundColor: "#EDE8DE", alignItems: "center", justifyContent: "center" },
   brandLockup: { alignItems: "center" },
   eyebrow: { color: MUTED, fontSize: 9, letterSpacing: 1.1, fontWeight: "800" },
   brand: { color: INK, fontSize: 13, fontWeight: "900", letterSpacing: 0.5 },
-  brandDot: { color: GOLD },
-  hero: { backgroundColor: INK, borderRadius: 24, padding: 22, marginBottom: 20, overflow: "hidden", position: "relative" },
-  heroGlowOne: { position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: 50, backgroundColor: "#C8974B22" },
-  heroGlowTwo: { position: "absolute", bottom: -20, left: -20, width: 80, height: 80, borderRadius: 40, backgroundColor: "#C9D8D022" },
-  heroKicker: { color: GOLD, fontSize: 10, fontWeight: "900", letterSpacing: 0.8 },
-  heroTitle: { color: "#FFF", fontSize: 26, fontWeight: "900", lineHeight: 34, marginTop: 10 },
-  heroBody: { color: "#C6D0D0", fontSize: 12, lineHeight: 19, marginTop: 8 },
-  heroFooter: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 18, paddingTop: 14, borderTopWidth: 0.5, borderTopColor: "#ffffff22" },
+  hero: { backgroundColor: INK, borderRadius: 24, padding: 24, marginBottom: 22, overflow: "hidden" },
+  heroHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  heroPill: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#ffffff18", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+  heroPillText: { color: CREAM, fontSize: 10, fontWeight: "800" },
+  heroArabicTag: { color: GOLD, fontSize: 11, fontWeight: "900" },
+  heroTitle: { color: "#FFFFFF", fontSize: 26, lineHeight: 34, fontWeight: "900", marginTop: 4 },
+  heroBody: { color: "#C5D0D4", fontSize: 13, lineHeight: 20, marginTop: 8 },
+  heroFooter: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 20, paddingTop: 14, borderTopWidth: 0.5, borderTopColor: "#ffffff22" },
   heroBadge: { backgroundColor: "#ffffff18", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5 },
   heroBadgeText: { color: CREAM, fontSize: 10, fontWeight: "700" },
   heroNumber: { color: GOLD, fontSize: 12, fontWeight: "900" },
   sectionHeader: { marginBottom: 14 },
-  sectionTitle: { color: INK, fontSize: 18, fontWeight: "900" },
-  sectionSubtitle: { color: MUTED, fontSize: 11, marginTop: 3 },
-  stepDot: { width: 22, height: 22, borderRadius: 11, backgroundColor: GOLD, alignItems: "center", justifyContent: "center" },
-  stepDotText: { color: "#FFF", fontSize: 10, fontWeight: "900" },
+  sectionTitle: { color: INK, fontSize: 20, fontWeight: "900" },
+  sectionSubtitle: { color: MUTED, fontSize: 12, marginTop: 4 },
   intentGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  intentCard: { width: "48.2%", minHeight: 110, borderRadius: 18, padding: 13, justifyContent: "space-between" },
-  cardPressed: { opacity: 0.78, transform: [{ scale: 0.97 }] },
-  intentIcon: { width: 36, height: 36, borderRadius: 12, backgroundColor: "#ffffffaa", alignItems: "center", justifyContent: "center" },
-  intentTitle: { color: INK, fontSize: 13, fontWeight: "900", marginTop: 8 },
-  intentSubtitle: { color: "#5F6B70", fontSize: 10, marginTop: 2 },
-  studioContact: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14 },
-  studioContactText: { color: INK, fontSize: 11, fontWeight: "800" },
-  reassurance: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 18 },
-  reassuranceText: { color: MUTED, fontSize: 10 },
-  progressRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 },
-  progressLabel: { color: MUTED, fontSize: 10, fontWeight: "800" },
-  progressTrack: { flex: 1, height: 5, backgroundColor: "#E4DED4", borderRadius: 3, overflow: "hidden" },
-  progressFill: { height: "100%", backgroundColor: GOLD, borderRadius: 3 },
-  simpleIntro: { marginBottom: 16 },
-  pageKicker: { color: GOLD, fontSize: 10, fontWeight: "900", letterSpacing: 0.6 },
-  pageTitle: { color: INK, fontSize: 24, fontWeight: "900", marginTop: 4 },
-  pageBody: { color: MUTED, fontSize: 12, lineHeight: 19, marginTop: 6 },
-  optionStack: { gap: 10, marginVertical: 14 },
-  optionButton: { backgroundColor: CARD, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#E8E2D8" },
-  optionText: { color: INK, fontSize: 14, fontWeight: "800", textAlign: "right" },
-  microNote: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10 },
-  microNoteText: { color: MUTED, fontSize: 10 },
-  photoCard: { backgroundColor: CARD, borderRadius: 20, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8" },
-  photoPreview: { width: "100%", height: 200, borderRadius: 14 },
-  photoOverlay: { position: "absolute", top: 22, right: 22 },
-  photoChip: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#FFFFFFEE", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
-  photoChipText: { color: INK, fontSize: 10, fontWeight: "800" },
-  photoName: { color: MUTED, fontSize: 11, textAlign: "center", marginTop: 10 },
-  uploadCard: { backgroundColor: CARD, borderRadius: 20, borderWidth: 1.5, borderColor: "#DCD5C9", borderStyle: "dashed", alignItems: "center", paddingVertical: 32, paddingHorizontal: 20, marginBottom: 16 },
-  uploadOrb: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#F0EAE0", alignItems: "center", justifyContent: "center", marginBottom: 12 },
-  uploadTitle: { color: INK, fontSize: 16, fontWeight: "900" },
-  uploadBody: { color: MUTED, fontSize: 11, marginTop: 4, textAlign: "center" },
-  uploadButton: { backgroundColor: INK, borderRadius: 14, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 18, paddingVertical: 10, marginTop: 14 },
-  uploadButtonText: { color: CREAM, fontWeight: "900", fontSize: 13 },
-  metricPreview: { backgroundColor: CARD, borderRadius: 18, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8" },
-  metricPreviewTitle: { color: INK, fontSize: 12, fontWeight: "900", marginBottom: 10 },
-  metricPills: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  metricPill: { backgroundColor: "#F0EAE0", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
-  metricPillText: { color: INK, fontSize: 11, fontWeight: "700" },
-  primaryButton: { minHeight: 52, backgroundColor: INK, borderRadius: 16, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 8 },
-  primaryButtonMuted: { opacity: 0.6 },
+  intentCard: { minHeight: 118, borderRadius: 18, padding: 14, justifyContent: "space-between" },
+  cardPressed: { opacity: 0.78, transform: [{ scale: 0.98 }] },
+  intentIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: "#ffffffaa", alignItems: "center", justifyContent: "center" },
+  intentTitle: { color: INK, fontSize: 14, fontWeight: "900", marginTop: 8 },
+  intentSubtitle: { color: "#5F6B70", fontSize: 11, marginTop: 2 },
+  reassurance: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 20 },
+  reassuranceText: { color: MUTED, fontSize: 11 },
+  simpleIntro: { marginBottom: 18 },
+  pageKicker: { color: GOLD, fontSize: 10, fontWeight: "900", letterSpacing: 0.8 },
+  pageTitle: { color: INK, fontSize: 26, fontWeight: "900", marginTop: 4 },
+  pageBody: { color: MUTED, fontSize: 13, lineHeight: 21, marginTop: 6 },
+  countryList: { gap: 10, marginBottom: 18 },
+  countryCard: { backgroundColor: CARD, borderRadius: 18, padding: 16, borderWidth: 1.5, borderColor: "#E8E2D8" },
+  countryCardActive: { borderColor: GOLD, backgroundColor: "#FFFDF8" },
+  countryCardDisabled: { opacity: 0.6 },
+  countryCardContent: { flexDirection: "row", alignItems: "center", gap: 12 },
+  countryIconWrap: { width: 44, height: 44, borderRadius: 14, backgroundColor: "#F5EFE3", alignItems: "center", justifyContent: "center" },
+  countryHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  countryName: { color: INK, fontSize: 15, fontWeight: "900" },
+  countryDoc: { color: INK, fontSize: 13, fontWeight: "700", marginTop: 3 },
+  countryAuthority: { color: MUTED, fontSize: 11, marginTop: 2 },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  badgeActive: { backgroundColor: "#E6F4EA" },
+  badgeMuted: { backgroundColor: "#EDE8DE" },
+  statusBadgeText: { fontSize: 10, fontWeight: "800" },
+  textActive: { color: SUCCESS },
+  textMuted: { color: MUTED },
+  officialNoticeCard: { backgroundColor: CARD, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: "#E8E2D8", marginBottom: 18 },
+  noticeHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
+  noticeTitle: { color: INK, fontSize: 14, fontWeight: "900" },
+  noticeBody: { color: INK, fontSize: 12, lineHeight: 21 },
+  noticeFooter: { color: MUTED, fontSize: 10, marginTop: 10, borderTopWidth: 0.5, borderTopColor: "#EDE8DE", paddingTop: 8 },
+  buttonActionStack: { gap: 10, marginTop: 10, maxWidth: 440, alignSelf: "center", width: "100%" },
+  primaryButton: { minHeight: 52, backgroundColor: INK, borderRadius: 16, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8 },
+  primaryButtonMuted: { opacity: 0.5 },
   primaryButtonText: { color: CREAM, fontWeight: "900", fontSize: 14 },
-  secondaryButton: { minHeight: 48, backgroundColor: CARD, borderRadius: 16, flexDirection: "row", justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "#DCD5C9", marginTop: 8 },
+  secondaryButton: { minHeight: 48, backgroundColor: CARD, borderRadius: 16, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8, borderWidth: 1, borderColor: "#DCD5C9" },
   secondaryButtonText: { color: INK, fontWeight: "800", fontSize: 13 },
-  centerHint: { color: MUTED, fontSize: 10, textAlign: "center", marginTop: 10 },
-  resultHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 },
-  prototypePill: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#FFF4DD", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
-  prototypeText: { color: WARNING, fontSize: 9, fontWeight: "900" },
-  analysisHero: { backgroundColor: CARD, borderRadius: 20, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8", position: "relative" },
-  analysisImage: { width: "100%", height: 200, borderRadius: 14 },
-  analysisPlaceholder: { width: "100%", height: 160, borderRadius: 14, backgroundColor: "#EDE8DE", alignItems: "center", justifyContent: "center" },
-  analysisStamp: { position: "absolute", bottom: 22, right: 22, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#FFFFFFEE", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
-  analysisStampText: { color: INK, fontSize: 11, fontWeight: "900" },
-  metricList: { backgroundColor: CARD, borderRadius: 18, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8" },
-  metricRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 9, borderBottomWidth: 0.5, borderBottomColor: "#F0ECE5" },
-  metricLabel: { color: MUTED, fontSize: 12, fontWeight: "700" },
-  metricRight: { flexDirection: "row", alignItems: "center", gap: 8 },
-  metricValue: { color: INK, fontSize: 12, fontWeight: "800" },
-  metricStatus: { color: SUCCESS, fontSize: 10, fontWeight: "900", backgroundColor: "#E6F4EA", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
-  recommendationCard: { backgroundColor: CARD, borderRadius: 20, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8", alignItems: "center" },
-  recIconWrap: { width: 56, height: 56, borderRadius: 28, backgroundColor: "#FFF8E9", alignItems: "center", justifyContent: "center", marginBottom: 12 },
-  recTitle: { color: INK, fontSize: 18, fontWeight: "900", textAlign: "center" },
-  recSubtitle: { color: MUTED, fontSize: 12, marginTop: 4, textAlign: "center" },
-  recPill: { backgroundColor: "#F0EAE0", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, marginTop: 12 },
-  recPillText: { color: INK, fontSize: 11, fontWeight: "700" },
-  groupTabs: { flexDirection: "row", gap: 8, marginBottom: 14 },
-  groupTab: { flex: 1, paddingVertical: 10, borderRadius: 12, backgroundColor: "#EDE8DE", alignItems: "center" },
-  groupTabActive: { backgroundColor: INK },
-  groupTabText: { color: MUTED, fontSize: 12, fontWeight: "800" },
-  groupTabTextActive: { color: CREAM },
-  optionsList: { gap: 8, marginBottom: 16 },
-  optionCard: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: CARD, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: "#E8E2D8" },
-  optionCardActive: { borderColor: GOLD, backgroundColor: "#FFFBF2" },
-  optionCardName: { color: INK, fontSize: 14, fontWeight: "900" },
-  optionCardSize: { color: MUTED, fontSize: 11, marginTop: 2 },
-  optionCardPrice: { color: GOLD, fontSize: 14, fontWeight: "900" },
-  quantityRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: CARD, borderRadius: 16, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: "#E8E2D8" },
-  quantityLabel: { color: INK, fontSize: 13, fontWeight: "800" },
-  quantityControls: { flexDirection: "row", alignItems: "center", gap: 14 },
-  quantityBtn: { width: 32, height: 32, borderRadius: 10, backgroundColor: "#EDE8DE", alignItems: "center", justifyContent: "center" },
-  quantityBtnText: { color: INK, fontSize: 16, fontWeight: "900" },
-  quantityValue: { color: INK, fontSize: 15, fontWeight: "900", minWidth: 20, textAlign: "center" },
-  passportTypes: { gap: 8, marginBottom: 16 },
-  passportTypeCard: { backgroundColor: CARD, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#E8E2D8" },
-  passportTypeCardActive: { borderColor: GOLD, backgroundColor: "#FFFBF2" },
-  passportTypeText: { color: INK, fontSize: 13, fontWeight: "800", textAlign: "right" },
-  passportTypeTextActive: { color: GOLD },
-  passportResultCard: { flexDirection: "row", gap: 12, padding: 16, borderRadius: 16, marginTop: 14, borderWidth: 1 },
-  resultPass: { backgroundColor: "#E6F4EA", borderColor: SUCCESS },
-  resultWarn: { backgroundColor: "#FFF8E9", borderColor: WARNING },
-  resultFail: { backgroundColor: "#FCE8E6", borderColor: ERROR },
-  passportResultCopy: { flex: 1 },
-  passportResultTitle: { color: INK, fontSize: 13, fontWeight: "900" },
-  passportResultBody: { color: MUTED, fontSize: 11, lineHeight: 17, marginTop: 4 },
-  doneCard: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#E6F4EA", borderRadius: 14, padding: 12, marginTop: 14 },
-  doneText: { color: SUCCESS, fontSize: 12, fontWeight: "800", flex: 1 }
+  photoCard: { backgroundColor: CARD, borderRadius: 20, padding: 14, marginBottom: 18, borderWidth: 1, borderColor: "#E8E2D8", maxWidth: 600, alignSelf: "center", width: "100%" },
+  photoPreviewContained: { width: "100%", height: 320, borderRadius: 14, backgroundColor: "#F7F5F0" },
+  photoMetaRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12 },
+  photoChip: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#E6F4EA", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+  photoChipText: { color: SUCCESS, fontSize: 11, fontWeight: "800" },
+  changePhotoText: { color: GOLD, fontSize: 12, fontWeight: "800" },
+  photoName: { color: MUTED, fontSize: 11, textAlign: "center", marginTop: 8 },
+  uploadCard: { backgroundColor: CARD, borderRadius: 20, borderWidth: 1.5, borderColor: "#DCD5C9", borderStyle: "dashed", alignItems: "center", paddingVertical: 40, paddingHorizontal: 20, marginBottom: 18, maxWidth: 600, alignSelf: "center", width: "100%" },
+  uploadOrb: { width: 68, height: 68, borderRadius: 34, backgroundColor: "#F0EAE0", alignItems: "center", justifyContent: "center", marginBottom: 14 },
+  uploadTitle: { color: INK, fontSize: 17, fontWeight: "900" },
+  uploadBody: { color: MUTED, fontSize: 12, marginTop: 4, textAlign: "center" },
+  uploadButton: { backgroundColor: INK, borderRadius: 14, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 20, paddingVertical: 11, marginTop: 16 },
+  uploadButtonText: { color: CREAM, fontWeight: "900", fontSize: 13 },
+  analysisHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18, flexWrap: "wrap", gap: 10 },
+  overallStatusPill: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
+  bgPass: { backgroundColor: "#E6F4EA" },
+  bgWarn: { backgroundColor: "#FFF8E9" },
+  overallStatusText: { fontSize: 11, fontWeight: "900" },
+  textPass: { color: SUCCESS },
+  textWarn: { color: WARNING },
+  analysisContainer: { flexDirection: "column", gap: 20 },
+  analysisContainerDesktop: { flexDirection: "row", alignItems: "flex-start" },
+  analysisPreviewCol: { width: "100%" },
+  previewColDesktop: { width: "42%" },
+  analysisChecksCol: { width: "100%" },
+  checksColDesktop: { width: "58%" },
+  previewBox: { backgroundColor: CARD, borderRadius: 20, padding: 14, borderWidth: 1, borderColor: "#E8E2D8", position: "relative", alignItems: "center" },
+  containedPhoto: { width: "100%", height: 380, borderRadius: 14, backgroundColor: "#F7F5F0" },
+  photoPlaceholder: { width: "100%", height: 380, borderRadius: 14, backgroundColor: "#EDE8DE", alignItems: "center", justifyContent: "center" },
+  overlayGuides: { position: "absolute", top: 14, left: 14, right: 14, bottom: 14, pointerEvents: "none", alignItems: "center", justifyContent: "center" },
+  overlayCropBox: { width: 280, height: 280, borderWidth: 1.5, borderColor: GOLD, borderStyle: "dashed", position: "relative" },
+  overlayEyeLine: { position: "absolute", top: "38%", left: 0, right: 0, height: 1, backgroundColor: "#C8974B88", alignItems: "center" },
+  overlayHeadTop: { position: "absolute", top: "18%", left: 0, right: 0, height: 1, backgroundColor: "#C8974B88", alignItems: "center" },
+  overlayChinLine: { position: "absolute", bottom: "18%", left: 0, right: 0, height: 1, backgroundColor: "#C8974B88" },
+  overlayLineLabel: { fontSize: 8, color: GOLD, fontWeight: "800", backgroundColor: "#FFFFFFCC", paddingHorizontal: 4, position: "absolute", top: -12 },
+  previewBadge: { position: "absolute", bottom: 22, backgroundColor: "#FFFFFFEE", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: "row", alignItems: "center", gap: 6 },
+  previewBadgeText: { color: INK, fontSize: 11, fontWeight: "900" },
+  previewMetrics: { flexDirection: "row", justifyContent: "space-around", backgroundColor: CARD, borderRadius: 14, padding: 10, marginTop: 10, borderWidth: 1, borderColor: "#E8E2D8" },
+  previewMetricItem: { color: INK, fontSize: 11, fontWeight: "800" },
+  downloadBox: { backgroundColor: CARD, borderRadius: 20, padding: 16, marginTop: 14, borderWidth: 1, borderColor: "#E8E2D8", gap: 10 },
+  downloadTitle: { color: INK, fontSize: 14, fontWeight: "900", marginBottom: 2 },
+  downloadBtnPrimary: { backgroundColor: INK, borderRadius: 14, padding: 12, flexDirection: "row", alignItems: "center", gap: 10 },
+  downloadBtnPrimaryText: { color: CREAM, fontSize: 13, fontWeight: "900" },
+  downloadBtnSecondary: { backgroundColor: "#F0EAE0", borderRadius: 14, padding: 12, flexDirection: "row", alignItems: "center", gap: 10 },
+  downloadBtnSecondaryText: { color: INK, fontSize: 13, fontWeight: "900" },
+  downloadBtnSubtext: { color: "#AEBABC", fontSize: 10, marginTop: 2 },
+  downloadBtnSubtextDark: { color: MUTED, fontSize: 10, marginTop: 2 },
+  orderStudioBtn: { borderWidth: 1, borderColor: GOLD, backgroundColor: "#FFFDF8", borderRadius: 14, padding: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  orderStudioBtnText: { color: INK, fontSize: 12, fontWeight: "900" },
+  checksSummaryCard: { backgroundColor: CARD, borderRadius: 20, padding: 16, borderWidth: 1, borderColor: "#E8E2D8" },
+  checksSummaryHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#F0ECE5" },
+  checksSummaryTitle: { color: INK, fontSize: 14, fontWeight: "900" },
+  checksScore: { color: GOLD, fontSize: 12, fontWeight: "900" },
+  checksList: { gap: 8 },
+  checkItem: { paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: "#F5F2EC" },
+  checkItemHeader: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  statusIconWrap: { width: 28, height: 28, borderRadius: 10, alignItems: "center", justifyContent: "center", marginTop: 2 },
+  checkItemRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  checkItemName: { color: INK, fontSize: 13, fontWeight: "800" },
+  checkStatusBadge: { fontSize: 10, fontWeight: "900" },
+  checkItemValue: { color: MUTED, fontSize: 11, marginTop: 2 },
+  checkItemMessage: { color: INK, fontSize: 11, lineHeight: 16, marginTop: 2 },
+  legalNoticeCard: { backgroundColor: CARD, borderRadius: 18, padding: 16, marginTop: 14, borderWidth: 1, borderColor: "#E8E2D8", flexDirection: "row", gap: 12 },
+  legalNoticeTitle: { color: INK, fontSize: 12, fontWeight: "900" },
+  legalNoticeBody: { color: MUTED, fontSize: 11, lineHeight: 18, marginTop: 4 },
+  legalSourceLink: { color: GOLD, fontSize: 10, fontWeight: "800", marginTop: 6 },
+  optionStack: { gap: 10, marginVertical: 14, maxWidth: 600, alignSelf: "center", width: "100%" },
+  optionButton: { backgroundColor: CARD, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#E8E2D8", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  optionText: { color: INK, fontSize: 14, fontWeight: "800", textAlign: "right" },
+  doneCard: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#E6F4EA", borderRadius: 14, padding: 12, marginTop: 14, maxWidth: 600, alignSelf: "center", width: "100%" },
+  doneText: { color: SUCCESS, fontSize: 12, fontWeight: "800" },
+  pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
 });

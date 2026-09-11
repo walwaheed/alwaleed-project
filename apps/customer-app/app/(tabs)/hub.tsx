@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { getMockCustomerProfile, getNextBestAction } from "@/lib/customer-intelligence";
 
@@ -82,6 +82,11 @@ const labels: Record<Service["mode"], { title: string; body: string; button: str
 };
 
 export default function HubScreen() {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 1024;
+  const isTablet = width >= 768 && width < 1024;
+  const cardWidth = isDesktop ? "23.5%" : isTablet ? "31.5%" : "48.2%";
+
   const [selected, setSelected] = useState<Service | null>(null);
   const [input, setInput] = useState("");
   const [complete, setComplete] = useState(false);
@@ -104,8 +109,8 @@ export default function HubScreen() {
   if (selected) {
     const copy = labels[selected.mode];
     return (
-      <ScreenContainer className="px-5 pb-6" containerClassName="bg-[#F7F5F0]">
-        <ScrollView style={styles.rtl} contentContainerStyle={styles.content}>
+      <ScreenContainer maxWidth={1180}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
           <Pressable
             onPress={() => {
               setSelected(null);
@@ -129,56 +134,55 @@ export default function HubScreen() {
           {selected.mode === "tracking" || selected.mode === "corporate" || selected.mode === "quote" ? (
             <View style={styles.form}>
               <Text style={styles.field}>
-                {selected.mode === "tracking" ? "رقم الطلب أو الجوال" : "ما أهم تفاصيل طلبك؟"}
+                {selected.mode === "tracking" ? "رقم الطلب أو الجوال" : "وصف موجز للمشروع أو المناسبة"}
               </Text>
               <TextInput
                 value={input}
                 onChangeText={setInput}
-                placeholder="اكتب هنا بشكل مختصر"
-                placeholderTextColor="#9AA2A4"
+                placeholder={selected.mode === "tracking" ? "مثال: ORD-10023 أو 05xxxxxxxx" : "اكتب التفاصيل هنا"}
+                placeholderTextColor={MUTED}
                 style={styles.input}
-                textAlign="right"
               />
             </View>
-          ) : selected.mode !== "support" ? (
+          ) : (
             <View style={styles.checkCard}>
-              <Text style={styles.checkTitle}>خطوات إتمام الخدمة</Text>
-              {["تحديد الخدمة", "تأكيد التفاصيل", "المتابعة مع الفريق"].map((item, index) => (
-                <View key={item} style={styles.checkRow}>
-                  <View style={styles.checkDot}>
-                    <Text style={styles.checkNumber}>{index + 1}</Text>
-                  </View>
-                  <Text style={styles.checkText}>{item}</Text>
-                </View>
-              ))}
-            </View>
-          ) : null}
-
-          {complete && (
-            <View style={styles.success}>
-              <MaterialIcons name="check-circle" size={20} color="#2F805A" />
-              <Text style={styles.successText}>
-                تم استلام طلبك بنجاح، وسيتواصل معك فريق الاستوديو على رقم الجوال المسجل.
-              </Text>
+              <Text style={styles.checkTitle}>خطوات تنفيذ الخدمة</Text>
+              <View style={styles.checkRow}>
+                <View style={styles.checkDot}><Text style={styles.checkNumber}>1</Text></View>
+                <Text style={styles.checkText}>تأكيد التفاصيل مع فريق استوديو الوليد</Text>
+              </View>
+              <View style={styles.checkRow}>
+                <View style={styles.checkDot}><Text style={styles.checkNumber}>2</Text></View>
+                <Text style={styles.checkText}>جلسة التصوير أو تدقيق ومعاينة الملفات</Text>
+              </View>
+              <View style={styles.checkRow}>
+                <View style={styles.checkDot}><Text style={styles.checkNumber}>3</Text></View>
+                <Text style={styles.checkText}>طباعة فاخرة وتسليم مباشر أو شحن موثوق</Text>
+              </View>
             </View>
           )}
 
           <Pressable onPress={() => handleAction(selected.mode)} style={styles.primary}>
             <Text style={styles.primaryText}>{copy.button}</Text>
-            <MaterialIcons
-              name={selected.mode === "support" ? "call" : "arrow-back"}
-              size={19}
-              color={CREAM}
-            />
+            <MaterialIcons name="check" size={20} color={CREAM} />
           </Pressable>
+
+          {complete && (
+            <View style={styles.success}>
+              <MaterialIcons name="check-circle" size={20} color="#2F805A" />
+              <Text style={styles.successText}>
+                تم استلام طلبك بنجاح وسيتواصل معك فريق استوديو الوليد عبر الهاتف لتأكيد الموعد والتفاصيل.
+              </Text>
+            </View>
+          )}
         </ScrollView>
       </ScreenContainer>
     );
   }
 
   return (
-    <ScreenContainer className="px-5 pb-6" containerClassName="bg-[#F7F5F0]">
-      <ScrollView style={styles.rtl} contentContainerStyle={styles.content}>
+    <ScreenContainer maxWidth={1180}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <View>
             <Text style={styles.eyebrow}>STUDIO ALWALEED</Text>
@@ -217,13 +221,19 @@ export default function HubScreen() {
             <Pressable
               key={service.title}
               onPress={() => setSelected(service)}
-              style={({ pressed }) => [styles.card, { backgroundColor: service.color }, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.card,
+                { width: cardWidth, backgroundColor: service.color },
+                pressed && styles.pressed,
+              ]}
             >
               <View style={styles.cardIcon}>
                 <MaterialIcons name={service.icon} size={22} color={INK} />
               </View>
-              <Text style={styles.cardTitle}>{service.title}</Text>
-              <Text style={styles.cardSubtitle}>{service.subtitle}</Text>
+              <View>
+                <Text style={styles.cardTitle}>{service.title}</Text>
+                <Text style={styles.cardSubtitle}>{service.subtitle}</Text>
+              </View>
             </Pressable>
           ))}
         </View>
@@ -238,8 +248,8 @@ export default function HubScreen() {
 }
 
 const styles = StyleSheet.create({
-  rtl: { direction: "rtl" },
-  content: { paddingBottom: 30 },
+  scrollView: { flex: 1, width: "100%" },
+  content: { paddingBottom: 60, width: "100%", direction: "rtl" },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", paddingTop: 15, paddingBottom: 18 },
   eyebrow: { color: MUTED, fontSize: 9, letterSpacing: 1.1, fontWeight: "800" },
   title: { color: INK, fontSize: 27, lineHeight: 34, fontWeight: "900", marginTop: 7 },
@@ -257,7 +267,7 @@ const styles = StyleSheet.create({
   suggestionTitle: { color: INK, fontSize: 16, fontWeight: "900", marginTop: 4 },
   suggestionBody: { color: MUTED, fontSize: 11, lineHeight: 17, marginTop: 3 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  card: { width: "48.2%", minHeight: 128, borderRadius: 19, padding: 13, justifyContent: "space-between" },
+  card: { minHeight: 128, borderRadius: 19, padding: 14, justifyContent: "space-between" },
   cardIcon: { width: 38, height: 38, borderRadius: 13, backgroundColor: "#FFFFFF99", alignItems: "center", justifyContent: "center" },
   cardTitle: { color: INK, fontSize: 14, fontWeight: "900", marginTop: 11 },
   cardSubtitle: { color: "#5F6B70", fontSize: 10, marginTop: 3 },
@@ -266,22 +276,22 @@ const styles = StyleSheet.create({
   disclaimerText: { color: MUTED, fontSize: 11, fontWeight: "700" },
   back: { flexDirection: "row", alignItems: "center", gap: 7, marginTop: 12, marginBottom: 18 },
   backText: { color: INK, fontWeight: "800", fontSize: 13 },
-  serviceHero: { borderRadius: 22, padding: 20, marginBottom: 15 },
+  serviceHero: { borderRadius: 22, padding: 20, marginBottom: 15, maxWidth: 640, alignSelf: "center", width: "100%" },
   serviceIcon: { width: 53, height: 53, borderRadius: 17, backgroundColor: "#FFFFFF99", alignItems: "center", justifyContent: "center", marginBottom: 18 },
   pageKicker: { color: GOLD, fontSize: 10, fontWeight: "900", letterSpacing: 0.7, marginBottom: 7 },
   pageTitle: { color: INK, fontSize: 28, lineHeight: 35, fontWeight: "900" },
   pageBody: { color: MUTED, fontSize: 13, lineHeight: 22, marginTop: 8 },
-  checkCard: { backgroundColor: CARD, borderRadius: 19, padding: 17, borderWidth: 1, borderColor: "#EAE5DC" },
+  checkCard: { backgroundColor: CARD, borderRadius: 19, padding: 17, borderWidth: 1, borderColor: "#EAE5DC", maxWidth: 640, alignSelf: "center", width: "100%" },
   checkTitle: { color: INK, fontSize: 14, fontWeight: "900", marginBottom: 8 },
   checkRow: { minHeight: 46, flexDirection: "row", alignItems: "center", gap: 10, borderBottomWidth: 1, borderBottomColor: "#F0ECE5" },
   checkDot: { width: 25, height: 25, borderRadius: 13, backgroundColor: "#F1E0BD", alignItems: "center", justifyContent: "center" },
   checkNumber: { color: GOLD, fontSize: 11, fontWeight: "900" },
   checkText: { color: MUTED, fontSize: 12 },
-  form: { backgroundColor: CARD, borderRadius: 19, padding: 16, borderWidth: 1, borderColor: "#EAE5DC" },
+  form: { backgroundColor: CARD, borderRadius: 19, padding: 16, borderWidth: 1, borderColor: "#EAE5DC", maxWidth: 640, alignSelf: "center", width: "100%" },
   field: { color: INK, fontSize: 12, fontWeight: "800", marginBottom: 8 },
   input: { minHeight: 50, backgroundColor: "#F7F5F0", borderRadius: 13, borderWidth: 1, borderColor: "#E4DED4", paddingHorizontal: 13, color: INK },
-  primary: { minHeight: 55, backgroundColor: INK, borderRadius: 17, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 9, marginTop: 16 },
+  primary: { minHeight: 55, backgroundColor: INK, borderRadius: 17, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 9, marginTop: 16, maxWidth: 440, alignSelf: "center", width: "100%" },
   primaryText: { color: CREAM, fontWeight: "900", fontSize: 14 },
-  success: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#E4F2E9", borderRadius: 14, padding: 12, marginTop: 14 },
-  successText: { flex: 1, color: "#2F805A", fontSize: 11, lineHeight: 17, fontWeight: "700" }
+  success: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#E4F2E9", borderRadius: 14, padding: 12, marginTop: 14, maxWidth: 640, alignSelf: "center", width: "100%" },
+  successText: { flex: 1, color: "#2F805A", fontSize: 11, lineHeight: 17, fontWeight: "700" },
 });
