@@ -27,6 +27,7 @@ const PEACH = "#F5DDD0";
 const SUCCESS = "#2F805A";
 const WARNING = "#B77A18";
 const ERROR = "#A94D49";
+const STUDIO_PHONE = "0133444101";
 
 type Screen = "home" | "unknown" | "upload" | "analysis" | "recommendation" | "print" | "passport";
 type Intent = {
@@ -183,7 +184,7 @@ export default function HomeScreen() {
         <Text style={styles.eyebrow}>{eyebrow}</Text>
         <Text style={styles.brand}>ALWALEED <Text style={styles.brandDot}>●</Text></Text>
       </View>
-      <Pressable accessibilityLabel="معلومات النموذج" onPress={() => setDoneMessage("هذا نموذج تجريبي محلي — لا توجد أي بيانات إنتاجية أو عمليات دفع حقيقية.")} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
+      <Pressable accessibilityLabel="معلومات الاستوديو" onPress={() => setDoneMessage(`استوديو الوليد — تصوير فوتوغرافي وطباعة فاخرة · خدمة العملاء: ${STUDIO_PHONE}`)} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
         <MaterialIcons name="info-outline" size={22} color={INK} />
       </Pressable>
     </View>
@@ -195,11 +196,11 @@ export default function HomeScreen() {
       <View style={styles.hero}>
         <View style={styles.heroGlowOne} />
         <View style={styles.heroGlowTwo} />
-        <Text style={styles.heroKicker}>SMART PHOTO ASSISTANT · V0</Text>
+        <Text style={styles.heroKicker}>SMART PHOTO ASSISTANT · استوديو الوليد</Text>
         <Text style={styles.heroTitle}>صورتك تستحق{`\n`}الخيار الصح.</Text>
         <Text style={styles.heroBody}>ارفع صورة، وسنساعدك تفهم أفضل استخدام لها في 3 خطوات بسيطة.</Text>
         <View style={styles.heroFooter}>
-          <View style={styles.heroBadge}><MaterialIcons name="auto-awesome" size={15} color={GOLD} /><Text style={styles.heroBadgeText}>نتيجة تجريبية ذكية</Text></View>
+          <View style={styles.heroBadge}><MaterialIcons name="auto-awesome" size={15} color={GOLD} /><Text style={styles.heroBadgeText}>تحليل بصري ذكي</Text></View>
           <Text style={styles.heroNumber}>01 / 03</Text>
         </View>
       </View>
@@ -219,7 +220,8 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      <View style={styles.reassurance}><MaterialIcons name="verified-user" size={18} color={SUCCESS} /><Text style={styles.reassuranceText}>تجربة محلية فقط · لا يتم إرسال صورك لأي خدمة خارجية</Text></View>
+      <View style={styles.studioContact}><MaterialIcons name="support-agent" size={17} color={GOLD} /><Text style={styles.studioContactText}>خدمة العملاء والدعم: 0133444101</Text></View>
+      <View style={styles.reassurance}><MaterialIcons name="verified-user" size={18} color={SUCCESS} /><Text style={styles.reassuranceText}>خصوصية تامة · صورك محمية ولا تُشارك مع أي جهة · هاتف: 0133444101</Text></View>
     </>
   );
 
@@ -244,14 +246,14 @@ export default function HomeScreen() {
   const renderUpload = () => (
     <>
       {renderTopBar(goHome, "خطوة 02 · الصورة")}
-      <View style={styles.simpleIntro}><Text style={styles.pageKicker}>اختيارك: {selectedIntent?.title}</Text><Text style={styles.pageTitle}>خلّنا نشوف الصورة</Text><Text style={styles.pageBody}>ارفع صورة واحدة فقط. التحليل التالي محاكاة تعليمية لنسخة V0.</Text></View>
+      <View style={styles.simpleIntro}><Text style={styles.pageKicker}>اختيارك: {selectedIntent?.title}</Text><Text style={styles.pageTitle}>خلّنا نشوف الصورة</Text><Text style={styles.pageBody}>ارفع صورة واحدة فقط. نحلل دقة وجودة الصورة لنقترح المقاس الأنسب للطباعة الفاخرة.</Text></View>
       {photo ? (
         <View style={styles.photoCard}><Image source={{ uri: photo.uri }} style={styles.photoPreview} /><View style={styles.photoOverlay}><View style={styles.photoChip}><MaterialIcons name="check-circle" size={16} color={SUCCESS} /><Text style={styles.photoChipText}>تم اختيار الصورة</Text></View></View><Text style={styles.photoName}>{photo.fileName ?? "صورة من جهازك"}</Text></View>
       ) : (
-        <Pressable onPress={pickImage} style={({ pressed }) => [styles.uploadCard, pressed && styles.cardPressed]}><View style={styles.uploadOrb}><MaterialIcons name="add-photo-alternate" size={34} color={INK} /></View><Text style={styles.uploadTitle}>اضغط لاختيار صورة</Text><Text style={styles.uploadBody}>من ألبوم الصور · لا يتم رفعها خارج النموذج</Text><View style={styles.uploadButton}><Text style={styles.uploadButtonText}>اختيار صورة</Text><MaterialIcons name="photo-library" size={18} color={CREAM} /></View></Pressable>
+        <Pressable onPress={pickImage} style={({ pressed }) => [styles.uploadCard, pressed && styles.cardPressed]}><View style={styles.uploadOrb}><MaterialIcons name="add-photo-alternate" size={34} color={INK} /></View><Text style={styles.uploadTitle}>اضغط لاختيار صورة</Text><Text style={styles.uploadBody}>من ألبوم الصور · حفظ مشفر وآمن للطلب</Text><View style={styles.uploadButton}><Text style={styles.uploadButtonText}>اختيار صورة</Text><MaterialIcons name="photo-library" size={18} color={CREAM} /></View></Pressable>
       )}
       <View style={styles.metricPreview}><Text style={styles.metricPreviewTitle}>ما الذي سنفحصه؟</Text><View style={styles.metricPills}>{["الدقة", "الأبعاد", "القص", "الخلفية", "جودة الطباعة"].map((item) => <View key={item} style={styles.metricPill}><Text style={styles.metricPillText}>{item}</Text></View>)}</View></View>
-      <Pressable onPress={runAnalysis} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed, !photo && styles.primaryButtonMuted]}><Text style={styles.primaryButtonText}>حلّل الصورة تجريبيًا</Text><MaterialIcons name="arrow-back" size={20} color={CREAM} /></Pressable>
+      <Pressable onPress={runAnalysis} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed, !photo && styles.primaryButtonMuted]}><Text style={styles.primaryButtonText}>تحليل جودة الصورة</Text><MaterialIcons name="arrow-back" size={20} color={CREAM} /></Pressable>
       {!photo && <Text style={styles.centerHint}>يمكنك المتابعة بدون صورة لرؤية تجربة التحليل.</Text>}
     </>
   );
@@ -269,12 +271,12 @@ export default function HomeScreen() {
         {renderTopBar(() => setScreen("upload"), "خطوة 03 · التحليل")}
         <View style={styles.resultHeader}>
           <View>
-            <Text style={styles.pageKicker}>نتيجة محاكاة الذكاء الاصطناعي</Text>
+            <Text style={styles.pageKicker}>نتيجة التحليل البصري الذكي</Text>
             <Text style={styles.pageTitle}>الصورة مفهومة الآن</Text>
           </View>
           <View style={styles.prototypePill}>
             <MaterialIcons name="science" size={15} color={WARNING} />
-            <Text style={styles.prototypeText}>PROTOTYPE</Text>
+            <Text style={styles.prototypeText}>فحص آلي</Text>
           </View>
         </View>
         <View style={styles.analysisHero}>
@@ -546,6 +548,8 @@ const styles = StyleSheet.create({
   intentIcon: { width: 36, height: 36, borderRadius: 12, backgroundColor: "#ffffffaa", alignItems: "center", justifyContent: "center" },
   intentTitle: { color: INK, fontSize: 13, fontWeight: "900", marginTop: 8 },
   intentSubtitle: { color: "#5F6B70", fontSize: 10, marginTop: 2 },
+  studioContact: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14 },
+  studioContactText: { color: INK, fontSize: 11, fontWeight: "800" },
   reassurance: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 18 },
   reassuranceText: { color: MUTED, fontSize: 10 },
   progressRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 },

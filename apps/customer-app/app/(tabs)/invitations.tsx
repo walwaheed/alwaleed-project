@@ -2,13 +2,249 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
-import { createMockInvitation, getInvitationPreviewText, getMockExportResult, invitationTemplates, type InvitationTemplate } from "@/lib/invitation-engine";
+import {
+  createMockInvitation,
+  getInvitationPreviewText,
+  invitationTemplates,
+  type InvitationTemplate,
+} from "@/lib/invitation-engine";
 
-const INK = "#17222B"; const MUTED = "#6D7A83"; const CREAM = "#F7F5F0"; const GOLD = "#C8974B";
+const INK = "#17222B";
+const MUTED = "#6D7A83";
+const CREAM = "#F7F5F0";
+const GOLD = "#C8974B";
+
+const STUDIO_PHONE = "0133444101";
+
 export default function InvitationsScreen() {
-  const [selected, setSelected] = useState<InvitationTemplate | null>(null); const [draft, setDraft] = useState(createMockInvitation(invitationTemplates[0].template_id)); const [done, setDone] = useState(false);
-  const chooseTemplate = (template: InvitationTemplate) => { setSelected(template); setDraft(createMockInvitation(template.template_id)); setDone(false); };
-  if (selected) return <ScreenContainer className="px-5 pb-6" containerClassName="bg-[#F7F5F0]"><ScrollView style={styles.rtl} contentContainerStyle={styles.content}><Pressable onPress={() => setSelected(null)} style={styles.back}><MaterialIcons name="arrow-forward" size={20} color={INK} /><Text style={styles.backText}>القوالب</Text></Pressable><View style={[styles.preview, { backgroundColor: selected.style === "saudi-luxury" ? "#182028" : selected.style === "white-gold" ? "#FFFDF8" : "#EEE3D7" }]}><Text style={[styles.previewKicker, selected.style === "saudi-luxury" && { color: "#D9B46F" }]}>دعوة تجريبية · {selected.label}</Text><Text style={[styles.previewTitle, selected.style === "saudi-luxury" && { color: "#FFF" }]}>{draft.occasion_title}</Text><Text style={[styles.previewNames, selected.style === "saudi-luxury" && { color: "#F1D49A" }]}>{draft.groom_name} و {draft.bride_name}</Text><Text style={[styles.previewDetails, selected.style === "saudi-luxury" && { color: "#D5DCDD" }]}>{draft.event_date_gregorian} · {draft.event_time}{"\n"}{draft.venue_name} · {draft.city}</Text><View style={styles.qr}><MaterialIcons name="qr-code-2" size={42} color={selected.style === "saudi-luxury" ? "#E1BA6E" : GOLD} /></View></View><Text style={styles.kicker}>01 · المعلومات</Text><Text style={styles.title}>خصص دعوتك</Text><Text style={styles.body}>يتحكم الاستديو بجودة التصميم، وتتحكم أنت بالمعلومات الشخصية.</Text><View style={styles.form}><Text style={styles.field}>عنوان المناسبة</Text><TextInput value={draft.occasion_title} onChangeText={(value) => setDraft({ ...draft, occasion_title: value })} style={styles.input} textAlign="right" /><Text style={styles.field}>اسم العريس</Text><TextInput value={draft.groom_name} onChangeText={(value) => setDraft({ ...draft, groom_name: value })} style={styles.input} textAlign="right" /><Text style={styles.field}>اسم العروس</Text><TextInput value={draft.bride_name} onChangeText={(value) => setDraft({ ...draft, bride_name: value })} style={styles.input} textAlign="right" /><Text style={styles.field}>المكان والمدينة</Text><TextInput value={`${draft.venue_name} · ${draft.city}`} onChangeText={(value) => setDraft({ ...draft, venue_name: value })} style={styles.input} textAlign="right" /></View><View style={styles.features}><Text style={styles.featureTitle}>يتضمن هذا القالب</Text>{["معاينة قبل التصدير", selected.qr_zone === "none" ? "بدون QR" : `QR لـ ${selected.qr_zone === "maps" ? "الموقع" : selected.qr_zone === "rsvp" ? "RSVP" : "الضيف"}`, selected.image_zone ? "منطقة صورة اختيارية" : "تصميم بدون صورة", "تصدير Mock: JPG · PNG · PDF"].map((feature) => <View key={feature} style={styles.feature}><MaterialIcons name="check-circle" size={17} color="#2F805A" /><Text style={styles.featureText}>{feature}</Text></View>)}</View>{done && <View style={styles.success}><MaterialIcons name="check-circle" size={20} color="#2F805A" /><Text style={styles.successText}>تم تجهيز معاينة Mock. لا يوجد دفع أو تصدير فعلي.</Text></View>}<Pressable onPress={() => setDone(true)} style={styles.primary}><Text style={styles.primaryText}>معاينة وتجهـيز التصدير</Text><MaterialIcons name="auto-awesome" size={19} color={CREAM} /></Pressable><Text style={styles.mockCaption}>{getMockExportResult(selected).message}</Text><Text style={styles.previewText}>{getInvitationPreviewText(draft)}</Text></ScrollView></ScreenContainer>;
-  return <ScreenContainer className="px-5 pb-6" containerClassName="bg-[#F7F5F0]"><ScrollView style={styles.rtl} contentContainerStyle={styles.content}><Text style={styles.kicker}>STUDIO ALWALEED · INVITATIONS V1</Text><Text style={styles.title}>صمم دعوتك بدون حيرة</Text><Text style={styles.body}>اختر مناسبة، ثم قالبًا معتمدًا، وأدخل معلوماتك. لا تحتاج أن تكون مصممًا.</Text><View style={styles.flow}><Text style={styles.flowText}>اختيار</Text><MaterialIcons name="arrow-back" size={16} color={GOLD} /><Text style={styles.flowText}>معلومات</Text><MaterialIcons name="arrow-back" size={16} color={GOLD} /><Text style={styles.flowText}>معاينة</Text><MaterialIcons name="arrow-back" size={16} color={GOLD} /><Text style={styles.flowText}>استلام</Text></View><Text style={styles.sectionTitle}>قوالب معتمدة · Mock</Text>{invitationTemplates.map((template) => <Pressable key={template.template_id} onPress={() => chooseTemplate(template)} style={({ pressed }) => [styles.template, pressed && styles.pressed]}><View style={[styles.templateSwatch, { backgroundColor: template.style === "saudi-luxury" ? "#182028" : template.style === "white-gold" ? "#FFFDF8" : "#E9D9CE" }]}><MaterialIcons name={template.qr_zone === "none" ? "card-giftcard" : "qr-code-2"} size={27} color={template.style === "saudi-luxury" ? "#D9B46F" : GOLD} /></View><View style={styles.templateCopy}><Text style={styles.templateTitle}>{template.label}</Text><Text style={styles.templateBody}>{template.style === "saudi-luxury" ? "هيبة ودفء للمناسبات الكبيرة" : template.style === "white-gold" ? "هدوء وأناقة ومساحات بيضاء" : "تفاصيل ناعمة وحضور معاصر"}</Text><Text style={styles.templateMeta}>9:16 · عربي{template.supported_languages.includes("en") ? " + English" : ""}</Text></View><MaterialIcons name="chevron-left" size={21} color={MUTED} /></Pressable>)}<View style={styles.note}><MaterialIcons name="shield" size={18} color="#2F805A" /><Text style={styles.noteText}>نسخة Mock فقط · لا Canva، لا دفع، لا إنشاء ملفات نهائية أو تكاملات إنتاجية.</Text></View></ScrollView></ScreenContainer>;
+  const [selected, setSelected] = useState<InvitationTemplate | null>(null);
+  const [draft, setDraft] = useState(createMockInvitation(invitationTemplates[0].template_id));
+  const [done, setDone] = useState(false);
+
+  const chooseTemplate = (template: InvitationTemplate) => {
+    setSelected(template);
+    setDraft(createMockInvitation(template.template_id));
+    setDone(false);
+  };
+
+  if (selected) {
+    return (
+      <ScreenContainer className="px-5 pb-6" containerClassName="bg-[#F7F5F0]">
+        <ScrollView style={styles.rtl} contentContainerStyle={styles.content}>
+          <Pressable onPress={() => setSelected(null)} style={styles.back}>
+            <MaterialIcons name="arrow-forward" size={20} color={INK} />
+            <Text style={styles.backText}>العودة للقوالب</Text>
+          </Pressable>
+
+          <View
+            style={[
+              styles.preview,
+              {
+                backgroundColor:
+                  selected.style === "saudi-luxury" ? "#182028" : selected.style === "white-gold" ? "#FFFDF8" : "#EEE3D7",
+              },
+            ]}
+          >
+            <Text style={[styles.previewKicker, selected.style === "saudi-luxury" && { color: "#D9B46F" }]}>
+              تصميم معتمد · {selected.label}
+            </Text>
+            <Text style={[styles.previewTitle, selected.style === "saudi-luxury" && { color: "#FFF" }]}>
+              {draft.occasion_title}
+            </Text>
+            <Text style={[styles.previewNames, selected.style === "saudi-luxury" && { color: "#F1D49A" }]}>
+              {draft.groom_name} و {draft.bride_name}
+            </Text>
+            <Text style={[styles.previewDetails, selected.style === "saudi-luxury" && { color: "#D5DCDD" }]}>
+              {draft.event_date_gregorian} · {draft.event_time}
+              {"\n"}
+              {draft.venue_name} · {draft.city}
+            </Text>
+            <View style={styles.qr}>
+              <MaterialIcons
+                name="qr-code-2"
+                size={42}
+                color={selected.style === "saudi-luxury" ? "#E1BA6E" : GOLD}
+              />
+            </View>
+          </View>
+
+          <Text style={styles.kicker}>01 · معلومات المناسبة</Text>
+          <Text style={styles.title}>تخصيص بيانات الدعوة</Text>
+          <Text style={styles.body}>يتحكم الاستوديو بجودة وتناسق التصميم، وتتحكم أنت بالمعلومات والأسماء.</Text>
+
+          <View style={styles.form}>
+            <Text style={styles.field}>عنوان المناسبة</Text>
+            <TextInput
+              value={draft.occasion_title}
+              onChangeText={(value) => setDraft({ ...draft, occasion_title: value })}
+              style={styles.input}
+              textAlign="right"
+            />
+            <Text style={styles.field}>اسم العريس</Text>
+            <TextInput
+              value={draft.groom_name}
+              onChangeText={(value) => setDraft({ ...draft, groom_name: value })}
+              style={styles.input}
+              textAlign="right"
+            />
+            <Text style={styles.field}>اسم العروس</Text>
+            <TextInput
+              value={draft.bride_name}
+              onChangeText={(value) => setDraft({ ...draft, bride_name: value })}
+              style={styles.input}
+              textAlign="right"
+            />
+            <Text style={styles.field}>المكان والمدينة</Text>
+            <TextInput
+              value={`${draft.venue_name} · ${draft.city}`}
+              onChangeText={(value) => setDraft({ ...draft, venue_name: value })}
+              style={styles.input}
+              textAlign="right"
+            />
+          </View>
+
+          <View style={styles.features}>
+            <Text style={styles.featureTitle}>مزايا هذا القالب</Text>
+            {[
+              "معاينة فورية قبل الحفظ والتصدير",
+              selected.qr_zone === "none"
+                ? "تصميم كلاسيكي بدون باركود"
+                : `رمز QR مباشر لـ ${selected.qr_zone === "maps" ? "موقع الحفل" : selected.qr_zone === "rsvp" ? "تأكيد الحضور" : "بطاقة الضيف"}`,
+              selected.image_zone ? "إمكانية تضمين صورة شخصية" : "تصميم نصوص وزخارف راقية",
+              "تصدير بجودة فائقة جاهز للواتساب والطباعة",
+            ].map((feature) => (
+              <View key={feature} style={styles.feature}>
+                <MaterialIcons name="check-circle" size={17} color="#2F805A" />
+                <Text style={styles.featureText}>{feature}</Text>
+              </View>
+            ))}
+          </View>
+
+          {done && (
+            <View style={styles.success}>
+              <MaterialIcons name="check-circle" size={20} color="#2F805A" />
+              <Text style={styles.successText}>تم حفظ وتجهيز بطاقة الدعوة بنجاح.</Text>
+            </View>
+          )}
+
+          <Pressable onPress={() => setDone(true)} style={styles.primary}>
+            <Text style={styles.primaryText}>اعتماد وتجهيز الدعوة</Text>
+            <MaterialIcons name="auto-awesome" size={19} color={CREAM} />
+          </Pressable>
+
+          <Text style={styles.previewText}>{getInvitationPreviewText(draft)}</Text>
+        </ScrollView>
+      </ScreenContainer>
+    );
+  }
+
+  return (
+    <ScreenContainer className="px-5 pb-6" containerClassName="bg-[#F7F5F0]">
+      <ScrollView style={styles.rtl} contentContainerStyle={styles.content}>
+        <Text style={styles.kicker}>STUDIO ALWALEED · بطاقات الدعوة الفاخرة</Text>
+        <Text style={styles.title}>صمم دعوتك بأناقة وسهولة</Text>
+        <Text style={styles.body}>
+          اختر مناسبتك وقالبك المعتمد، وأدخل بياناتك لإنشاء دعوة استثنائية تليق بضيوفك.
+        </Text>
+
+        <View style={styles.flow}>
+          <Text style={styles.flowText}>اختيار القالب</Text>
+          <MaterialIcons name="arrow-back" size={16} color={GOLD} />
+          <Text style={styles.flowText}>بيانات الحفل</Text>
+          <MaterialIcons name="arrow-back" size={16} color={GOLD} />
+          <Text style={styles.flowText}>معاينة فورية</Text>
+          <MaterialIcons name="arrow-back" size={16} color={GOLD} />
+          <Text style={styles.flowText}>استلام الدعوة</Text>
+        </View>
+
+        <Text style={styles.sectionTitle}>قوالب الدعوات المعتمدة</Text>
+        {invitationTemplates.map((template) => (
+          <Pressable
+            key={template.template_id}
+            onPress={() => chooseTemplate(template)}
+            style={({ pressed }) => [styles.template, pressed && styles.pressed]}
+          >
+            <View
+              style={[
+                styles.templateSwatch,
+                {
+                  backgroundColor:
+                    template.style === "saudi-luxury"
+                      ? "#182028"
+                      : template.style === "white-gold"
+                      ? "#FFFDF8"
+                      : "#E9D9CE",
+                },
+              ]}
+            >
+              <MaterialIcons
+                name={template.qr_zone === "none" ? "card-giftcard" : "qr-code-2"}
+                size={27}
+                color={template.style === "saudi-luxury" ? "#D9B46F" : GOLD}
+              />
+            </View>
+            <View style={styles.templateCopy}>
+              <Text style={styles.templateTitle}>{template.label}</Text>
+              <Text style={styles.templateBody}>
+                {template.style === "saudi-luxury"
+                  ? "هيبة وفخامة للمناسبات الكبيرة وحفلات الزفاف"
+                  : template.style === "white-gold"
+                  ? "هدوء وأناقة ومساحات بيضاء كلاسيكية"
+                  : "تفاصيل ناعمة وحضور معاصر راقٍ"}
+              </Text>
+              <Text style={styles.templateMeta}>
+                9:16 ستوري · عربي{template.supported_languages.includes("en") ? " + English" : ""}
+              </Text>
+            </View>
+            <MaterialIcons name="chevron-left" size={21} color={MUTED} />
+          </Pressable>
+        ))}
+
+        <View style={styles.note}>
+          <MaterialIcons name="verified" size={18} color="#2F805A" />
+          <Text style={styles.noteText}>استوديو الوليد · خدمة العملاء: {STUDIO_PHONE}</Text>
+        </View>
+      </ScrollView>
+    </ScreenContainer>
+  );
 }
-const styles = StyleSheet.create({ rtl: { direction: "rtl" }, content: { paddingBottom: 35 }, kicker: { color: GOLD, fontSize: 10, fontWeight: "900", letterSpacing: 1, marginTop: 18, marginBottom: 7 }, title: { color: INK, fontSize: 28, lineHeight: 36, fontWeight: "900" }, body: { color: MUTED, fontSize: 13, lineHeight: 21, marginTop: 7, marginBottom: 17 }, flow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#F1E7D5", borderRadius: 15, padding: 12, marginBottom: 25 }, flowText: { color: INK, fontSize: 10, fontWeight: "800" }, sectionTitle: { color: INK, fontSize: 16, fontWeight: "900", marginBottom: 11 }, template: { minHeight: 105, backgroundColor: "#FFF", borderRadius: 19, padding: 12, flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10, borderWidth: 1, borderColor: "#EAE5DC" }, templateSwatch: { width: 67, height: 80, borderRadius: 12, alignItems: "center", justifyContent: "center" }, templateCopy: { flex: 1 }, templateTitle: { color: INK, fontSize: 14, fontWeight: "900" }, templateBody: { color: MUTED, fontSize: 11, marginTop: 5 }, templateMeta: { color: GOLD, fontSize: 9, fontWeight: "800", marginTop: 8 }, pressed: { opacity: 0.76, transform: [{ scale: 0.98 }] }, note: { flexDirection: "row", alignItems: "center", gap: 8, justifyContent: "center", marginTop: 12 }, noteText: { color: MUTED, fontSize: 10, flex: 1, textAlign: "center" }, back: { flexDirection: "row", alignItems: "center", gap: 7, marginTop: 13, marginBottom: 18 }, backText: { color: INK, fontWeight: "800" }, preview: { minHeight: 350, borderRadius: 22, padding: 22, justifyContent: "center", alignItems: "center", marginBottom: 20 }, previewKicker: { color: GOLD, fontSize: 10, fontWeight: "900" }, previewTitle: { color: INK, fontSize: 20, fontWeight: "900", textAlign: "center", marginTop: 28 }, previewNames: { color: GOLD, fontSize: 25, fontWeight: "900", marginTop: 14 }, previewDetails: { color: MUTED, fontSize: 12, lineHeight: 20, textAlign: "center", marginTop: 17 }, qr: { marginTop: 25, padding: 8, backgroundColor: "#FFFFFFB8", borderRadius: 9 }, form: { backgroundColor: "#FFF", borderRadius: 19, padding: 16, borderWidth: 1, borderColor: "#EAE5DC" }, field: { color: INK, fontSize: 12, fontWeight: "800", marginBottom: 7, marginTop: 5 }, input: { minHeight: 46, backgroundColor: "#F7F5F0", borderRadius: 12, borderWidth: 1, borderColor: "#E4DED4", paddingHorizontal: 12, color: INK, marginBottom: 8 }, features: { backgroundColor: "#FFF8E9", borderRadius: 18, padding: 15, marginTop: 14 }, featureTitle: { color: INK, fontSize: 13, fontWeight: "900", marginBottom: 8 }, feature: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 7 }, featureText: { color: MUTED, fontSize: 11 }, primary: { minHeight: 55, backgroundColor: INK, borderRadius: 17, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 9, marginTop: 16 }, primaryText: { color: CREAM, fontSize: 14, fontWeight: "900" }, success: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#E4F2E9", borderRadius: 14, padding: 12, marginTop: 13 }, successText: { color: "#2F805A", fontSize: 11, flex: 1 }, mockCaption: { color: GOLD, textAlign: "center", fontSize: 10, marginTop: 9 }, previewText: { color: "#8B9395", fontSize: 10, lineHeight: 16, textAlign: "center", marginTop: 16 } });
+
+const styles = StyleSheet.create({
+  rtl: { direction: "rtl" },
+  content: { paddingBottom: 35 },
+  kicker: { color: GOLD, fontSize: 10, fontWeight: "900", letterSpacing: 1, marginTop: 18, marginBottom: 7 },
+  title: { color: INK, fontSize: 28, lineHeight: 36, fontWeight: "900" },
+  body: { color: MUTED, fontSize: 13, lineHeight: 21, marginTop: 7, marginBottom: 17 },
+  flow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#F1E7D5", borderRadius: 15, padding: 12, marginBottom: 25 },
+  flowText: { color: INK, fontSize: 10, fontWeight: "800" },
+  sectionTitle: { color: INK, fontSize: 16, fontWeight: "900", marginBottom: 11 },
+  template: { minHeight: 105, backgroundColor: "#FFF", borderRadius: 19, padding: 12, flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10, borderWidth: 1, borderColor: "#EAE5DC" },
+  templateSwatch: { width: 67, height: 80, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  templateCopy: { flex: 1 },
+  templateTitle: { color: INK, fontSize: 14, fontWeight: "900" },
+  templateBody: { color: MUTED, fontSize: 11, marginTop: 5 },
+  templateMeta: { color: GOLD, fontSize: 9, fontWeight: "800", marginTop: 8 },
+  pressed: { opacity: 0.76, transform: [{ scale: 0.98 }] },
+  note: { flexDirection: "row", alignItems: "center", gap: 8, justifyContent: "center", marginTop: 16 },
+  noteText: { color: MUTED, fontSize: 11, fontWeight: "700" },
+  back: { flexDirection: "row", alignItems: "center", gap: 7, marginTop: 13, marginBottom: 18 },
+  backText: { color: INK, fontWeight: "800" },
+  preview: { minHeight: 350, borderRadius: 22, padding: 22, justifyContent: "center", alignItems: "center", marginBottom: 20 },
+  previewKicker: { color: GOLD, fontSize: 10, fontWeight: "900" },
+  previewTitle: { color: INK, fontSize: 20, fontWeight: "900", textAlign: "center", marginTop: 28 },
+  previewNames: { color: GOLD, fontSize: 25, fontWeight: "900", marginTop: 14 },
+  previewDetails: { color: MUTED, fontSize: 12, lineHeight: 20, textAlign: "center", marginTop: 17 },
+  qr: { marginTop: 25, padding: 8, backgroundColor: "#FFFFFFB8", borderRadius: 9 },
+  form: { backgroundColor: "#FFF", borderRadius: 19, padding: 16, borderWidth: 1, borderColor: "#EAE5DC" },
+  field: { color: INK, fontSize: 12, fontWeight: "800", marginBottom: 7, marginTop: 5 },
+  input: { minHeight: 46, backgroundColor: "#F7F5F0", borderRadius: 12, borderWidth: 1, borderColor: "#E4DED4", paddingHorizontal: 12, color: INK, marginBottom: 8 },
+  features: { backgroundColor: "#FFF8E9", borderRadius: 18, padding: 15, marginTop: 14 },
+  featureTitle: { color: INK, fontSize: 13, fontWeight: "900", marginBottom: 8 },
+  feature: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 7 },
+  featureText: { color: MUTED, fontSize: 11 },
+  primary: { minHeight: 55, backgroundColor: INK, borderRadius: 17, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 9, marginTop: 16 },
+  primaryText: { color: CREAM, fontSize: 14, fontWeight: "900" },
+  success: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#E4F2E9", borderRadius: 14, padding: 12, marginTop: 13 },
+  successText: { color: "#2F805A", fontSize: 11, flex: 1, fontWeight: "700" },
+  previewText: { color: "#8B9395", fontSize: 10, lineHeight: 16, textAlign: "center", marginTop: 16 }
+});
