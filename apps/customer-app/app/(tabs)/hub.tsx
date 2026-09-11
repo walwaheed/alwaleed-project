@@ -28,7 +28,7 @@ const services: Service[] = [
   { title: "صورة شخصية احترافية", subtitle: "حضور مهني متميز", icon: "person", color: "#C9D8D0", mode: "booking" },
   { title: "تصوير الشركات والمنتجات", subtitle: "حلول بصرية للأعمال", icon: "business", color: "#F5DDD0", mode: "corporate" },
   { title: "متابعة طلب", subtitle: "اعرف حالة طلبك فورًا", icon: "local-shipping", color: "#DCEAF0", mode: "tracking" },
-  { title: "دفع فاتورة", subtitle: "سداد آمن ومعتمد", icon: "receipt-long", color: "#E9E1EC", mode: "payment" },
+  { title: "دفع فاتورة", subtitle: "سداد إلكتروني آمن", icon: "receipt-long", color: "#E9E1EC", mode: "payment" },
   { title: "طلب عرض سعر", subtitle: "للمشاريع والمناسبات", icon: "request-quote", color: "#F5DDD0", mode: "quote" },
   { title: "خدمة العملاء والدعم", subtitle: `هاتف: ${STUDIO_PHONE}`, icon: "support-agent", color: "#C9D8D0", mode: "support" },
 ];
@@ -66,7 +66,7 @@ const labels: Record<Service["mode"], { title: string; body: string; button: str
   },
   payment: {
     title: "سداد الفاتورة",
-    body: "سداد آمن لطلبات واستشارات الاستوديو عبر بوابة الدفع الإلكتروني المعتمدة.",
+    body: "سداد آمن لطلبات واستشارات الاستوديو عبر بوابة الدفع الإلكتروني الآمنة.",
     button: "متابعة السداد",
   },
   quote: {

@@ -87,18 +87,18 @@ export default function CatalogScreen() {
           </View>
           <View style={styles.badge}>
             <MaterialIcons name="verified" size={15} color={GREEN} />
-            <Text style={styles.badgeText}>جودة مضمونة</Text>
+            <Text style={styles.badgeText}>جودة احترافية</Text>
           </View>
         </View>
 
         <Text style={styles.subtitle}>
-          اختر المقاس والكمية ومكان التوصيل، لحساب السعر النهائي المعتمد شامل الضريبة والتجهيز.
+          اختر المقاس والكمية ومكان التوصيل، لحساب السعر النهائي المحدد شامل الضريبة والتجهيز.
         </Text>
 
         <View style={styles.dataNotice}>
           <MaterialIcons name="auto-awesome" size={18} color={GOLD} />
           <Text style={styles.dataNoticeText}>
-            طباعة فوتوغرافية احترافية فائقة الدقة باستخدام أرقى أنواع الورق والأحبار المعتمدة عالمياً.
+            طباعة فوتوغرافية احترافية فائقة الدقة باستخدام أرقى أنواع الورق والأحبار الاحترافية عالية الثبات.
           </Text>
         </View>
 
@@ -182,7 +182,7 @@ export default function CatalogScreen() {
           <View style={styles.stateCard}>
             <MaterialIcons name="autorenew" size={22} color={GOLD} />
             <View>
-              <Text style={styles.stateTitle}>نراجع السعر المعتمد</Text>
+              <Text style={styles.stateTitle}>نراجع تسعير الطلب</Text>
               <Text style={styles.stateText}>لحظات ونجهز لك السعر الدقيق حسب المقاس والكمية والوجهة.</Text>
             </View>
           </View>
@@ -192,7 +192,7 @@ export default function CatalogScreen() {
           <View style={styles.quoteCard}>
             <View style={styles.quoteHeader}>
               <View>
-                <Text style={styles.quoteKicker}>السعر النهائي المعتمد</Text>
+                <Text style={styles.quoteKicker}>السعر النهائي المحدد</Text>
                 <Text style={styles.quoteTotal}>{quote.quote.total_sar.toFixed(2)} ر.س</Text>
               </View>
               <View style={styles.serverPill}>

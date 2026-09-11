@@ -117,7 +117,7 @@ export default function CheckoutScreen() {
           <View>
             <View style={styles.intro}>
               <Text style={styles.sectionTitle}>أضف صورتك</Text>
-              <Text style={styles.body}>اختر صورة من جهازك. يمكنك معاينتها واستبدالها بحرية قبل اعتماد الطلب.</Text>
+              <Text style={styles.body}>اختر صورة من جهازك. يمكنك معاينتها واستبدالها بحرية قبل تأكيد الطلب.</Text>
             </View>
 
             {uploading ? (
@@ -153,7 +153,7 @@ export default function CheckoutScreen() {
           <View>
             <View style={styles.intro}>
               <Text style={styles.sectionTitle}>معاينة وفحص الصورة</Text>
-              <Text style={styles.body}>راجع تفاصيل الصورة لضمان أفضل دقة طباعة معتمدة.</Text>
+              <Text style={styles.body}>راجع تفاصيل الصورة لضمان أفضل دقة طباعة احترافية.</Text>
             </View>
 
             <PhotoCard photo={photo} onReplace={choosePhoto} onRemove={removePhoto} />

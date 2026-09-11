@@ -10,7 +10,7 @@ const GOLD = "#C8974B";
 const GREEN = "#2F805A";
 
 const STUDIO_PHONE = "0133444101";
-const steps = ["اختيار المقاس", "رفع الصورة", "اعتماد السعر", "إنشاء الطلب", "تأكيد الدفع", "التجهيز والشحن"];
+const steps = ["اختيار المقاس", "رفع الصورة", "تأكيد السعر", "إنشاء الطلب", "تأكيد الدفع", "التجهيز والشحن"];
 
 export default function TransactionScreen() {
   const [orderRef] = useState("AW-PR-849201");
@@ -22,7 +22,7 @@ export default function TransactionScreen() {
         <Text style={styles.eyebrow}>STUDIO ALWALEED · تتبع المعاملة</Text>
         <Text style={styles.title}>حالة طلب طباعة الصور</Text>
         <Text style={styles.subtitle}>
-          متابعة فورية لحالة طلبك ومعاملتك المعتمدة في استوديو الوليد.
+          متابعة فورية لحالة طلبك ومعاملتك المسجلة في استوديو الوليد.
         </Text>
 
         <View style={styles.reference}>
@@ -53,7 +53,7 @@ export default function TransactionScreen() {
           <MaterialIcons name="check-circle" size={24} color={GREEN} />
           <View style={styles.statusCopy}>
             <Text style={styles.statusTitle}>الطلب مؤكد وجارٍ تجهيزه</Text>
-            <Text style={styles.statusBody}>تم اعتماد الطلب ونقله إلى خط الطباعة الاحترافي.</Text>
+            <Text style={styles.statusBody}>تم تأكيد الطلب ونقله إلى خط الطباعة الاحترافي.</Text>
           </View>
         </View>
 
@@ -61,7 +61,7 @@ export default function TransactionScreen() {
           <Text style={styles.cardTitle}>ملخص المعاملة</Text>
           <Row label="رقم الطلب" value={orderRef} />
           <Row label="العميل" value="عميل استوديو الوليد" />
-          <Row label="الملف" value="صورة فوتوغرافية معتمدة" />
+          <Row label="الملف" value="صورة فوتوغرافية رسمية" />
           <Row label="قيمة الطباعة" value="36.00 ر.س" />
           <Row label="رسوم التجهيز" value="5.00 ر.س" />
           <View style={styles.totalRow}>

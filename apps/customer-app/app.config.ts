@@ -24,9 +24,12 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
-    "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+      NSCameraUsageDescription: "يحتاج تطبيق استوديو الوليد للوصول إلى الكاميرا لالتقاط الصور الشخصية وفحص مطابقتها للمواصفات الرسمية.",
+      NSPhotoLibraryUsageDescription: "يحتاج التطبيق للوصول إلى مكتبة الصور لاختيار الصورة المراد تدقيقها وتجهيزها.",
+      NSPhotoLibraryAddUsageDescription: "يحتاج التطبيق لإذن حفظ الصورة الرسمية المطابقة مباشرة إلى ألبوم الصور على جهازك."
+    }
   },
   android: {
     adaptiveIcon: {
@@ -38,7 +41,13 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    permissions: ["POST_NOTIFICATIONS"],
+    permissions: [
+      "POST_NOTIFICATIONS",
+      "CAMERA",
+      "READ_MEDIA_IMAGES",
+      "READ_EXTERNAL_STORAGE",
+      "WRITE_EXTERNAL_STORAGE"
+    ],
     intentFilters: [
       {
         action: "VIEW",

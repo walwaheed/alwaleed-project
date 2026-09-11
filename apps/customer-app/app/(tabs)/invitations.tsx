@@ -46,7 +46,7 @@ export default function InvitationsScreen() {
             ]}
           >
             <Text style={[styles.previewKicker, selected.style === "saudi-luxury" && { color: "#D9B46F" }]}>
-              تصميم معتمد · {selected.label}
+              تصميم مميز · {selected.label}
             </Text>
             <Text style={[styles.previewTitle, selected.style === "saudi-luxury" && { color: "#FFF" }]}>
               {draft.occasion_title}
@@ -128,7 +128,7 @@ export default function InvitationsScreen() {
           )}
 
           <Pressable onPress={() => setDone(true)} style={styles.primary}>
-            <Text style={styles.primaryText}>اعتماد وتجهيز الدعوة</Text>
+            <Text style={styles.primaryText}>تأكيد وتجهيز الدعوة</Text>
             <MaterialIcons name="auto-awesome" size={19} color={CREAM} />
           </Pressable>
 
@@ -144,7 +144,7 @@ export default function InvitationsScreen() {
         <Text style={styles.kicker}>STUDIO ALWALEED · بطاقات الدعوة الفاخرة</Text>
         <Text style={styles.title}>صمم دعوتك بأناقة وسهولة</Text>
         <Text style={styles.body}>
-          اختر مناسبتك وقالبك المعتمد، وأدخل بياناتك لإنشاء دعوة استثنائية تليق بضيوفك.
+          اختر مناسبتك وقالبك المفضل، وأدخل بياناتك لإنشاء دعوة استثنائية تليق بضيوفك.
         </Text>
 
         <View style={styles.flow}>
@@ -157,7 +157,7 @@ export default function InvitationsScreen() {
           <Text style={styles.flowText}>استلام الدعوة</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>قوالب الدعوات المعتمدة</Text>
+        <Text style={styles.sectionTitle}>قوالب الدعوات المختارة</Text>
         {invitationTemplates.map((template) => (
           <Pressable
             key={template.template_id}
